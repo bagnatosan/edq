@@ -10,35 +10,54 @@
     <p style="color: var(--text-secondary); font-size: 14px;">Buscador global de grupos disponibles</p>
 </div>
 
-<!-- Buscador en tiempo real -->
-<div class="search-container">
-    <div class="search-input-wrapper">
-        <svg class="search-icon" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <input type="text" id="searchInput" class="form-control-neon" placeholder="Buscar grupo por nombre..." autocomplete="off" />
+<!-- Sección: Mis Grupos -->
+<div class="groups-section" style="margin-bottom: 24px;">
+    <h2 class="section-title-neon" style="font-size: 18px; font-weight: 700; margin-bottom: 12px; color: var(--neon-green);">Mis Grupos</h2>
+    <div id="myGroupsList" class="groups-list">
+        <!-- Cargado dinámicamente -->
+    </div>
+    <div id="myGroupsEmptyMessage" class="no-results-message" style="display: none; padding: 20px; font-size: 14px;">
+        <span>Aún no perteneces a ningún grupo.</span>
     </div>
 </div>
 
-<!-- Listado de Grupos -->
-<div id="groupsList" class="groups-list">
-    <!-- Cargado dinámicamente -->
-</div>
+<div class="divider"></div>
 
-<!-- Indicadores de Carga y Mensajes -->
-<div class="load-more-container">
-    <button id="btnLoadMore" class="btn-outline-neon" style="display: none; padding: 10px 20px; font-size: 14px; width: auto;">Cargar más</button>
-    <div id="loadingIndicator" class="loading-spinner" style="display: none;">Cargando grupos...</div>
-    <div id="noResultsMessage" class="no-results-message" style="display: none;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="8" y1="12" x2="16" y2="12"></line>
-        </svg>
-        <span>No se encontraron grupos disponibles.</span>
+<!-- Sección: Descubrir Grupos -->
+<div class="groups-section">
+    <h2 class="section-title-neon" style="font-size: 18px; font-weight: 700; margin-bottom: 12px; color: var(--text-primary);">Descubrir Grupos</h2>
+    
+    <!-- Buscador en tiempo real -->
+    <div class="search-container">
+        <div class="search-input-wrapper">
+            <svg class="search-icon" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="searchInput" class="form-control-neon" placeholder="Buscar grupo por nombre..." autocomplete="off" />
+        </div>
+    </div>
+
+    <!-- Listado de Otros Grupos -->
+    <div id="otherGroupsList" class="groups-list">
+        <!-- Cargado dinámicamente -->
+    </div>
+
+    <!-- Indicadores de Carga y Mensajes -->
+    <div class="load-more-container">
+        <button id="btnLoadMore" class="btn-outline-neon" style="display: none; padding: 10px 20px; font-size: 14px; width: auto;">Cargar más</button>
+        <div id="loadingIndicator" class="loading-spinner" style="display: none;">Cargando grupos...</div>
+        <div id="noResultsMessage" class="no-results-message" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+            <span>No se encontraron grupos disponibles.</span>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <script src="~/js/explore.js" asp-append-version="true"></script>
 }
+

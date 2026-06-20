@@ -1,0 +1,105 @@
+@{
+    ViewData["Title"] = "Dashboard de Grupo";
+}
+
+@Html.AntiForgeryToken()
+
+<input type="hidden" id="groupIdInput" value="@ViewBag.GroupId" />
+
+<!-- Navegación y Encabezado del Dashboard -->
+<div class="dashboard-header-nav" style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+    <a href="/Group/Explore" class="btn-back-arrow" style="color: var(--text-primary); text-decoration: none; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: background-color 0.2s;">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+    </a>
+    <h1 id="groupNameTitle" class="hero-title" style="font-size: 22px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">Cargando grupo...</h1>
+</div>
+
+<!-- Carrusel de Miembros -->
+<div class="card">
+    <div class="card-header-flex">
+        <h2 class="card-title">Miembros</h2>
+        <span id="membersCountBadge" class="card-subtitle-badge">0 JUGADORES</span>
+    </div>
+    <div id="membersCarousel" class="member-list-horizontal">
+        <!-- Cargar dinámicamente por JS -->
+    </div>
+</div>
+
+<!-- Acciones del Grupo -->
+<div class="actions-container" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+    <button id="btnCreateMatch" class="btn-neon" style="gap: 8px;">
+        ⚽ Crear Nuevo Partido
+    </button>
+    <button id="btnAssignScores" class="btn-outline-neon" style="display: none; gap: 8px;">
+        🏆 Asignar Puntajes
+    </button>
+</div>
+
+<!-- Panel de Administración (Solo para Creadores con Solicitudes Pendientes) -->
+<div id="adminPanel" class="card" style="display: none; border-color: var(--neon-green-glow);">
+    <div class="card-header-flex">
+        <h2 class="card-title" style="color: var(--neon-green);">Solicitudes Pendientes</h2>
+        <span id="requestsCountBadge" class="card-subtitle-badge" style="color: var(--neon-green);">0 PENDIENTES</span>
+    </div>
+    <div id="requestsList" class="requests-list" style="display: flex; flex-direction: column; gap: 12px;">
+        <!-- Cargar dinámicamente por JS -->
+    </div>
+</div>
+
+<!-- Ranking del Grupo -->
+<div class="card active-neon">
+    <div class="card-header-flex">
+        <h2 class="card-title">Ranking del Grupo</h2>
+        <span class="card-subtitle-badge">TOP JUGADORES</span>
+    </div>
+    <div class="ranking-placeholder-list" style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="ranking-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: rgba(158,255,0,0.03); border: 1px solid rgba(158,255,0,0.1); border-radius: var(--border-radius-md);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 16px; font-weight: 800; color: var(--neon-green); width: 20px;">#1</span>
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: #232731; border: 1px solid var(--neon-green-solid); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: var(--neon-green);">
+                    LM
+                </div>
+                <div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Lionel Messi</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">Leo</div>
+                </div>
+            </div>
+            <div style="font-size: 14px; font-weight: 800; color: var(--neon-green);">9.8</div>
+        </div>
+        
+        <div class="ranking-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--border-radius-md);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 16px; font-weight: 800; color: var(--text-secondary); width: 20px;">#2</span>
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: #232731; border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: var(--neon-green);">
+                    CR
+                </div>
+                <div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Cristiano Ronaldo</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">El Bicho</div>
+                </div>
+            </div>
+            <div style="font-size: 14px; font-weight: 800; color: var(--text-secondary);">8.9</div>
+        </div>
+
+        <div class="ranking-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--border-radius-md);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 16px; font-weight: 800; color: #a05a2c; width: 20px;">#3</span>
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: #232731; border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: var(--neon-green);">
+                    NJ
+                </div>
+                <div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Neymar Jr</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">Ney</div>
+                </div>
+            </div>
+            <div style="font-size: 14px; font-weight: 800; color: #a05a2c;">8.2</div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/dashboard.js" asp-append-version="true"></script>
+}

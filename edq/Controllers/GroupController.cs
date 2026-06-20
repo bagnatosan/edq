@@ -1,10 +1,7 @@
-using edq.Data;
-using edq.Models;
+using edq.DTO;
+using edq.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -13,11 +10,11 @@ namespace edq.Controllers;
 [Authorize]
 public class GroupController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IGroupService _groupService;
 
-    public GroupController(ApplicationDbContext context)
+    public GroupController(IGroupService groupService)
     {
-        _context = context;
+        _groupService = groupService;
     }
 
     // GET: /Group/Explore
@@ -37,48 +34,36 @@ public class GroupController : Controller
             return Unauthorized();
         }
 
-        var query = _context.Groups
-            .Include(g => g.Creator)
-            .Include(g => g.GroupPlayers)
-            .AsQueryable();
+        var (myGroups, otherGroups) = await _groupService.GetGroupsAsync(userId, search, skip, take);
 
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            var searchLower = search.Trim().ToLower();
-            query = query.Where(g => g.Name.ToLower().Contains(searchLower));
-        }
-
-        var groups = await query
-            .OrderBy(g => g.Name)
-            .Skip(skip)
-            .Take(take)
-            .ToListAsync();
-
-        var groupIds = groups.Select(g => g.Id).ToList();
-
-        // Get user requests for these groups
-        var userRequests = await _context.Requests
-            .Where(r => r.PlayerId == userId && groupIds.Contains(r.GroupId))
-            .ToDictionaryAsync(r => r.GroupId, r => r.State);
-
-        // Get user memberships for these groups
-        var userMemberships = await _context.GroupPlayers
-            .Where(gp => gp.PlayerId == userId && groupIds.Contains(gp.GroupId))
-            .Select(gp => gp.GroupId)
-            .ToListAsync();
-
-        var result = groups.Select(g => new
+        // Mapear los DTOs a la misma estructura JSON que espera el cliente javascript
+        var myGroupsResult = myGroups.Select(g => new
         {
             id = g.Id,
             name = g.Name,
-            creatorName = g.Creator != null ? (g.Creator.Nickname ?? $"{g.Creator.Name} {g.Creator.LastName}") : "Desconocido",
-            memberCount = g.GroupPlayers.Count,
-            isCreator = g.CreatorId == userId,
-            isMember = userMemberships.Contains(g.Id),
-            requestStatus = userRequests.TryGetValue(g.Id, out var status) ? status : null
-        });
+            creatorName = g.CreatorName,
+            memberCount = g.MemberCount,
+            isCreator = g.IsCreator,
+            isMember = g.IsMember,
+            requestStatus = g.RequestStatus
+        }).ToList();
 
-        return Json(result);
+        var otherGroupsResult = otherGroups.Select(g => new
+        {
+            id = g.Id,
+            name = g.Name,
+            creatorName = g.CreatorName,
+            memberCount = g.MemberCount,
+            isCreator = g.IsCreator,
+            isMember = g.IsMember,
+            requestStatus = g.RequestStatus
+        }).ToList();
+
+        return Json(new
+        {
+            myGroups = myGroupsResult,
+            otherGroups = otherGroupsResult
+        });
     }
 
     // POST: /Group/JoinRequest (AJAX endpoint)
@@ -91,42 +76,117 @@ public class GroupController : Controller
             return Unauthorized();
         }
 
-        var group = await _context.Groups.FindAsync(groupId);
-        if (group == null)
-        {
-            return NotFound("Grupo no encontrado.");
-        }
+        var result = await _groupService.RequestJoinGroupAsync(userId, groupId);
 
-        // Check if creator
-        if (group.CreatorId == userId)
+        return result switch
         {
-            return BadRequest("Eres el creador de este grupo.");
-        }
-
-        // Check if member
-        var isMember = await _context.GroupPlayers.AnyAsync(gp => gp.GroupId == groupId && gp.PlayerId == userId);
-        if (isMember)
-        {
-            return BadRequest("Ya eres miembro de este grupo.");
-        }
-
-        var request = new Request
-        {
-            GroupId = groupId,
-            PlayerId = userId,
-            DateRequest = DateTime.UtcNow,
-            State = "Pending"
+            JoinRequestResult.GroupNotFound => NotFound("Grupo no encontrado."),
+            JoinRequestResult.IsCreator => BadRequest("Eres el creador de este grupo."),
+            JoinRequestResult.AlreadyMember => BadRequest("Ya eres miembro de este grupo."),
+            JoinRequestResult.AlreadyRequested => Conflict("Ya has enviado una solicitud para este grupo."),
+            JoinRequestResult.Success => Json(new { success = true, state = "Pending" }),
+            _ => BadRequest("Error al procesar la solicitud.")
         };
+    }
 
-        try
+    // GET: /Group/Dashboard
+    [HttpGet]
+    public async Task<IActionResult> Dashboard(int groupId)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
         {
-            _context.Requests.Add(request);
-            await _context.SaveChangesAsync();
-            return Json(new { success = true, state = "Pending" });
+            return Unauthorized();
         }
-        catch (DbUpdateException)
+
+        var canAccess = await _groupService.CanAccessDashboardAsync(userId, groupId);
+        if (!canAccess)
         {
-            return Conflict("Ya has enviado una solicitud para este grupo.");
+            return Forbid();
         }
+
+        ViewBag.GroupId = groupId;
+        return View();
+    }
+
+    // GET: /Group/GetGroupDashboardData (AJAX endpoint)
+    [HttpGet]
+    public async Task<IActionResult> GetGroupDashboardData(int groupId)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var data = await _groupService.GetGroupDashboardDataAsync(userId, groupId);
+        if (data == null)
+        {
+            return Forbid();
+        }
+
+        // Mapear al formato JSON que espera el cliente javascript
+        return Json(new
+        {
+            groupId = data.GroupId,
+            groupName = data.GroupName,
+            isCreator = data.IsCreator,
+            members = data.Members.Select(m => new
+            {
+                id = m.Id,
+                name = m.Name,
+                nickname = m.Nickname,
+                photoUrl = m.PhotoUrl,
+                initials = m.Initials,
+                score = m.Score
+            }).ToList(),
+            pendingRequests = data.PendingRequests?.Select(r => new
+            {
+                requestId = r.RequestId,
+                playerId = r.PlayerId,
+                name = r.Name,
+                nickname = r.Nickname,
+                photoUrl = r.PhotoUrl,
+                initials = r.Initials
+            }).ToList()
+        });
+    }
+
+    // POST: /Group/AcceptRequest (AJAX endpoint)
+    [HttpPost]
+    public async Task<IActionResult> AcceptRequest(int requestId)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var success = await _groupService.AcceptRequestAsync(userId, requestId);
+        if (!success)
+        {
+            return BadRequest("La solicitud no pudo ser procesada, ya fue procesada o no tienes permisos.");
+        }
+
+        return Json(new { success = true });
+    }
+
+    // POST: /Group/DeclineRequest (AJAX endpoint)
+    [HttpPost]
+    public async Task<IActionResult> DeclineRequest(int requestId)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var success = await _groupService.DeclineRequestAsync(userId, requestId);
+        if (!success)
+        {
+            return BadRequest("La solicitud no pudo ser procesada, ya fue procesada o no tienes permisos.");
+        }
+
+        return Json(new { success = true });
     }
 }

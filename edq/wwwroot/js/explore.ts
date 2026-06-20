@@ -8,14 +8,21 @@ interface Group {
     requestStatus: string | null;
 }
 
+interface GroupsResponse {
+    myGroups: Group[];
+    otherGroups: Group[];
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById("searchInput") as HTMLInputElement | null;
-    const groupsList = document.getElementById("groupsList") as HTMLDivElement | null;
+    const myGroupsList = document.getElementById("myGroupsList") as HTMLDivElement | null;
+    const myGroupsEmptyMessage = document.getElementById("myGroupsEmptyMessage") as HTMLDivElement | null;
+    const otherGroupsList = document.getElementById("otherGroupsList") as HTMLDivElement | null;
     const btnLoadMore = document.getElementById("btnLoadMore") as HTMLButtonElement | null;
     const loadingIndicator = document.getElementById("loadingIndicator") as HTMLDivElement | null;
     const noResultsMessage = document.getElementById("noResultsMessage") as HTMLDivElement | null;
 
-    if (!groupsList || !loadingIndicator || !noResultsMessage) return;
+    if (!myGroupsList || !myGroupsEmptyMessage || !otherGroupsList || !loadingIndicator || !noResultsMessage) return;
 
     let currentSearch: string = "";
     let skip: number = 0;
@@ -38,23 +45,44 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch(`/Group/GetGroups?search=${encodeURIComponent(currentSearch)}&skip=${skip}&take=${take}`);
             if (!response.ok) throw new Error("Error en la carga de grupos.");
 
-            const groups: Group[] = await response.json();
+            const data: GroupsResponse = await response.json();
 
-            if (!append) {
-                groupsList.innerHTML = "";
+            // 1. Renderizar Mis Grupos (solo si es la carga inicial skip === 0)
+            if (skip === 0) {
+                myGroupsList.innerHTML = "";
+                const filteredMyGroups = currentSearch 
+                    ? data.myGroups.filter(g => g.name.toLowerCase().includes(currentSearch.toLowerCase()))
+                    : data.myGroups;
+
+                if (filteredMyGroups.length === 0) {
+                    myGroupsEmptyMessage.style.display = "flex";
+                } else {
+                    myGroupsEmptyMessage.style.display = "none";
+                    filteredMyGroups.forEach(group => {
+                        const card = createGroupCard(group, true);
+                        myGroupsList.appendChild(card);
+                    });
+                }
             }
 
-            if (groups.length === 0 && skip === 0) {
+            // 2. Renderizar Otros Grupos (Descubrir)
+            if (!append) {
+                otherGroupsList.innerHTML = "";
+            }
+
+            const otherGroups = data.otherGroups;
+
+            if (otherGroups.length === 0 && skip === 0) {
                 noResultsMessage.style.display = "flex";
                 hasMore = false;
             } else {
-                groups.forEach(group => {
-                    const card = createGroupCard(group);
-                    groupsList.appendChild(card);
+                otherGroups.forEach(group => {
+                    const card = createGroupCard(group, false);
+                    otherGroupsList.appendChild(card);
                 });
 
                 // Determinar si hay más elementos
-                if (groups.length < take) {
+                if (otherGroups.length < take) {
                     hasMore = false;
                     if (btnLoadMore) btnLoadMore.style.display = "none";
                 } else {
@@ -63,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            skip += groups.length;
+            skip += otherGroups.length;
 
         } catch (error) {
             console.error("Error cargando grupos:", error);
@@ -75,10 +103,22 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Crear la tarjeta de grupo individual
-    const createGroupCard = (group: Group): HTMLDivElement => {
+    const createGroupCard = (group: Group, isMyGroup: boolean): HTMLDivElement => {
         const card = document.createElement("div");
         card.className = "group-card";
         card.dataset.groupId = group.id.toString();
+
+        if (isMyGroup) {
+            card.classList.add("clickable-group-card");
+            card.style.cursor = "pointer";
+            // Al hacer clic, redirige al dashboard del grupo
+            card.addEventListener("click", (e) => {
+                // Prevenir navegación si se hace clic en algún botón interno si existiera
+                const target = e.target as HTMLElement;
+                if (target.closest("button") || target.closest("a")) return;
+                window.location.href = `/Group/Dashboard?groupId=${group.id}`;
+            });
+        }
 
         // Crear estructura de la tarjeta
         card.innerHTML = `
@@ -107,7 +147,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // Añadir evento al botón de unirse si existe
         const joinBtn = card.querySelector(".btn-join-group") as HTMLButtonElement | null;
         if (joinBtn) {
-            joinBtn.addEventListener("click", () => handleJoinRequest(group.id, joinBtn));
+            joinBtn.addEventListener("click", (e) => {
+                e.stopPropagation(); // Prevenir navegación
+                handleJoinRequest(group.id, joinBtn);
+            });
         }
 
         return card;
@@ -202,11 +245,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Scroll infinito opcional
+    // Scroll infinito
     const handleScroll = (): void => {
         if (!hasMore || isLoading) return;
         
-        // Si el scroll está cerca del final, cargar más automáticamente
         const mainContent = document.querySelector(".app-content") as HTMLDivElement | null;
         if (mainContent) {
             const threshold = 100; // píxeles antes del final

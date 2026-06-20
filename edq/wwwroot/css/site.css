@@ -1206,3 +1206,8 @@ body {
   height: 48px;
   color: var(--text-muted);
 }
+
+.clickable-group-card:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
