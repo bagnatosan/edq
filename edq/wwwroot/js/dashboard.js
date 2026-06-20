@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
         requestsCountBadge.textContent = `${requests.length} ${requests.length === 1 ? 'PENDIENTE' : 'PENDIENTES'}`;
         requests.forEach(req => {
             const requestItem = document.createElement("div");
-            requestItem.className = "request-item";
+            requestItem.className = "request-card";
             requestItem.dataset.requestId = req.requestId.toString();
             // Avatar (foto o iniciales)
             let avatarContent = "";
@@ -152,20 +152,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 avatarContent = `<span class="avatar-initials">${escapeHtml(req.initials)}</span>`;
             }
             requestItem.innerHTML = `
-                <div class="request-info">
-                    <div class="avatar-container" style="width: 40px; height: 40px; margin-bottom: 0;">
+                <div class="request-user-info">
+                    <div class="avatar-container" style="width: 40px; height: 40px; margin-bottom: 0; flex-shrink: 0;">
                         ${avatarContent}
                     </div>
                     <div class="request-details">
                         <span class="request-name">${escapeHtml(req.name)}</span>
-                        <span style="font-size: 12px; color: var(--text-secondary);">@${escapeHtml(req.nickname)}</span>
+                        <span class="request-nickname">@${escapeHtml(req.nickname)}</span>
                     </div>
                 </div>
                 <div class="request-actions">
-                    <button class="btn-action btn-action-accept" data-id="${req.requestId}" aria-label="Aceptar">
+                    <button class="btn-request-circle btn-request-accept btn-action-accept btn-action" data-id="${req.requestId}" aria-label="Aceptar">
                         ✔
                     </button>
-                    <button class="btn-action btn-action-decline" data-id="${req.requestId}" aria-label="Rechazar">
+                    <button class="btn-request-circle btn-request-decline btn-action-decline btn-action" data-id="${req.requestId}" aria-label="Rechazar">
                         ❌
                     </button>
                 </div>
@@ -223,24 +223,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         members.forEach((member, index) => {
             const position = index + 1;
-            const isTop1 = position === 1;
             const rankingItem = document.createElement("div");
-            rankingItem.className = "ranking-item";
-            // Estilos específicos para la primera posición
-            if (isTop1) {
-                rankingItem.style.background = "rgba(158, 255, 0, 0.03)";
-                rankingItem.style.borderColor = "rgba(158, 255, 0, 0.15)";
-            }
-            else {
-                rankingItem.style.background = "rgba(255, 255, 255, 0.01)";
-                rankingItem.style.borderColor = "rgba(255, 255, 255, 0.03)";
-            }
-            rankingItem.style.display = "flex";
-            rankingItem.style.alignItems = "center";
-            rankingItem.style.justifyContent = "space-between";
-            rankingItem.style.padding = "10px 12px";
-            rankingItem.style.border = "1px solid";
-            rankingItem.style.borderRadius = "var(--border-radius-md)";
+            rankingItem.className = `ranking-row rank-${position}`;
             // Avatar
             let avatarContent = "";
             if (member.photoUrl) {
@@ -249,35 +233,30 @@ document.addEventListener("DOMContentLoaded", () => {
             else {
                 avatarContent = `<span class="avatar-initials" style="font-size: 11px;">${escapeHtml(member.initials)}</span>`;
             }
-            // Color del indicador de puesto
-            let positionColor = "var(--text-secondary)";
-            let avatarBorderColor = "rgba(255, 255, 255, 0.08)";
-            if (position === 1) {
-                positionColor = "var(--neon-green)";
-                avatarBorderColor = "var(--neon-green-solid)";
-            }
-            else if (position === 2) {
-                positionColor = "var(--text-primary)";
-            }
-            else if (position === 3) {
-                positionColor = "#a05a2c"; // Bronce / café sutil
-            }
+            // Símbolo de posición
+            let positionSymbol = `#${position}`;
+            if (position === 1)
+                positionSymbol = "👑";
+            else if (position === 2)
+                positionSymbol = "🥈";
+            else if (position === 3)
+                positionSymbol = "🥉";
             rankingItem.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1;">
-                    <span style="font-size: 16px; font-weight: 800; color: ${positionColor}; width: 22px; flex-shrink: 0; text-align: center;">#${position}</span>
-                    <div class="avatar-container" style="width: 32px; height: 32px; margin-bottom: 0; border-color: ${avatarBorderColor}; flex-shrink: 0;">
+                <div class="ranking-player-info">
+                    <span class="ranking-position">${positionSymbol}</span>
+                    <div class="avatar-container" style="width: 36px; height: 36px; margin-bottom: 0; flex-shrink: 0;">
                         ${avatarContent}
                     </div>
-                    <div style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                        <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                    <div class="ranking-details">
+                        <div class="ranking-name" style="display: flex; align-items: center; gap: 6px;">
                             ${escapeHtml(member.name)}
                         </div>
-                        <div style="font-size: 11px; color: var(--text-muted); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                        <div class="ranking-nickname">
                             @${escapeHtml(member.nickname)}
                         </div>
                     </div>
                 </div>
-                <div style="font-size: 14px; font-weight: 800; color: ${isTop1 ? 'var(--neon-green)' : 'var(--text-secondary)'}; flex-shrink: 0;">
+                <div class="ranking-winrate-pill">
                     ${member.winrate ? member.winrate.toFixed(0) : "0"}%
                 </div>
             `;

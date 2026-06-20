@@ -1247,3 +1247,228 @@ body {
   border-color: var(--red-alert);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 77, 77, 0.15);
 }
+
+/* Tarjetas de Solicitud en Panel de Admin */
+.request-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius-md);
+  margin-bottom: 12px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.request-card:last-child {
+  margin-bottom: 0;
+}
+
+.request-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.request-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.request-details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.request-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.request-nickname {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.request-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Botones Circulares de Acción */
+.btn-request-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+}
+
+.btn-request-accept {
+  background: rgba(76, 175, 80, 0.1);
+  border-color: rgba(76, 175, 80, 0.2);
+  color: var(--green-success);
+}
+
+.btn-request-accept:hover {
+  background: var(--green-success);
+  color: #050608;
+  border-color: var(--green-success);
+  box-shadow: 0 0 12px rgba(76, 175, 80, 0.4);
+}
+
+.btn-request-decline {
+  background: rgba(255, 77, 77, 0.1);
+  border-color: rgba(255, 77, 77, 0.2);
+  color: var(--red-alert);
+}
+
+.btn-request-decline:hover {
+  background: var(--red-alert);
+  color: #ffffff;
+  border-color: var(--red-alert);
+  box-shadow: 0 0 12px rgba(255, 77, 77, 0.4);
+}
+
+/* Contenedor del Ranking */
+.ranking-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Fila de Ranking */
+.ranking-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--border-radius-md);
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.ranking-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+/* Efecto de Luces (Backdrop Filters y Bordes Neon para los Top) */
+.ranking-row.rank-1 {
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.06) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border-color: rgba(255, 215, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.05);
+}
+
+.ranking-row.rank-2 {
+  background: linear-gradient(90deg, rgba(192, 192, 192, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border-color: rgba(192, 192, 192, 0.25);
+}
+
+.ranking-row.rank-3 {
+  background: linear-gradient(90deg, rgba(205, 127, 50, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border-color: rgba(205, 127, 50, 0.2);
+}
+
+/* Información del Jugador */
+.ranking-player-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  flex: 1;
+}
+
+.ranking-position {
+  font-size: 16px;
+  font-weight: 800;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.rank-1 .ranking-position {
+  color: #ffd700;
+}
+
+.rank-2 .ranking-position {
+  color: #c0c0c0;
+}
+
+.rank-3 .ranking-position {
+  color: #cd7f32;
+}
+
+
+
+.ranking-details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ranking-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ranking-nickname {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Winrate Badge / Pill */
+.ranking-winrate-pill {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 6px 12px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.rank-1 .ranking-winrate-pill {
+  color: #ffd700;
+  background: rgba(255, 215, 0, 0.05);
+  border-color: rgba(255, 215, 0, 0.2);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
+}
+
+.rank-2 .ranking-winrate-pill {
+  color: #c0c0c0;
+  background: rgba(192, 192, 192, 0.04);
+  border-color: rgba(192, 192, 192, 0.15);
+}
+
+.rank-3 .ranking-winrate-pill {
+  color: #cd7f32;
+  background: rgba(205, 127, 50, 0.03);
+  border-color: rgba(205, 127, 50, 0.1);
+}

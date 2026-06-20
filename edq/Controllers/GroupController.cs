@@ -139,7 +139,8 @@ public class GroupController : Controller
                 nickname = m.Nickname,
                 photoUrl = m.PhotoUrl,
                 initials = m.Initials,
-                score = m.Score
+                score = m.Score,
+                winrate = m.Winrate
             }).ToList(),
             pendingRequests = data.PendingRequests?.Select(r => new
             {
