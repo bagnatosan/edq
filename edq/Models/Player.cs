@@ -23,6 +23,9 @@ public class Player
 
     public string? PhotoUrl { get; set; } //wwwroot/images/profilesd
 
+    [Required]
+    public string Password { get; set; } = string.Empty;
+
     // Iniciales calculadas al vuelo (no guardadas en base de datos)
     [System.ComponentModel.DataAnnotations.Schema.NotMapped]
     public string Initials => 

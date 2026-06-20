@@ -1,0 +1,189 @@
+@{
+    ViewData["Title"] = "Ingresar / Registrarse";
+}
+
+<!-- Encabezado de la Sección -->
+<div class="hero-container auth-hero">
+    <img src="/images/logo_appicon.svg" alt="edq. Logo" class="logo-hero auth-logo" />
+    <h1 class="hero-title auth-title">Comenzá tu partido</h1>
+</div>
+
+<!-- Tarjeta de Autenticación Unificada (Glassmorphism) -->
+<div class="card">
+    <div id="authWrapper" class="auth-wrapper @(ViewBag.ShowRegisterOnLoad == true ? "show-register" : "")">
+        
+        <!-- ================= FORMULARIO DE INGRESO (LOGIN) ================= -->
+        <div id="loginForm" class="auth-form login-form">
+            <h2 class="card-title auth-card-title">Iniciar Sesión</h2>
+            
+            <form method="post" asp-controller="Account" asp-action="Login">
+                @if (!ViewData.ModelState.IsValid && ViewBag.ShowRegisterOnLoad != true)
+                {
+                    <div class="auth-error-container">
+                        @foreach (var modelState in ViewData.ModelState.Values)
+                        {
+                            foreach (var error in modelState.Errors)
+                            {
+                                <div class="auth-error-message">
+                                    <span class="error-icon">⚠️</span> @error.ErrorMessage
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="Email" value="@(ViewBag.ShowRegisterOnLoad != true ? ViewData.ModelState["Email"]?.AttemptedValue : "")" class="form-control-neon" placeholder="ejemplo@email.com" required />
+                </div>
+                
+                <div class="form-group form-group-spaced">
+                    <label class="form-label">Contraseña</label>
+                    <input type="password" name="Password" class="form-control-neon" placeholder="••••••••" required />
+                </div>
+
+                <!-- Recordarme & Olvidé contraseña -->
+                <div class="auth-actions-row">
+                    <label class="checkbox-label-neon">
+                        <input type="checkbox" name="RememberMe" value="true" @(ViewBag.ShowRegisterOnLoad != true && ViewData.ModelState["RememberMe"]?.AttemptedValue == "true" ? "checked" : "") />
+                        <span class="checkbox-box-custom"></span>
+                        <span>Recordarme</span>
+                    </label>
+                    <a href="#" class="forgot-password-link">¿La olvidaste?</a>
+                </div>
+
+                <button type="submit" class="btn-neon">Ingresar</button>
+            </form>
+
+            <div class="form-footer-link">
+                ¿No tienes cuenta? <a href="#" id="linkGoToRegister">Registrate</a>
+            </div>
+        </div>
+
+        <!-- ================= FORMULARIO DE REGISTRO ================= -->
+        <div id="registerForm" class="auth-form register-form">
+            <h2 class="card-title auth-card-title">Registrarse</h2>
+            
+            <form method="post" asp-controller="Account" asp-action="Register" enctype="multipart/form-data">
+                @if (!ViewData.ModelState.IsValid && ViewBag.ShowRegisterOnLoad == true)
+                {
+                    <div class="auth-error-container">
+                        @foreach (var modelState in ViewData.ModelState.Values)
+                        {
+                            foreach (var error in modelState.Errors)
+                            {
+                                <div class="auth-error-message">
+                                    <span class="error-icon">⚠️</span> @error.ErrorMessage
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+
+                <div class="form-row-double">
+                    <div class="form-col-half">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" name="Name" value="@(ViewBag.ShowRegisterOnLoad == true ? ViewData.ModelState["Name"]?.AttemptedValue : "")" class="form-control-neon" placeholder="Juan" required />
+                    </div>
+                    <div class="form-col-half">
+                        <label class="form-label">Apellido</label>
+                        <input type="text" name="LastName" value="@(ViewBag.ShowRegisterOnLoad == true ? ViewData.ModelState["LastName"]?.AttemptedValue : "")" class="form-control-neon" placeholder="Pérez" required />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="Email" value="@(ViewBag.ShowRegisterOnLoad == true ? ViewData.ModelState["Email"]?.AttemptedValue : "")" class="form-control-neon" placeholder="ejemplo@email.com" required />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Apodo (Opcional)</label>
+                    <input type="text" name="Nickname" value="@(ViewBag.ShowRegisterOnLoad == true ? ViewData.ModelState["Nickname"]?.AttemptedValue : "")" class="form-control-neon" placeholder="El Toro" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Contraseña</label>
+                    <input type="password" name="Password" class="form-control-neon" placeholder="••••••••" required />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Confirmar Contraseña</label>
+                    <input type="password" name="ConfirmPassword" class="form-control-neon" placeholder="••••••••" required />
+                </div>
+
+                <!-- Carga de Foto de Perfil personalizada -->
+                <div class="form-group form-group-photo">
+                    <label class="form-label">Foto de Perfil</label>
+                    <div class="file-upload-wrapper">
+                        <div id="fileUploadBtn" class="file-upload-btn">
+                            📷 Seleccionar archivo...
+                        </div>
+                        <input type="file" name="ProfilePhoto" id="profilePhotoInput" accept="image/*" />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-neon">Crear Cuenta</button>
+            </form>
+
+            <div class="form-footer-link">
+                ¿Ya tienes cuenta? <a href="#" id="linkGoToLogin">Ingresá</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const authWrapper = document.getElementById("authWrapper");
+            const loginForm = document.getElementById("loginForm");
+            const registerForm = document.getElementById("registerForm");
+            const linkGoToRegister = document.getElementById("linkGoToRegister");
+            const linkGoToLogin = document.getElementById("linkGoToLogin");
+            const profilePhotoInput = document.getElementById("profilePhotoInput");
+            const fileUploadBtn = document.getElementById("fileUploadBtn");
+
+            // Función para ajustar la altura del contenedor dinámicamente según el formulario visible
+            const adjustContainerHeight = () => {
+                const activeForm = authWrapper.classList.contains("show-register") ? registerForm : loginForm;
+                authWrapper.style.height = `${activeForm.offsetHeight}px`;
+            };
+
+            // Ajustar altura inicial al cargar la página
+            setTimeout(adjustContainerHeight, 100);
+
+            // Alternar a Registro
+            linkGoToRegister.addEventListener("click", (e) => {
+                e.preventDefault();
+                authWrapper.classList.add("show-register");
+                adjustContainerHeight();
+            });
+
+            // Alternar a Login
+            linkGoToLogin.addEventListener("click", (e) => {
+                e.preventDefault();
+                authWrapper.classList.remove("show-register");
+                adjustContainerHeight();
+            });
+
+            // Mostrar el nombre del archivo de foto seleccionado
+            profilePhotoInput.addEventListener("change", () => {
+                if (profilePhotoInput.files.length > 0) {
+                    fileUploadBtn.textContent = `✔️ ${profilePhotoInput.files[0].name}`;
+                    fileUploadBtn.style.borderColor = "var(--neon-green-solid)";
+                    fileUploadBtn.style.color = "var(--neon-green)";
+                } else {
+                    fileUploadBtn.textContent = "📷 Seleccionar archivo...";
+                    fileUploadBtn.style.borderColor = "var(--text-secondary)";
+                    fileUploadBtn.style.color = "var(--text-secondary)";
+                }
+                // Reajustar la altura en caso de que cambie por el texto
+                setTimeout(adjustContainerHeight, 50);
+            });
+
+            // Reajustar la altura si cambia el tamaño de la ventana (responsive layout)
+            window.addEventListener("resize", adjustContainerHeight);
+        });
+    </script>
+}

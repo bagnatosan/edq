@@ -1,8 +1,85 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Bienvenido a edq.";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Hero Section -->
+<div class="hero-container">
+    <!-- Logotipo principal animado -->
+    <img src="~/images/logo_appicon.svg" alt="edq. Logo" class="logo-hero" />
+    
+    <!-- Título y Subtítulo Principal -->
+    <h1 class="hero-title">Equipos de fútbol<br/>sin discusiones.</h1>
+    <p class="hero-subtitle">
+        Armá partidos con tus amigos, confirmá asistencia y balanceá los equipos de forma justa con nuestro algoritmo de optimización heurística.
+    </p>
+
+    <!-- Botón CTA con estilo Neón -->
+    <div class="hero-cta-wrapper">
+        <a asp-controller="Account" asp-action="Login" class="btn-neon">Comenzar ahora</a>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Vista previa del Mockup (El celular del mockup de Obsidian) -->
+<div class="card active-neon">
+    <div class="card-header-flex">
+        <h2 class="card-title">Estilo de la App</h2>
+        <span class="card-subtitle-badge">Mobile First</span>
+    </div>
+    
+    <p class="card-description">
+        Diseño optimizado para su uso en el vestuario o la cancha. Modo oscuro de alto contraste y tarjetas translúcidas con respuestas táctiles instantáneas.
+    </p>
+
+    <!-- Mockup renderizado con efecto resplandor de neón -->
+    <div class="mockup-container">
+        <img src="~/images/grupo_dashboard_mobile.png" alt="Mockup Móvil" class="mockup-image-frame" />
+    </div>
+</div>
+
+<!-- Características / Propuesta de Valor -->
+<div class="card">
+    <h2 class="card-title">¿Cómo funciona?</h2>
+    
+    <div class="features-list">
+        <!-- Paso 1 -->
+        <div class="feature-item">
+            <div class="feature-step-number">
+                1
+            </div>
+            <div>
+                <h3 class="feature-step-title">Califica a tus amigos</h3>
+                <p class="feature-step-desc">
+                    El creador del grupo califica a cada jugador del 1 al 10 (con precisión de decimales).
+                </p>
+            </div>
+        </div>
+
+        <!-- Paso 2 -->
+        <div class="feature-item">
+            <div class="feature-step-number">
+                2
+            </div>
+            <div>
+                <h3 class="feature-step-title">Agenda el partido</h3>
+                <p class="feature-step-desc">
+                    Define la fecha del encuentro y confirma quiénes asistirán al partido con simples toques en la pantalla.
+                </p>
+            </div>
+        </div>
+
+        <!-- Paso 3 -->
+        <div class="feature-item">
+            <div class="feature-step-number">
+                3
+            </div>
+            <div>
+                <h3 class="feature-step-title">Balancea al instante</h3>
+                <p class="feature-step-desc">
+                    El sistema utiliza un algoritmo de optimización heurística (Búsqueda Local con reinicios aleatorios) que analiza las calificaciones de los jugadores confirmados para armar equipos equilibrados minimizando la diferencia de nivel en segundos.
+                </p>
+            </div>
+        </div>
+    </div>
 </div>
