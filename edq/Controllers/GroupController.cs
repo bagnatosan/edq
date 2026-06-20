@@ -84,7 +84,8 @@ public class GroupController : Controller
             JoinRequestResult.IsCreator => BadRequest("Eres el creador de este grupo."),
             JoinRequestResult.AlreadyMember => BadRequest("Ya eres miembro de este grupo."),
             JoinRequestResult.AlreadyRequested => Conflict("Ya has enviado una solicitud para este grupo."),
-            JoinRequestResult.Success => Json(new { success = true, state = "Pending" }),
+            JoinRequestResult.SuccessPending => Json(new { success = true, state = "Pending" }),
+            JoinRequestResult.SuccessApproved => Json(new { success = true, state = "Approved" }),
             _ => BadRequest("Error al procesar la solicitud.")
         };
     }
@@ -189,4 +190,113 @@ public class GroupController : Controller
 
         return Json(new { success = true });
     }
+
+    // GET: /Group/AssignScores
+    [HttpGet]
+    public async Task<IActionResult> AssignScores(int groupId)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var groupData = await _groupService.GetGroupDashboardDataAsync(userId, groupId);
+        if (groupData == null || !groupData.IsCreator)
+        {
+            return Forbid();
+        }
+
+        ViewBag.GroupId = groupId;
+        return View();
+    }
+
+    // POST: /Group/UpdateScores (AJAX endpoint)
+    [HttpPost]
+    public async Task<IActionResult> UpdateScores(int groupId, [FromBody] System.Collections.Generic.List<MemberScoreUpdateDto> updates)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        if (updates == null || updates.Count == 0)
+        {
+            return BadRequest("No se recibieron puntajes para actualizar.");
+        }
+
+        var success = await _groupService.UpdateMemberScoresAsync(userId, groupId, updates);
+        if (!success)
+        {
+            return BadRequest("No se pudieron actualizar los puntajes.");
+        }
+
+        return Json(new { success = true });
+    }
+
+    // POST: /Group/CreateTemporaryPlayer (AJAX endpoint)
+    [HttpPost]
+    public async Task<IActionResult> CreateTemporaryPlayer(int groupId, string name, string lastName, byte initialScore)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(lastName))
+        {
+            return BadRequest("El nombre y el apellido son obligatorios.");
+        }
+
+        var success = await _groupService.CreateTemporaryPlayerAsync(userId, groupId, name, lastName, initialScore);
+        if (!success)
+        {
+            return BadRequest("No se pudo crear el jugador temporal.");
+        }
+
+        return Json(new { success = true });
+    }
+
+    // GET: /Group/MatchHistory
+    [HttpGet]
+    public async Task<IActionResult> MatchHistory(int groupId)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var canAccess = await _groupService.CanAccessDashboardAsync(userId, groupId);
+        if (!canAccess)
+        {
+            return Forbid();
+        }
+
+        ViewBag.GroupId = groupId;
+        return View();
+    }
+
+    // GET: /Group/GetMatchHistoryData (AJAX endpoint)
+    [HttpGet]
+    public async Task<IActionResult> GetMatchHistoryData(int groupId)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var data = await _groupService.GetMatchHistoryAsync(userId, groupId);
+        if (data == null)
+        {
+            return Forbid();
+        }
+
+        return Json(data);
+    }
 }
+
+

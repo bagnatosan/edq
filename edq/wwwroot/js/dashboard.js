@@ -16,10 +16,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const adminPanel = document.getElementById("adminPanel");
     const requestsCountBadge = document.getElementById("requestsCountBadge");
     const requestsList = document.getElementById("requestsList");
+    // Elementos de Próximo Partido
+    const upcomingMatchCard = document.getElementById("upcomingMatchCard");
+    const matchTimeLabel = document.getElementById("matchTimeLabel");
+    const teamAList = document.getElementById("teamAList");
+    const teamBList = document.getElementById("teamBList");
+    // Elemento del Ranking
+    const rankingList = document.getElementById("rankingList");
     // Botones de acción
     const btnCreateMatch = document.getElementById("btnCreateMatch");
     const btnAssignScores = document.getElementById("btnAssignScores");
-    if (!groupIdInput || !groupNameTitle || !membersCarousel || !membersCountBadge || !requestsList)
+    const btnMatchHistory = document.getElementById("btnMatchHistory");
+    if (!groupIdInput || !groupNameTitle || !membersCarousel || !membersCountBadge || !requestsList || !rankingList)
         return;
     const groupId = parseInt(groupIdInput.value);
     if (isNaN(groupId))
@@ -39,12 +47,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = yield response.json();
             // 1. Mostrar nombre del grupo
             groupNameTitle.textContent = data.groupName;
-            // 2. Mostrar miembros en el carrusel
-            renderMembers(data.members);
+            // 2. Mostrar miembros en el carrusel (solo mostrar puntaje si el usuario actual es el creador)
+            renderMembers(data.members, data.isCreator);
             // 3. Configurar botones según rol
             if (data.isCreator) {
                 if (btnAssignScores) {
-                    btnAssignScores.style.display = "flex"; // Mostrar el botón de asignar puntajes
+                    btnAssignScores.style.display = "flex";
                 }
             }
             else {
@@ -64,6 +72,23 @@ document.addEventListener("DOMContentLoaded", () => {
                     adminPanel.style.display = "none";
                 }
             }
+            // 5. Renderizar Próximo Partido si hay alguno planificado
+            if (data.upcomingMatch && upcomingMatchCard && matchTimeLabel && teamAList && teamBList) {
+                matchTimeLabel.textContent = `⚽ ${formatDate(data.upcomingMatch.date)} hs`;
+                teamAList.innerHTML = data.upcomingMatch.team1.length > 0
+                    ? data.upcomingMatch.team1.map(p => `<div>• ${escapeHtml(p)}</div>`).join("")
+                    : `<div style="font-style: italic; color: var(--text-muted);">Sin jugadores</div>`;
+                teamBList.innerHTML = data.upcomingMatch.team2.length > 0
+                    ? data.upcomingMatch.team2.map(p => `<div>• ${escapeHtml(p)}</div>`).join("")
+                    : `<div style="font-style: italic; color: var(--text-muted);">Sin jugadores</div>`;
+                upcomingMatchCard.style.display = "block";
+            }
+            else {
+                if (upcomingMatchCard)
+                    upcomingMatchCard.style.display = "none";
+            }
+            // 6. Renderizar ranking completo ordenado por winrate
+            renderRanking(data.members);
         }
         catch (error) {
             console.error("Error al cargar datos del dashboard:", error);
@@ -71,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     // Renderizar miembros en el carrusel horizontal
-    const renderMembers = (members) => {
+    const renderMembers = (members, isCreator) => {
         if (!membersCarousel || !membersCountBadge)
             return;
         membersCarousel.innerHTML = "";
@@ -88,15 +113,22 @@ document.addEventListener("DOMContentLoaded", () => {
             else {
                 avatarContent = `<span class="avatar-initials">${escapeHtml(member.initials)}</span>`;
             }
+            // Mostrar el puntaje abajo del nombre únicamente si es el creador
+            let ratingHtml = "";
+            if (isCreator) {
+                ratingHtml = `
+                    <div class="member-rating">
+                        <span class="star-icon">★</span>
+                        <span>${member.score ? member.score.toFixed(1) : "6.0"}</span>
+                    </div>
+                `;
+            }
             memberCard.innerHTML = `
                 <div class="avatar-container">
                     ${avatarContent}
                 </div>
                 <div class="member-name">${escapeHtml(member.nickname)}</div>
-                <div class="member-rating">
-                    <span class="star-icon">★</span>
-                    <span>${member.score ? member.score.toFixed(1) : "6.0"}</span>
-                </div>
+                ${ratingHtml}
             `;
             membersCarousel.appendChild(memberCard);
         });
@@ -153,7 +185,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Procesar la solicitud (Aceptar o Rechazar) por AJAX
     const handleProcessRequest = (requestId, accept, itemElement) => __awaiter(void 0, void 0, void 0, function* () {
         const actionUrl = accept ? "/Group/AcceptRequest" : "/Group/DeclineRequest";
-        // Deshabilitar botones dentro de este elemento para evitar doble click
         const buttons = itemElement.querySelectorAll(".btn-action");
         buttons.forEach(btn => btn.disabled = true);
         try {
@@ -167,12 +198,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 const errorText = yield response.text();
                 throw new Error(errorText || "Error al procesar la solicitud.");
             }
-            // Éxito: Animación de desvanecimiento y actualizar datos
             itemElement.style.transition = "all 0.3s ease";
             itemElement.style.opacity = "0";
             itemElement.style.transform = "translateX(-20px)";
             setTimeout(() => {
-                // Eliminar el elemento del DOM y recargar los datos para actualizar miembros y contador
                 itemElement.remove();
                 loadDashboardData();
             }, 300);
@@ -183,6 +212,91 @@ document.addEventListener("DOMContentLoaded", () => {
             buttons.forEach(btn => btn.disabled = false);
         }
     });
+    // Renderizar ranking completo en orden descendente de winrate
+    const renderRanking = (members) => {
+        if (!rankingList)
+            return;
+        rankingList.innerHTML = "";
+        if (members.length === 0) {
+            rankingList.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 10px;">Aún no hay suficientes partidos completados.</div>`;
+            return;
+        }
+        members.forEach((member, index) => {
+            const position = index + 1;
+            const isTop1 = position === 1;
+            const rankingItem = document.createElement("div");
+            rankingItem.className = "ranking-item";
+            // Estilos específicos para la primera posición
+            if (isTop1) {
+                rankingItem.style.background = "rgba(158, 255, 0, 0.03)";
+                rankingItem.style.borderColor = "rgba(158, 255, 0, 0.15)";
+            }
+            else {
+                rankingItem.style.background = "rgba(255, 255, 255, 0.01)";
+                rankingItem.style.borderColor = "rgba(255, 255, 255, 0.03)";
+            }
+            rankingItem.style.display = "flex";
+            rankingItem.style.alignItems = "center";
+            rankingItem.style.justifyContent = "space-between";
+            rankingItem.style.padding = "10px 12px";
+            rankingItem.style.border = "1px solid";
+            rankingItem.style.borderRadius = "var(--border-radius-md)";
+            // Avatar
+            let avatarContent = "";
+            if (member.photoUrl) {
+                avatarContent = `<img src="${escapeHtml(member.photoUrl)}" class="avatar-image" alt="${escapeHtml(member.nickname)}" />`;
+            }
+            else {
+                avatarContent = `<span class="avatar-initials" style="font-size: 11px;">${escapeHtml(member.initials)}</span>`;
+            }
+            // Color del indicador de puesto
+            let positionColor = "var(--text-secondary)";
+            let avatarBorderColor = "rgba(255, 255, 255, 0.08)";
+            if (position === 1) {
+                positionColor = "var(--neon-green)";
+                avatarBorderColor = "var(--neon-green-solid)";
+            }
+            else if (position === 2) {
+                positionColor = "var(--text-primary)";
+            }
+            else if (position === 3) {
+                positionColor = "#a05a2c"; // Bronce / café sutil
+            }
+            rankingItem.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1;">
+                    <span style="font-size: 16px; font-weight: 800; color: ${positionColor}; width: 22px; flex-shrink: 0; text-align: center;">#${position}</span>
+                    <div class="avatar-container" style="width: 32px; height: 32px; margin-bottom: 0; border-color: ${avatarBorderColor}; flex-shrink: 0;">
+                        ${avatarContent}
+                    </div>
+                    <div style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                            ${escapeHtml(member.name)}
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-muted); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                            @${escapeHtml(member.nickname)}
+                        </div>
+                    </div>
+                </div>
+                <div style="font-size: 14px; font-weight: 800; color: ${isTop1 ? 'var(--neon-green)' : 'var(--text-secondary)'}; flex-shrink: 0;">
+                    ${member.winrate ? member.winrate.toFixed(0) : "0"}%
+                </div>
+            `;
+            rankingList.appendChild(rankingItem);
+        });
+    };
+    // Helper para formatear fecha en formato legible "Sábado 20/06 - 18:00"
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime()))
+            return dateString;
+        const days = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+        const dayName = days[date.getDay()];
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${dayName} ${day}/${month} - ${hours}:${minutes}`;
+    };
     // Anti forgery token helper
     const getAntiForgeryToken = () => {
         const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
@@ -205,10 +319,16 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("¡Funcionalidad para crear nuevo partido coming soon!");
         });
     }
-    // Agregar evento a botón Asignar Puntajes (mock/redirección)
+    // Redirigir al panel de asignación de puntajes
     if (btnAssignScores) {
         btnAssignScores.addEventListener("click", () => {
-            alert("¡Funcionalidad para asignar puntajes coming soon!");
+            window.location.href = `/Group/AssignScores?groupId=${groupId}`;
+        });
+    }
+    // Redirigir al historial de partidos
+    if (btnMatchHistory) {
+        btnMatchHistory.addEventListener("click", () => {
+            window.location.href = `/Group/MatchHistory?groupId=${groupId}`;
         });
     }
     // Cargar datos iniciales

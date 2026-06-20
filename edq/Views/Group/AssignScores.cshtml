@@ -1,0 +1,73 @@
+@{
+    ViewData["Title"] = "Asignar Puntajes";
+}
+
+@Html.AntiForgeryToken()
+
+<input type="hidden" id="groupIdInput" value="@ViewBag.GroupId" />
+
+<!-- Navegación y Encabezado -->
+<div class="dashboard-header-nav" style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+    <a href="/Group/Dashboard?groupId=@ViewBag.GroupId" class="btn-back-arrow" style="color: var(--text-primary); text-decoration: none; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: background-color 0.2s;">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+    </a>
+    <h1 id="groupNameTitle" class="hero-title" style="font-size: 20px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">Asignar Puntajes</h1>
+</div>
+
+<!-- Listado de Miembros para Editar Puntajes -->
+<div class="card" style="border-color: rgba(255, 255, 255, 0.05);">
+    <div class="card-header-flex">
+        <h2 class="card-title">Puntajes de Jugadores</h2>
+        <span id="membersCountBadge" class="card-subtitle-badge">0 MIEMBROS</span>
+    </div>
+    
+    <div id="membersScoresList" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; max-height: 400px; overflow-y: auto; padding-right: 16px;">
+        <!-- Carga dinámica -->
+        <div class="loading-spinner" style="justify-content: center; padding: 20px 0;">Cargando jugadores...</div>
+    </div>
+
+    <button id="btnSaveScores" class="btn-neon" style="gap: 8px;">
+        💾 Guardar Puntajes
+    </button>
+</div>
+
+<!-- Sección: Crear Jugador Temporal -->
+<div class="card active-neon" style="margin-bottom: 20px;">
+    <div class="card-header-flex">
+        <h2 class="card-title" style="color: var(--neon-green);">Crear Jugador Temporal</h2>
+        <span class="card-subtitle-badge" style="color: var(--neon-green);">NUEVO</span>
+    </div>
+    
+    <form id="createTempPlayerForm" onsubmit="return false;" style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label">Nombre</label>
+            <input type="text" id="tempPlayerName" class="form-control-neon" placeholder="Ej. Juan" required style="padding: 12px 14px; font-size: 14px;" />
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label">Apellido</label>
+            <input type="text" id="tempPlayerLastName" class="form-control-neon" placeholder="Ej. Pérez" required style="padding: 12px 14px; font-size: 14px;" />
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="display: flex; justify-content: space-between;">
+                <span>Puntaje Inicial</span>
+                <span id="tempPlayerScoreVal" style="color: var(--neon-green); font-weight: 800;">6</span>
+            </label>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <input type="range" id="tempPlayerScore" min="1" max="10" value="6" style="flex: 1; accent-color: var(--neon-green-solid);" />
+            </div>
+        </div>
+
+        <button type="submit" id="btnCreateTempPlayer" class="btn-outline-neon" style="margin-top: 6px; padding: 12px; font-size: 14px;">
+            ➕ Crear e Integrar al Grupo
+        </button>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="~/js/assign-scores.js" asp-append-version="true"></script>
+}

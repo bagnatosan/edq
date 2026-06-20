@@ -18,13 +18,41 @@
 </div>
 
 <!-- Carrusel de Miembros -->
-<div class="card">
+<div class="card" style="margin-bottom: 16px;">
     <div class="card-header-flex">
         <h2 class="card-title">Miembros</h2>
         <span id="membersCountBadge" class="card-subtitle-badge">0 JUGADORES</span>
     </div>
     <div id="membersCarousel" class="member-list-horizontal">
         <!-- Cargar dinámicamente por JS -->
+    </div>
+</div>
+
+<!-- Banner Próximo Partido (Si hay alguno planificado) -->
+<div id="upcomingMatchCard" class="card" style="display: none; border-color: var(--neon-green-glow); background: rgba(158, 255, 0, 0.01); margin-bottom: 16px;">
+    <div class="card-header-flex">
+        <h2 class="card-title" style="color: var(--neon-green);">Próximo Partido</h2>
+        <span class="card-subtitle-badge" style="color: var(--neon-green);">CONVOCADO</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div id="matchTimeLabel" style="font-size: 15px; font-weight: 700; color: var(--text-primary);">
+            Fecha del partido
+        </div>
+        
+        <div class="teams-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: rgba(255,255,255,0.02); padding: 10px; border-radius: var(--border-radius-md); border: 1px solid rgba(255,255,255,0.04);">
+            <div style="border-right: 1px solid rgba(255,255,255,0.06); padding-right: 8px;">
+                <div style="font-size: 11px; font-weight: 800; color: var(--neon-green); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Equipo A</div>
+                <div id="teamAList" style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--text-secondary);">
+                    <!-- Nombres -->
+                </div>
+            </div>
+            <div style="padding-left: 8px;">
+                <div style="font-size: 11px; font-weight: 800; color: var(--neon-green); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Equipo B</div>
+                <div id="teamBList" style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--text-secondary);">
+                    <!-- Nombres -->
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -36,10 +64,13 @@
     <button id="btnAssignScores" class="btn-outline-neon" style="display: none; gap: 8px;">
         🏆 Asignar Puntajes
     </button>
+    <button id="btnMatchHistory" class="btn-outline-neon" style="gap: 8px;">
+        📅 Historial de Partidos
+    </button>
 </div>
 
 <!-- Panel de Administración (Solo para Creadores con Solicitudes Pendientes) -->
-<div id="adminPanel" class="card" style="display: none; border-color: var(--neon-green-glow);">
+<div id="adminPanel" class="card" style="display: none; border-color: var(--neon-green-glow); margin-bottom: 16px;">
     <div class="card-header-flex">
         <h2 class="card-title" style="color: var(--neon-green);">Solicitudes Pendientes</h2>
         <span id="requestsCountBadge" class="card-subtitle-badge" style="color: var(--neon-green);">0 PENDIENTES</span>
@@ -53,50 +84,10 @@
 <div class="card active-neon">
     <div class="card-header-flex">
         <h2 class="card-title">Ranking del Grupo</h2>
-        <span class="card-subtitle-badge">TOP JUGADORES</span>
+        <span class="card-subtitle-badge">WINRATE</span>
     </div>
-    <div class="ranking-placeholder-list" style="display: flex; flex-direction: column; gap: 12px;">
-        <div class="ranking-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: rgba(158,255,0,0.03); border: 1px solid rgba(158,255,0,0.1); border-radius: var(--border-radius-md);">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 16px; font-weight: 800; color: var(--neon-green); width: 20px;">#1</span>
-                <div style="width: 32px; height: 32px; border-radius: 50%; background: #232731; border: 1px solid var(--neon-green-solid); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: var(--neon-green);">
-                    LM
-                </div>
-                <div>
-                    <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Lionel Messi</div>
-                    <div style="font-size: 11px; color: var(--text-muted);">Leo</div>
-                </div>
-            </div>
-            <div style="font-size: 14px; font-weight: 800; color: var(--neon-green);">9.8</div>
-        </div>
-        
-        <div class="ranking-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--border-radius-md);">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 16px; font-weight: 800; color: var(--text-secondary); width: 20px;">#2</span>
-                <div style="width: 32px; height: 32px; border-radius: 50%; background: #232731; border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: var(--neon-green);">
-                    CR
-                </div>
-                <div>
-                    <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Cristiano Ronaldo</div>
-                    <div style="font-size: 11px; color: var(--text-muted);">El Bicho</div>
-                </div>
-            </div>
-            <div style="font-size: 14px; font-weight: 800; color: var(--text-secondary);">8.9</div>
-        </div>
-
-        <div class="ranking-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--border-radius-md);">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 16px; font-weight: 800; color: #a05a2c; width: 20px;">#3</span>
-                <div style="width: 32px; height: 32px; border-radius: 50%; background: #232731; border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: var(--neon-green);">
-                    NJ
-                </div>
-                <div>
-                    <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Neymar Jr</div>
-                    <div style="font-size: 11px; color: var(--text-muted);">Ney</div>
-                </div>
-            </div>
-            <div style="font-size: 14px; font-weight: 800; color: #a05a2c;">8.2</div>
-        </div>
+    <div id="rankingList" style="display: flex; flex-direction: column; gap: 12px;">
+        <!-- Cargar dinámicamente por JS -->
     </div>
 </div>
 

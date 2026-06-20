@@ -180,8 +180,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 const errorMsg = yield response.text();
                 throw new Error(errorMsg || "Error al procesar la solicitud.");
             }
-            // Éxito: cambiar botón por badge solicitado
-            setButtonStateRequested(buttonElement);
+            const result = yield response.json();
+            // Éxito: cambiar botón por badge correspondiente
+            if (result.state === "Approved") {
+                const parent = buttonElement.parentElement;
+                if (parent) {
+                    parent.innerHTML = `<span class="badge-status badge-status-member">✓ Eres Miembro</span>`;
+                }
+                alert("¡Te has unido automáticamente al grupo ya que habías sido pre-registrado por el administrador!");
+                // Recargar el listado para mover el grupo a 'Mis Grupos' en tiempo real
+                setTimeout(() => {
+                    skip = 0;
+                    hasMore = true;
+                    loadGroups(false);
+                }, 1000);
+            }
+            else {
+                setButtonStateRequested(buttonElement);
+            }
         }
         catch (error) {
             console.error("Error al enviar solicitud:", error);

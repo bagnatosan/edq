@@ -34,12 +34,20 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9Mb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/home/santiago/Documentos/GitHub/edq/edq/Views/Group/AssignScores.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR3JvdXAvQXNzaWduU2NvcmVzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/home/santiago/Documentos/GitHub/edq/edq/Views/Group/Dashboard.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR3JvdXAvRGFzaGJvYXJkLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/home/santiago/Documentos/GitHub/edq/edq/Views/Group/Explore.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR3JvdXAvRXhwbG9yZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/santiago/Documentos/GitHub/edq/edq/Views/Group/MatchHistory.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR3JvdXAvTWF0Y2hIaXN0b3J5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/home/santiago/Documentos/GitHub/edq/edq/Views/Home/Index.cshtml]
