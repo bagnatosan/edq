@@ -134,56 +134,5 @@
 </div>
 
 @section Scripts {
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const authWrapper = document.getElementById("authWrapper");
-            const loginForm = document.getElementById("loginForm");
-            const registerForm = document.getElementById("registerForm");
-            const linkGoToRegister = document.getElementById("linkGoToRegister");
-            const linkGoToLogin = document.getElementById("linkGoToLogin");
-            const profilePhotoInput = document.getElementById("profilePhotoInput");
-            const fileUploadBtn = document.getElementById("fileUploadBtn");
-
-            // Función para ajustar la altura del contenedor dinámicamente según el formulario visible
-            const adjustContainerHeight = () => {
-                const activeForm = authWrapper.classList.contains("show-register") ? registerForm : loginForm;
-                authWrapper.style.height = `${activeForm.offsetHeight}px`;
-            };
-
-            // Ajustar altura inicial al cargar la página
-            setTimeout(adjustContainerHeight, 100);
-
-            // Alternar a Registro
-            linkGoToRegister.addEventListener("click", (e) => {
-                e.preventDefault();
-                authWrapper.classList.add("show-register");
-                adjustContainerHeight();
-            });
-
-            // Alternar a Login
-            linkGoToLogin.addEventListener("click", (e) => {
-                e.preventDefault();
-                authWrapper.classList.remove("show-register");
-                adjustContainerHeight();
-            });
-
-            // Mostrar el nombre del archivo de foto seleccionado
-            profilePhotoInput.addEventListener("change", () => {
-                if (profilePhotoInput.files.length > 0) {
-                    fileUploadBtn.textContent = `✔️ ${profilePhotoInput.files[0].name}`;
-                    fileUploadBtn.style.borderColor = "var(--neon-green-solid)";
-                    fileUploadBtn.style.color = "var(--neon-green)";
-                } else {
-                    fileUploadBtn.textContent = "📷 Seleccionar archivo...";
-                    fileUploadBtn.style.borderColor = "var(--text-secondary)";
-                    fileUploadBtn.style.color = "var(--text-secondary)";
-                }
-                // Reajustar la altura en caso de que cambie por el texto
-                setTimeout(adjustContainerHeight, 50);
-            });
-
-            // Reajustar la altura si cambia el tamaño de la ventana (responsive layout)
-            window.addEventListener("resize", adjustContainerHeight);
-        });
-    </script>
+    <script src="~/js/login.js" asp-append-version="true"></script>
 }

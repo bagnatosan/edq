@@ -218,3 +218,5 @@
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/edq.pdb
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/edq.genruntimeconfig.cache
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/ref/edq.dll
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/b61zlydoc8-{0}-hlcpv5rxbe-hlcpv5rxbe.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/tpmc4f0ug7-{0}-1bc7zisff4-1bc7zisff4.gz
