@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <!-- Gradiente lime a cian -->
+    <linearGradient id="gradientB2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#39ff14" />
+      <stop offset="100%" stop-color="#00f2fe" />
+    </linearGradient>
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Squircle App Container (Premium Dark Mode Icon Base) -->
+  <rect width="440" height="440" x="30" y="30" rx="90" fill="#121212" stroke="#222" stroke-width="4"/>
+  <rect width="436" height="436" x="32" y="32" rx="88" fill="none" stroke="url(#gradientB2)" stroke-width="2" opacity="0.4"/>
+
+  <!-- Glowing Balance Scale (No Text, Pure Symbol) -->
+  <g transform="translate(250, 245)">
+    <!-- Base forming 'E' -->
+    <path d="M -35,90 L 35,90 M 0,90 L 0,-60 M 0,-20 L 25,-20 M 0,-60 L 35,-60" 
+          fill="none" stroke="url(#gradientB2)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+          
+    <!-- Main Beam -->
+    <path d="M -115,-40 L 115,-40" 
+          fill="none" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round"/>
+    
+    <!-- Left Football -->
+    <g transform="translate(-115, 10)">
+      <path d="M 0,-50 L -30,0 M 0,-50 L 30,0" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+      <circle cx="0" cy="15" r="35" fill="#161616" stroke="url(#gradientB2)" stroke-width="8" filter="url(#neonGlow)"/>
+      <path d="M 0,-20 L 10,-8 L 5,8 L -5,8 L -10,-8 Z" fill="none" stroke="url(#gradientB2)" stroke-width="3"/>
+    </g>
+
+    <!-- Right Football -->
+    <g transform="translate(115, 10)">
+      <path d="M 0,-50 L -30,0 M 0,-50 L 30,0" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+      <circle cx="0" cy="15" r="35" fill="#161616" stroke="url(#gradientB2)" stroke-width="8" filter="url(#neonGlow)"/>
+      <path d="M 0,-20 L 10,-8 L 5,8 L -5,8 L -10,-8 Z" fill="none" stroke="url(#gradientB2)" stroke-width="3"/>
+    </g>
+  </g>
+</svg>
