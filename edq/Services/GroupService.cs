@@ -524,6 +524,65 @@ public class GroupService : IGroupService
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<bool> RemoveMemberAsync(int userId, int groupId, int playerId)
+    {
+        // 1. Validar que el usuario que remueve sea el creador del grupo
+        var group = await _context.Groups.FindAsync(groupId);
+        if (group == null || group.CreatorId != userId)
+        {
+            return false;
+        }
+
+        // 2. El creador no puede auto-eliminarse
+        if (group.CreatorId == playerId)
+        {
+            return false;
+        }
+
+        // 3. Buscar al miembro en la relación GroupPlayer
+        var gp = await _context.GroupPlayers
+            .FirstOrDefaultAsync(x => x.GroupId == groupId && x.PlayerId == playerId);
+
+        if (gp == null)
+        {
+            return false;
+        }
+
+        // 4. Eliminar el registro de membresía
+        _context.GroupPlayers.Remove(gp);
+
+        // 5. Eliminarlo de participaciones en partidos pendientes (futuros) de este grupo
+        var pendingMatchIds = await _context.Matches
+            .Where(m => m.GroupId == groupId && m.State == "Pending")
+            .Select(m => m.Id)
+            .ToListAsync();
+
+        if (pendingMatchIds.Any())
+        {
+            var matchPlayersToRemove = await _context.MatchPlayers
+                .Where(mp => mp.PlayerId == playerId && pendingMatchIds.Contains(mp.MatchId))
+                .ToListAsync();
+
+            if (matchPlayersToRemove.Any())
+            {
+                _context.MatchPlayers.RemoveRange(matchPlayersToRemove);
+            }
+        }
+
+        // 6. Eliminar solicitudes de unión (aprobadas o pendientes) para este grupo
+        var requests = await _context.Requests
+            .Where(r => r.GroupId == groupId && r.PlayerId == playerId)
+            .ToListAsync();
+
+        if (requests.Any())
+        {
+            _context.Requests.RemoveRange(requests);
+        }
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }
 
 

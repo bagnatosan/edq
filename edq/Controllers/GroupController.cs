@@ -153,6 +153,7 @@ public class GroupController : Controller
             groupId = data.GroupId,
             groupName = data.GroupName,
             isCreator = data.IsCreator,
+            creatorId = userId,
             members = data.Members.Select(m => new
             {
                 id = m.Id,
@@ -399,6 +400,45 @@ public class GroupController : Controller
         if (!success)
         {
             return BadRequest("No se pudo actualizar el nombre del grupo.");
+        }
+
+        return Json(new { success = true });
+    }
+
+    // GET: /Group/RemoveMembers
+    [HttpGet]
+    public async Task<IActionResult> RemoveMembers(int groupId)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var groupData = await _groupService.GetGroupDashboardDataAsync(userId, groupId);
+        if (groupData == null || !groupData.IsCreator)
+        {
+            return Forbid();
+        }
+
+        ViewBag.GroupId = groupId;
+        return View();
+    }
+
+    // POST: /Group/RemoveMember (AJAX endpoint)
+    [HttpPost]
+    public async Task<IActionResult> RemoveMember(int groupId, int playerId)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var success = await _groupService.RemoveMemberAsync(userId, groupId, playerId);
+        if (!success)
+        {
+            return BadRequest("No se pudo eliminar al jugador del grupo o no tienes permisos.");
         }
 
         return Json(new { success = true });

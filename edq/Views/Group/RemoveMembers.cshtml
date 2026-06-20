@@ -1,0 +1,48 @@
+@{
+    ViewData["Title"] = "Eliminar Jugadores";
+}
+
+@Html.AntiForgeryToken()
+
+<input type="hidden" id="groupIdInput" value="@ViewBag.GroupId" />
+
+<!-- Navegación y Encabezado -->
+<div class="dashboard-header-nav" style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+    <a href="/Group/AdminPanel?groupId=@ViewBag.GroupId" class="btn-back-arrow" style="color: var(--text-primary); text-decoration: none; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: background-color 0.2s;">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+    </a>
+    <h1 id="groupNameTitle" class="hero-title" style="font-size: 20px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">Eliminar Jugadores</h1>
+</div>
+
+<!-- Listado de Miembros para Eliminar -->
+<div class="card" style="border-color: rgba(255, 255, 255, 0.05); margin-bottom: 20px;">
+    <div class="card-header-flex">
+        <h2 class="card-title">Integrantes del Grupo</h2>
+        <span id="membersCountBadge" class="card-subtitle-badge">0 JUGADORES</span>
+    </div>
+    
+    <div id="membersRemoveList" style="display: flex; flex-direction: column; gap: 16px; max-height: 580px; overflow-y: auto; padding-right: 8px;">
+        <!-- Carga dinámica -->
+        <div class="loading-spinner" style="justify-content: center; padding: 20px 0; color: var(--text-muted);">Cargando jugadores...</div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación Estilizado -->
+<div id="confirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 10, 13, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.25s ease-out;">
+    <div id="confirmModalCard" class="card" style="max-width: 320px; width: 90%; border-color: var(--red-alert); background: rgba(26, 29, 36, 0.95); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 77, 77, 0.1); text-align: center; display: flex; flex-direction: column; gap: 16px; padding: 24px; transform: scale(0.9); transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);">
+        <div style="font-size: 40px; color: var(--red-alert); margin-bottom: 4px;">⚠️</div>
+        <h3 style="font-size: 18px; font-weight: 700; color: var(--text-primary); margin: 0;">¿Eliminar Jugador?</h3>
+        <p id="confirmModalText" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin: 0;">¿Estás seguro de que deseas eliminar a este jugador del grupo?</p>
+        <div style="display: flex; gap: 12px; margin-top: 8px;">
+            <button type="button" id="btnConfirmCancel" class="btn-outline-neon" style="flex: 1; border-color: rgba(255,255,255,0.1); color: var(--text-secondary); padding: 12px; justify-content: center; font-size: 13px;">Cancelar</button>
+            <button type="button" id="btnConfirmDelete" class="btn-neon" style="flex: 1; background: var(--red-alert); border-color: var(--red-alert); color: #ffffff; padding: 12px; justify-content: center; box-shadow: 0 0 10px rgba(255, 77, 77, 0.2); font-size: 13px;">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/remove-members.js" asp-append-version="true"></script>
+}

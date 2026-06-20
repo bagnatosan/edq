@@ -44,7 +44,21 @@
         </div>
     </a>
 
-    <!-- Opción 3: Cambiar Nombre del Grupo -->
+    <!-- Opción 3: Eliminar Jugadores -->
+    <a href="/Group/RemoveMembers?groupId=@ViewBag.GroupId" class="card" style="display: flex; align-items: center; gap: 18px; text-decoration: none; padding: 20px; transition: transform 0.2s; border-color: rgba(255, 255, 255, 0.05);">
+        <div style="font-size: 32px; background: rgba(255, 77, 77, 0.05); width: 60px; height: 60px; border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255, 77, 77, 0.15); flex-shrink: 0;">
+            ❌
+        </div>
+        <div style="flex: 1; min-width: 0;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Eliminar Jugadores</h3>
+            <p style="font-size: 12px; color: var(--text-secondary); margin: 0;">Remueve de forma permanente integrantes de este grupo.</p>
+        </div>
+        <div style="color: var(--text-secondary); font-size: 20px; font-weight: 700; margin-left: auto;">
+            →
+        </div>
+    </a>
+
+    <!-- Opción 4: Cambiar Nombre del Grupo -->
     <a href="/Group/GroupSettings?groupId=@ViewBag.GroupId" class="card" style="display: flex; align-items: center; gap: 18px; text-decoration: none; padding: 20px; transition: transform 0.2s; border-color: rgba(255, 255, 255, 0.05);">
         <div style="font-size: 32px; background: rgba(255, 255, 255, 0.03); width: 60px; height: 60px; border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255, 255, 255, 0.05); flex-shrink: 0;">
             ⚙️
