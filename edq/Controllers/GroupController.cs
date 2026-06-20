@@ -110,6 +110,27 @@ public class GroupController : Controller
         return View();
     }
 
+    // GET: /Group/CreateMatch
+    [HttpGet]
+    public async Task<IActionResult> CreateMatch(int groupId)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        // Validar acceso: Solo el creador puede crear partidos
+        var groupData = await _groupService.GetGroupDashboardDataAsync(userId, groupId);
+        if (groupData == null || !groupData.IsCreator)
+        {
+            return Forbid();
+        }
+
+        ViewBag.GroupId = groupId;
+        return View();
+    }
+
     // GET: /Group/GetGroupDashboardData (AJAX endpoint)
     [HttpGet]
     public async Task<IActionResult> GetGroupDashboardData(int groupId)

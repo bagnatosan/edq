@@ -354,7 +354,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Agregar evento a botón Crear Partido (mock/redirección)
     if (btnCreateMatch) {
         btnCreateMatch.addEventListener("click", () => {
-            alert("¡Funcionalidad para crear nuevo partido coming soon!");
+            window.location.href = `/Group/CreateMatch?groupId=${groupId}`;
         });
     }
 

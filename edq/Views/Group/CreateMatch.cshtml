@@ -1,0 +1,59 @@
+@{
+    ViewData["Title"] = "Crear Nuevo Partido";
+}
+
+@Html.AntiForgeryToken()
+
+<input type="hidden" id="groupIdInput" value="@ViewBag.GroupId" />
+
+<!-- Navegación y Encabezado -->
+<div class="dashboard-header-nav" style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+    <a href="/Group/Dashboard?groupId=@ViewBag.GroupId" class="btn-back-arrow" style="color: var(--text-primary); text-decoration: none; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: background-color 0.2s;">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+    </a>
+    <h1 id="groupNameTitle" class="hero-title" style="font-size: 20px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">Crear Partido</h1>
+</div>
+
+<!-- Formulario de Configuración del Partido -->
+<div class="card" style="border-color: rgba(255, 255, 255, 0.05);">
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        
+        <!-- Campo Fecha y Hora -->
+        <div>
+            <label style="font-size: 13px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 8px;">Fecha del Encuentro</label>
+            <input type="datetime-local" id="matchDateTime" class="form-control-neon" />
+        </div>
+
+        <!-- Campo Convocados -->
+        <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <label style="font-size: 13px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Convocados Iniciales</label>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" id="btnSelectAll" style="background: none; border: none; color: var(--neon-green); font-size: 12px; font-weight: 700; cursor: pointer; padding: 0;">Todos</button>
+                    <span style="color: var(--text-muted); font-size: 12px;">|</span>
+                    <button type="button" id="btnClearAll" style="background: none; border: none; color: var(--text-secondary); font-size: 12px; font-weight: 700; cursor: pointer; padding: 0;">Ninguno</button>
+                </div>
+            </div>
+            
+            <div id="playersCheckboxGrid" class="player-checkbox-grid" style="max-height: 280px; overflow-y: auto; padding-right: 4px; gap: 12px 16px;">
+                <!-- Carga dinámica por AJAX -->
+                <div class="loading-spinner" style="display: flex; justify-content: center; padding: 20px 0; color: var(--text-muted); grid-column: span 2;">Cargando jugadores...</div>
+            </div>
+        </div>
+
+        <!-- Botón de Envío -->
+        <div style="margin-top: 10px;">
+            <button type="button" id="btnBalanceAndCreate" class="btn-neon" style="width: 100%; justify-content: center; gap: 8px;">
+                ⚖️ Balancear y Crear Partido
+            </button>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/create-match.js" asp-append-version="true"></script>
+}
