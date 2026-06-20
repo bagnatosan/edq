@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "jAXuZKTjX2Q=",
+  "success": true,
+  "projectFilePath": "/home/santiago/Documentos/GitHub/edq/edq/edq.csproj",
+  "expectedPackageFiles": [
+    "/home/santiago/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.8/microsoft.aspnetcore.app.ref.10.0.8.nupkg.sha512"
+  ],
+  "logs": []
+}

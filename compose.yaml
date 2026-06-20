@@ -1,0 +1,7 @@
+﻿services:
+  edq:
+    image: edq
+    build:
+      context: .
+      dockerfile: edq/Dockerfile
+
