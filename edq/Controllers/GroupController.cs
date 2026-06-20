@@ -11,10 +11,12 @@ namespace edq.Controllers;
 public class GroupController : Controller
 {
     private readonly IGroupService _groupService;
+    private readonly IMatchmakingService _matchmakingService;
 
-    public GroupController(IGroupService groupService)
+    public GroupController(IGroupService groupService, IMatchmakingService matchmakingService)
     {
         _groupService = groupService;
+        _matchmakingService = matchmakingService;
     }
 
     // GET: /Group/Explore
@@ -129,6 +131,29 @@ public class GroupController : Controller
 
         ViewBag.GroupId = groupId;
         return View();
+    }
+
+    // POST: /Group/BalanceAndCreateMatch
+    [HttpPost]
+    public async Task<IActionResult> BalanceAndCreateMatch([FromBody] BalanceMatchRequestDto request)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        // Validar acceso: Cualquier miembro del grupo puede crear partidos
+        var canAccess = await _groupService.CanAccessDashboardAsync(userId, request.GroupId);
+        if (!canAccess)
+        {
+            return Forbid();
+        }
+
+        // TODO: Invocar el algoritmo de emparejamiento (IMatchmakingService) y guardar el partido.
+        // El usuario implementará la lógica aquí.
+
+        return Ok(new { success = true });
     }
 
     // GET: /Group/GetGroupDashboardData (AJAX endpoint)
@@ -442,6 +467,12 @@ public class GroupController : Controller
         }
 
         return Json(new { success = true });
+    }
+
+
+    public async Task<IActionResult> GenerateMatch([FromBody] BalanceMatchRequestDto request)
+    {
+        await _matchmakingService.BalanceTeamsAsync(request.PlayerIds, request.GroupId);
     }
 }
 

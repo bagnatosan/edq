@@ -14,6 +14,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
 
 
 // Configuración de autenticación por cookies

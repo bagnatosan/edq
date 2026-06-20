@@ -95,9 +95,17 @@ document.addEventListener("DOMContentLoaded", () => {
             checkboxes.forEach(cb => cb.checked = false);
         });
     }
-    // Botón de Envío
+    // Elementos del modal de carga de emparejamiento
+    const matchmakingLoadingModal = document.getElementById("matchmakingLoadingModal");
+    const matchmakingLoadingCard = document.getElementById("matchmakingLoadingCard");
+    const loadingProgressPath = document.getElementById("loadingProgressPath");
+    const loadingIconContainer = document.getElementById("loadingIconContainer");
+    const loadingTitle = document.getElementById("loadingTitle");
+    const loadingSubtitle = document.getElementById("loadingSubtitle");
+    const loadingPercent = document.getElementById("loadingPercent");
+    // Botones de Envío
     if (btnBalanceAndCreate) {
-        btnBalanceAndCreate.addEventListener("click", () => {
+        btnBalanceAndCreate.addEventListener("click", () => __awaiter(void 0, void 0, void 0, function* () {
             const checkboxes = document.querySelectorAll('input[name="selectedPlayers"]:checked');
             const selectedIds = [];
             checkboxes.forEach(cb => {
@@ -113,34 +121,105 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert("Por favor selecciona una fecha y hora para el encuentro.");
                 return;
             }
-            // Simular respuesta del Frontend y mostrar datos recolectados
-            const dateStr = new Date(matchDateTime.value).toLocaleString("es-ES");
-            showSuccessToast(`¡Listo! Se recolectaron ${selectedIds.length} jugadores para la fecha ${dateStr}. (Lógica de backend lista para ser implementada)`);
-            setTimeout(() => {
-                window.location.href = `/Group/Dashboard?groupId=${groupId}`;
-            }, 3500);
-        });
+            // Mostrar modal de carga
+            if (!matchmakingLoadingModal || !matchmakingLoadingCard || !loadingProgressPath || !loadingPercent || !loadingTitle || !loadingSubtitle || !loadingIconContainer)
+                return;
+            // Resetear estado del loader
+            loadingTitle.textContent = "Balanceando Equipos";
+            loadingSubtitle.textContent = "Ejecutando algoritmo de emparejamiento...";
+            loadingPercent.textContent = "0%";
+            loadingProgressPath.setAttribute("stroke-dasharray", "0, 100");
+            loadingIconContainer.textContent = "⚖️";
+            loadingIconContainer.style.transform = "translate(-50%, -50%) scale(1)";
+            matchmakingLoadingCard.style.borderColor = "rgba(255, 255, 255, 0.05)";
+            matchmakingLoadingCard.style.boxShadow = "0 8px 32px rgba(0, 0, 0, 0.6)";
+            matchmakingLoadingModal.style.display = "flex";
+            matchmakingLoadingModal.offsetHeight; // Forzar reflow
+            matchmakingLoadingModal.style.opacity = "1";
+            matchmakingLoadingCard.style.transform = "scale(1)";
+            // Animación de barra de progreso simulada
+            let currentProgress = 0;
+            const progressSpeed = 30; // 30ms por tick
+            const targetSimulatedProgress = 95;
+            const progressInterval = setInterval(() => {
+                if (currentProgress < targetSimulatedProgress) {
+                    currentProgress += 1.5;
+                    if (currentProgress > targetSimulatedProgress)
+                        currentProgress = targetSimulatedProgress;
+                    const progressVal = Math.round(currentProgress);
+                    loadingPercent.textContent = `${progressVal}%`;
+                    loadingProgressPath.setAttribute("stroke-dasharray", `${progressVal}, 100`);
+                }
+            }, progressSpeed);
+            try {
+                // Realizar llamada al backend para balancear y crear el partido
+                const response = yield fetch(`/Group/BalanceAndCreateMatch`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "RequestVerificationToken": getAntiForgeryToken()
+                    },
+                    body: JSON.stringify({
+                        groupId: groupId,
+                        dateTime: matchDateTime.value,
+                        playerIds: selectedIds
+                    })
+                });
+                clearInterval(progressInterval);
+                if (!response.ok) {
+                    const errorText = yield response.text();
+                    throw new Error(errorText || "Error al balancear y crear el partido.");
+                }
+                // Completar al 100% de inmediato
+                loadingPercent.textContent = "100%";
+                loadingProgressPath.setAttribute("stroke-dasharray", "100, 100");
+                // Mostrar estado de éxito premium
+                setTimeout(() => {
+                    loadingTitle.textContent = "¡Completado!";
+                    loadingSubtitle.textContent = "Partido creado correctamente";
+                    loadingPercent.textContent = "Listo";
+                    loadingIconContainer.textContent = "✔️";
+                    loadingIconContainer.style.transform = "translate(-50%, -50%) scale(1.2)";
+                    matchmakingLoadingCard.style.borderColor = "var(--neon-green-solid)";
+                    matchmakingLoadingCard.style.boxShadow = "0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px var(--neon-green-glow)";
+                    // Redirección después de mostrar el estado de éxito
+                    setTimeout(() => {
+                        window.location.href = `/Group/Dashboard?groupId=${groupId}`;
+                    }, 1500);
+                }, 300);
+            }
+            catch (error) {
+                clearInterval(progressInterval);
+                console.error("Error al balancear y crear el partido:", error);
+                // Ocultar modal de carga
+                matchmakingLoadingModal.style.opacity = "0";
+                matchmakingLoadingCard.style.transform = "scale(0.9)";
+                setTimeout(() => {
+                    matchmakingLoadingModal.style.display = "none";
+                }, 250);
+                // Mostrar error con toast premium
+                showToast(error.message || "No se pudo crear el partido balanceado.", true);
+            }
+        }));
     }
     // Helper Toast
-    const showSuccessToast = (message) => {
+    const showToast = (message, isError = false) => {
         const toast = document.createElement("div");
-        toast.className = "toast-notification toast-success show";
-        toast.style.position = "fixed";
-        toast.style.bottom = "100px";
-        toast.style.left = "50%";
-        toast.style.transform = "translateX(-50%)";
-        toast.style.zIndex = "9999";
-        toast.style.opacity = "1";
-        toast.style.pointerEvents = "all";
-        toast.style.background = "rgba(18, 20, 26, 0.95)";
-        toast.style.border = "1px solid var(--neon-green-solid)";
-        toast.style.boxShadow = "0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px var(--neon-green-glow)";
+        toast.className = `toast-notification ${isError ? 'toast-error' : 'toast-success'}`;
         toast.textContent = message;
         document.body.appendChild(toast);
+        // Trigger reflow
+        toast.offsetHeight;
+        toast.classList.add("show");
         setTimeout(() => {
             toast.classList.remove("show");
             setTimeout(() => toast.remove(), 400);
         }, 3000);
+    };
+    // Anti forgery token helper
+    const getAntiForgeryToken = () => {
+        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+        return tokenInput ? tokenInput.value : "";
     };
     // Escapar HTML para evitar XSS
     const escapeHtml = (unsafe) => {

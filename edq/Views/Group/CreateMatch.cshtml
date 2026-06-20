@@ -54,6 +54,23 @@
     </div>
 </div>
 
+<!-- Modal de Carga de Emparejamiento Estilizado -->
+<div id="matchmakingLoadingModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 10, 13, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.25s ease-out;">
+    <div id="matchmakingLoadingCard" class="card" style="max-width: 320px; width: 90%; border-color: rgba(255, 255, 255, 0.05); background: rgba(26, 29, 36, 0.95); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6); text-align: center; display: flex; flex-direction: column; gap: 16px; padding: 28px; transform: scale(0.9); transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s ease, box-shadow 0.3s ease;">
+        <!-- Icono de Progreso Circular -->
+        <div style="position: relative; width: 80px; height: 80px; margin: 0 auto;">
+            <svg viewBox="0 0 36 36" style="width: 80px; height: 80px; transform: rotate(-90deg);">
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255, 255, 255, 0.05)" stroke-width="3" />
+                <path id="loadingProgressPath" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--neon-green-solid)" stroke-width="3" stroke-dasharray="0, 100" stroke-linecap="round" style="transition: stroke-dasharray 0.1s linear;" />
+            </svg>
+            <div id="loadingIconContainer" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 28px; transition: transform 0.3s ease;">⚖️</div>
+        </div>
+        <h3 id="loadingTitle" style="font-size: 18px; font-weight: 700; color: var(--text-primary); margin: 0;">Balanceando Equipos</h3>
+        <p id="loadingSubtitle" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin: 0;">Ejecutando algoritmo de emparejamiento...</p>
+        <span id="loadingPercent" style="font-size: 12px; font-weight: 700; color: var(--neon-green); margin-top: -4px;">0%</span>
+    </div>
+</div>
+
 @section Scripts {
     <script src="~/js/create-match.js" asp-append-version="true"></script>
 }
