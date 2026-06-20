@@ -506,6 +506,24 @@ public class GroupService : IGroupService
             };
         }).ToList();
     }
+
+    public async Task<bool> UpdateGroupNameAsync(int userId, int groupId, string newName)
+    {
+        var group = await _context.Groups.FindAsync(groupId);
+        if (group == null || group.CreatorId != userId)
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(newName))
+        {
+            return false;
+        }
+
+        group.Name = newName.Trim();
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }
 
 

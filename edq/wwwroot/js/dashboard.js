@@ -298,10 +298,10 @@ document.addEventListener("DOMContentLoaded", () => {
             window.location.href = `/Group/CreateMatch?groupId=${groupId}`;
         });
     }
-    // Redirigir al panel de asignación de puntajes
+    // Redirigir al panel de administración
     if (btnAssignScores) {
         btnAssignScores.addEventListener("click", () => {
-            window.location.href = `/Group/AssignScores?groupId=${groupId}`;
+            window.location.href = `/Group/AdminPanel?groupId=${groupId}`;
         });
     }
     // Redirigir al historial de partidos

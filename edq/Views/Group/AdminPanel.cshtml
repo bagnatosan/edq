@@ -1,0 +1,61 @@
+@{
+    ViewData["Title"] = "Panel de Administración";
+}
+
+<!-- Navegación y Encabezado -->
+<div class="dashboard-header-nav" style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+    <a href="/Group/Dashboard?groupId=@ViewBag.GroupId" class="btn-back-arrow" style="color: var(--text-primary); text-decoration: none; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: background-color 0.2s;">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+    </a>
+    <h1 class="hero-title" style="font-size: 20px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">Panel de Administración</h1>
+</div>
+
+<!-- Menú de Administración Opciones (Hub) -->
+<div style="display: flex; flex-direction: column; gap: 16px;">
+    
+    <!-- Opción 1: Calificar Jugadores -->
+    <a href="/Group/AssignScores?groupId=@ViewBag.GroupId" class="card active-neon" style="display: flex; align-items: center; gap: 18px; text-decoration: none; padding: 20px; transition: transform 0.2s; border-color: rgba(255, 255, 255, 0.05);">
+        <div style="font-size: 32px; background: rgba(158, 255, 0, 0.05); width: 60px; height: 60px; border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(158, 255, 0, 0.15); flex-shrink: 0;">
+            🏆
+        </div>
+        <div style="flex: 1; min-width: 0;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Calificar Miembros</h3>
+            <p style="font-size: 12px; color: var(--text-secondary); margin: 0;">Ajusta el nivel de habilidad (1 a 10) de los integrantes del grupo.</p>
+        </div>
+        <div style="color: var(--neon-green); font-size: 20px; font-weight: 700; margin-left: auto;">
+            →
+        </div>
+    </a>
+
+    <!-- Opción 2: Crear Jugador Temporal -->
+    <a href="/Group/CreateTempPlayer?groupId=@ViewBag.GroupId" class="card" style="display: flex; align-items: center; gap: 18px; text-decoration: none; padding: 20px; transition: transform 0.2s; border-color: rgba(255, 255, 255, 0.05);">
+        <div style="font-size: 32px; background: rgba(255, 255, 255, 0.03); width: 60px; height: 60px; border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255, 255, 255, 0.05); flex-shrink: 0;">
+            ➕
+        </div>
+        <div style="flex: 1; min-width: 0;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Crear Jugador Temporal</h3>
+            <p style="font-size: 12px; color: var(--text-secondary); margin: 0;">Añade jugadores temporales para completar convocatorias.</p>
+        </div>
+        <div style="color: var(--text-secondary); font-size: 20px; font-weight: 700; margin-left: auto;">
+            →
+        </div>
+    </a>
+
+    <!-- Opción 3: Cambiar Nombre del Grupo -->
+    <a href="/Group/GroupSettings?groupId=@ViewBag.GroupId" class="card" style="display: flex; align-items: center; gap: 18px; text-decoration: none; padding: 20px; transition: transform 0.2s; border-color: rgba(255, 255, 255, 0.05);">
+        <div style="font-size: 32px; background: rgba(255, 255, 255, 0.03); width: 60px; height: 60px; border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255, 255, 255, 0.05); flex-shrink: 0;">
+            ⚙️
+        </div>
+        <div style="flex: 1; min-width: 0;">
+            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Cambiar Nombre del Grupo</h3>
+            <p style="font-size: 12px; color: var(--text-secondary); margin: 0;">Modifica el nombre oficial del grupo en el sistema.</p>
+        </div>
+        <div style="color: var(--text-secondary); font-size: 20px; font-weight: 700; margin-left: auto;">
+            →
+        </div>
+    </a>
+
+</div>

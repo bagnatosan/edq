@@ -15,5 +15,6 @@ public interface IGroupService
     Task<bool> UpdateMemberScoresAsync(int userId, int groupId, List<MemberScoreUpdateDto> updates);
     Task<bool> CreateTemporaryPlayerAsync(int userId, int groupId, string name, string lastName, byte initialScore);
     Task<List<MatchHistoryDto>?> GetMatchHistoryAsync(int userId, int groupId);
+    Task<bool> UpdateGroupNameAsync(int userId, int groupId, string newName);
 }
 

@@ -23,13 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Controles de guardar
     const btnSaveScores = document.getElementById("btnSaveScores") as HTMLButtonElement | null;
 
-    // Controles de jugador temporal
-    const createTempPlayerForm = document.getElementById("createTempPlayerForm") as HTMLFormElement | null;
-    const tempPlayerName = document.getElementById("tempPlayerName") as HTMLInputElement | null;
-    const tempPlayerLastName = document.getElementById("tempPlayerLastName") as HTMLInputElement | null;
-    const tempPlayerScore = document.getElementById("tempPlayerScore") as HTMLInputElement | null;
-    const tempPlayerScoreVal = document.getElementById("tempPlayerScoreVal") as HTMLSpanElement | null;
-
     if (!groupIdInput || !groupNameTitle || !membersScoresList || !membersCountBadge) return;
 
     const groupId = parseInt(groupIdInput.value);
@@ -68,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const data: DashboardData = await response.json();
 
             // 1. Título
-            groupNameTitle.textContent = `Asignar Puntajes - ${data.groupName}`;
+            groupNameTitle.textContent = `Calificar Miembros - ${data.groupName}`;
 
             // 2. Renderizar listado de puntajes
             renderMembersList(data.members);
@@ -186,68 +179,6 @@ document.addEventListener("DOMContentLoaded", () => {
             } finally {
                 btnSaveScores.disabled = false;
                 btnSaveScores.innerHTML = `💾 Guardar Puntajes`;
-            }
-        });
-    }
-
-    // Vincular slider del formulario de jugador temporal
-    if (tempPlayerScore && tempPlayerScoreVal) {
-        tempPlayerScore.addEventListener("input", () => {
-            tempPlayerScoreVal.textContent = tempPlayerScore.value;
-        });
-    }
-
-    // Crear jugador temporal
-    if (createTempPlayerForm) {
-        createTempPlayerForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            if (!tempPlayerName || !tempPlayerLastName || !tempPlayerScore) return;
-
-            const name = tempPlayerName.value.trim();
-            const lastName = tempPlayerLastName.value.trim();
-            const score = parseInt(tempPlayerScore.value);
-
-            if (!name || !lastName || isNaN(score)) return;
-
-            const submitBtn = document.getElementById("btnCreateTempPlayer") as HTMLButtonElement | null;
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.textContent = "Creando...";
-            }
-
-            try {
-                const response = await fetch(`/Group/CreateTemporaryPlayer?groupId=${groupId}&name=${encodeURIComponent(name)}&lastName=${encodeURIComponent(lastName)}&initialScore=${score}`, {
-                    method: "POST",
-                    headers: {
-                        "RequestVerificationToken": getAntiForgeryToken()
-                    }
-                });
-
-                if (!response.ok) {
-                    const errMsg = await response.text();
-                    throw new Error(errMsg || "Error al crear el jugador temporal.");
-                }
-
-                showToast("¡Jugador temporal creado e integrado con éxito!", false);
-                
-                // Limpiar inputs
-                tempPlayerName.value = "";
-                tempPlayerLastName.value = "";
-                tempPlayerScore.value = "6";
-                if (tempPlayerScoreVal) tempPlayerScoreVal.textContent = "6";
-
-                // Recargar listado
-                loadGroupData();
-
-            } catch (error: any) {
-                console.error("Error creando jugador temporal:", error);
-                showToast(error.message || "No se pudo crear el jugador temporal.", true);
-            } finally {
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = "➕ Crear e Integrar al Grupo";
-                }
             }
         });
     }

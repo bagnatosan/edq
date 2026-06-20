@@ -120,9 +120,9 @@ public class GroupController : Controller
             return Unauthorized();
         }
 
-        // Validar acceso: Solo el creador puede crear partidos
-        var groupData = await _groupService.GetGroupDashboardDataAsync(userId, groupId);
-        if (groupData == null || !groupData.IsCreator)
+        // Validar acceso: Cualquier miembro del grupo puede crear partidos
+        var canAccess = await _groupService.CanAccessDashboardAsync(userId, groupId);
+        if (!canAccess)
         {
             return Forbid();
         }
@@ -318,6 +318,90 @@ public class GroupController : Controller
         }
 
         return Json(data);
+    }
+
+    // GET: /Group/AdminPanel
+    [HttpGet]
+    public async Task<IActionResult> AdminPanel(int groupId)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var groupData = await _groupService.GetGroupDashboardDataAsync(userId, groupId);
+        if (groupData == null || !groupData.IsCreator)
+        {
+            return Forbid();
+        }
+
+        ViewBag.GroupId = groupId;
+        return View();
+    }
+
+    // GET: /Group/CreateTempPlayer
+    [HttpGet]
+    public async Task<IActionResult> CreateTempPlayer(int groupId)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var groupData = await _groupService.GetGroupDashboardDataAsync(userId, groupId);
+        if (groupData == null || !groupData.IsCreator)
+        {
+            return Forbid();
+        }
+
+        ViewBag.GroupId = groupId;
+        return View();
+    }
+
+    // GET: /Group/GroupSettings
+    [HttpGet]
+    public async Task<IActionResult> GroupSettings(int groupId)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var groupData = await _groupService.GetGroupDashboardDataAsync(userId, groupId);
+        if (groupData == null || !groupData.IsCreator)
+        {
+            return Forbid();
+        }
+
+        ViewBag.GroupId = groupId;
+        return View();
+    }
+
+    // POST: /Group/UpdateGroupName (AJAX endpoint)
+    [HttpPost]
+    public async Task<IActionResult> UpdateGroupName(int groupId, string name)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return BadRequest("El nombre del grupo no puede estar vacío.");
+        }
+
+        var success = await _groupService.UpdateGroupNameAsync(userId, groupId, name);
+        if (!success)
+        {
+            return BadRequest("No se pudo actualizar el nombre del grupo.");
+        }
+
+        return Json(new { success = true });
     }
 }
 

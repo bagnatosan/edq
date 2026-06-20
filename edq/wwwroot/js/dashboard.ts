@@ -358,10 +358,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Redirigir al panel de asignación de puntajes
+    // Redirigir al panel de administración
     if (btnAssignScores) {
         btnAssignScores.addEventListener("click", () => {
-            window.location.href = `/Group/AssignScores?groupId=${groupId}`;
+            window.location.href = `/Group/AdminPanel?groupId=${groupId}`;
         });
     }
 

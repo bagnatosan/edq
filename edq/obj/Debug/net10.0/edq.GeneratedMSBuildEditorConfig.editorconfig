@@ -34,8 +34,20 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9Mb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/home/santiago/Documentos/GitHub/edq/edq/Views/Group/AdminPanel.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR3JvdXAvQWRtaW5QYW5lbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/home/santiago/Documentos/GitHub/edq/edq/Views/Group/AssignScores.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR3JvdXAvQXNzaWduU2NvcmVzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/santiago/Documentos/GitHub/edq/edq/Views/Group/CreateMatch.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR3JvdXAvQ3JlYXRlTWF0Y2guY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/santiago/Documentos/GitHub/edq/edq/Views/Group/CreateTempPlayer.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR3JvdXAvQ3JlYXRlVGVtcFBsYXllci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/home/santiago/Documentos/GitHub/edq/edq/Views/Group/Dashboard.cshtml]
@@ -44,6 +56,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/home/santiago/Documentos/GitHub/edq/edq/Views/Group/Explore.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR3JvdXAvRXhwbG9yZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/santiago/Documentos/GitHub/edq/edq/Views/Group/GroupSettings.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR3JvdXAvR3JvdXBTZXR0aW5ncy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/home/santiago/Documentos/GitHub/edq/edq/Views/Group/MatchHistory.cshtml]
