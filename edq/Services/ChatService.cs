@@ -80,10 +80,18 @@ public class ChatService : IChatService
         _context.Polls.Add(poll);
         await _context.SaveChangesAsync();
 
+        var creator = await _context.Players.FindAsync(userId);
+        var creatorName = creator != null ? (!string.IsNullOrWhiteSpace(creator.Nickname) ? creator.Nickname : $"{creator.Name} {creator.LastName}") : "Desconocido";
+
         return new PollDto
         {
             Id = poll.Id,
+            CreatorId = userId,
+            CreatorName = creatorName,
+            CreatorInitials = creator?.Initials ?? "",
+            CreatorPhotoUrl = creator?.PhotoUrl,
             Question = poll.Question,
+            CreatedAt = poll.CreatedAt,
             ExpiresAt = poll.ExpiresAt,
             Options = poll.Options.Select(o => new PollOptionDto
             {
@@ -99,24 +107,42 @@ public class ChatService : IChatService
     {
         var now = DateTime.UtcNow;
         var polls = await _context.Polls
+            .Include(p => p.Creator)
             .Include(p => p.Options)
                 .ThenInclude(o => o.Votes)
+                    .ThenInclude(v => v.Player)
             .Where(p => p.GroupId == groupId && p.IsActive && p.ExpiresAt > now)
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
 
-        return polls.Select(p => new PollDto
-        {
-            Id = p.Id,
-            Question = p.Question,
-            ExpiresAt = p.ExpiresAt,
-            Options = p.Options.Select(o => new PollOptionDto
+        return polls.Select(p => {
+            var creatorName = p.Creator != null ? (!string.IsNullOrWhiteSpace(p.Creator.Nickname) ? p.Creator.Nickname : $"{p.Creator.Name} {p.Creator.LastName}") : "Desconocido";
+            return new PollDto
             {
-                Id = o.Id,
-                OptionText = o.OptionText,
-                VoteCount = o.Votes.Count,
-                UserVoted = o.Votes.Any(v => v.PlayerId == userId)
-            }).ToList()
+                Id = p.Id,
+                CreatorId = p.CreatorId,
+                CreatorName = creatorName,
+                CreatorInitials = p.Creator?.Initials ?? "",
+                CreatorPhotoUrl = p.Creator?.PhotoUrl,
+                Question = p.Question,
+                CreatedAt = p.CreatedAt,
+                ExpiresAt = p.ExpiresAt,
+                Options = p.Options.Select(o => new PollOptionDto
+                {
+                    Id = o.Id,
+                    OptionText = o.OptionText,
+                    VoteCount = o.Votes.Count,
+                    UserVoted = o.Votes.Any(v => v.PlayerId == userId),
+                    Voters = o.Votes.Select(v => new PollVoterDto
+                    {
+                        PlayerId = v.PlayerId,
+                        Name = v.Player != null ? $"{v.Player.Name} {v.Player.LastName}" : "Desconocido",
+                        Nickname = v.Player != null ? v.Player.Nickname : null,
+                        Initials = v.Player != null ? v.Player.Initials : "",
+                        PhotoUrl = v.Player != null ? v.Player.PhotoUrl : null
+                    }).ToList()
+                }).ToList()
+            };
         }).ToList();
     }
 
@@ -172,12 +198,21 @@ public class ChatService : IChatService
 
         var updatedOptions = await _context.PollOptions
             .Include(o => o.Votes)
+                .ThenInclude(v => v.Player)
             .Where(o => o.PollId == pollId)
             .Select(o => new
             {
                 id = o.Id,
                 optionText = o.OptionText,
-                voteCount = o.Votes.Count
+                voteCount = o.Votes.Count,
+                voters = o.Votes.Select(v => new
+                {
+                    playerId = v.PlayerId,
+                    name = v.Player != null ? $"{v.Player.Name} {v.Player.LastName}" : "Desconocido",
+                    nickname = v.Player != null ? v.Player.Nickname : null,
+                    initials = v.Player != null ? v.Player.Initials : "",
+                    photoUrl = v.Player != null ? v.Player.PhotoUrl : null
+                }).ToList()
             })
             .ToListAsync();
 

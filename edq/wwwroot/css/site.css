@@ -58,6 +58,7 @@ body {
   border-right: 1px solid rgba(255, 255, 255, 0.03);
   border-bottom: none;
   overflow: hidden;
+  transform: translate3d(0, 0, 0);
 }
 
 @media (min-width: 481px) {
