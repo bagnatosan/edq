@@ -17,5 +17,6 @@ public interface IGroupService
     Task<List<MatchHistoryDto>?> GetMatchHistoryAsync(int userId, int groupId);
     Task<bool> UpdateGroupNameAsync(int userId, int groupId, string newName);
     Task<bool> RemoveMemberAsync(int userId, int groupId, int playerId);
+    Task<int> CreateGroupAsync(int creatorId, string name);
 }
 

@@ -582,6 +582,28 @@ public class GroupService : IGroupService
 
         await _context.SaveChangesAsync();
         return true;
+     }
+
+    public async Task<int> CreateGroupAsync(int creatorId, string name)
+    {
+        var group = new Group
+        {
+            Name = name,
+            CreatorId = creatorId
+        };
+        _context.Groups.Add(group);
+        await _context.SaveChangesAsync();
+
+        var groupPlayer = new GroupPlayer
+        {
+            GroupId = group.Id,
+            PlayerId = creatorId,
+            Score = 6
+        };
+        _context.GroupPlayers.Add(groupPlayer);
+        await _context.SaveChangesAsync();
+
+        return group.Id;
     }
 }
 

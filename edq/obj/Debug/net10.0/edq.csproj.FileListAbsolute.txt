@@ -227,3 +227,4 @@
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/ref/edq.dll
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/9flnuhc6xo-{0}-p35frioxvb-p35frioxvb.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/n4yz2p1bdy-{0}-90l7gmxu4s-90l7gmxu4s.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/ascjuncfqn-{0}-k3unl9v34n-k3unl9v34n.gz

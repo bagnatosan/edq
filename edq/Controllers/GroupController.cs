@@ -27,6 +27,32 @@ public class GroupController : Controller
         return View();
     }
 
+    // GET: /Group/Create
+    [HttpGet]
+    public IActionResult Create()
+    {
+        return View();
+    }
+
+    // POST: /Group/CreateGroup (AJAX endpoint)
+    [HttpPost]
+    public async Task<IActionResult> CreateGroup(string name)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return BadRequest("El nombre del grupo no puede estar vacío.");
+        }
+
+        var groupId = await _groupService.CreateGroupAsync(userId, name.Trim());
+        return Ok(new { success = true, groupId = groupId });
+    }
+
     // GET: /Group/GetGroups (AJAX endpoint)
     [HttpGet]
     public async Task<IActionResult> GetGroups(string? search, int skip = 0, int take = 15)
