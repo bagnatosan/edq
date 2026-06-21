@@ -373,6 +373,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+
+
     // Redirigir al panel de administración
     if (btnAssignScores) {
         btnAssignScores.addEventListener("click", () => {

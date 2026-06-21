@@ -227,7 +227,12 @@
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/39938q6i2y-{0}-yvgr7qf5xh-yvgr7qf5xh.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/sdwh7dt9yp-{0}-3y2rstb4jp-3y2rstb4jp.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/8o1p1ndg8z-{0}-rhag89u5ua-rhag89u5ua.gz
-/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/z4x438jh9m-{0}-lzw6dgltzx-lzw6dgltzx.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/hyiiw9gq10-{0}-cq6d9g8vj4-cq6d9g8vj4.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/1m8qta0b2r-{0}-ojqac90086-ojqac90086.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/15508tqiwp-{0}-0zxi9a1aca-0zxi9a1aca.gz
+/home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/BouncyCastle.Crypto.dll
+/home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/WebPush.dll
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/8fy9rbicfq-{0}-mv2uk0ce6b-mv2uk0ce6b.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/z4x438jh9m-{0}-lzw6dgltzx-lzw6dgltzx.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/pn8qc0slma-{0}-nau7e6myws-nau7e6myws.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/35t5j8b4ca-{0}-9jokhurgo8-9jokhurgo8.gz

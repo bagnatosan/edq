@@ -13,11 +13,13 @@ public class GroupController : Controller
 {
     private readonly IGroupService _groupService;
     private readonly IMatchmakingService _matchmakingService;
+    private readonly IPushNotificationService _pushService;
 
-    public GroupController(IGroupService groupService, IMatchmakingService matchmakingService)
+    public GroupController(IGroupService groupService, IMatchmakingService matchmakingService, IPushNotificationService pushService)
     {
         _groupService = groupService;
         _matchmakingService = matchmakingService;
+        _pushService = pushService;
     }
 
     // GET: /Group/Explore
@@ -498,8 +500,12 @@ public class GroupController : Controller
     }
 
 
+    [HttpPost]
     public async Task<IActionResult> GenerateMatch([FromBody] BalanceMatchRequestDto request)
     {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        int.TryParse(userIdString, out var userId);
+
         var teamsBalanced = await _matchmakingService.BalanceTeamsAsync
             (request.PlayerIds, request.GroupId);
 
@@ -507,9 +513,9 @@ public class GroupController : Controller
 
         if (success)
         {
+            _ = _pushService.SendNotificationToGroupAsync(request.GroupId, "⚽ Nuevo Partido!", $"Se programó un nuevo partido para el {request.Date.ToLocalTime():dd/MM HH:mm} hs.", "/Match/Upcoming", userId);
             return Ok("Partido creado correctamente");
         }
-
         else
         {
             return BadRequest("No se pudo crear el partido");

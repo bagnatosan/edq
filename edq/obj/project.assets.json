@@ -764,6 +764,19 @@
           }
         }
       },
+      "Portable.BouncyCastle/1.9.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/BouncyCastle.Crypto.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/BouncyCastle.Crypto.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "SQLitePCLRaw.bundle_e_sqlite3/2.1.11": {
         "type": "package",
         "dependencies": {
@@ -1028,6 +1041,18 @@
         },
         "build": {
           "buildTransitive/net8.0/_._": {}
+        }
+      },
+      "WebPush/1.0.13": {
+        "type": "package",
+        "dependencies": {
+          "Portable.BouncyCastle": "1.9.0"
+        },
+        "compile": {
+          "lib/net10.0/WebPush.dll": {}
+        },
+        "runtime": {
+          "lib/net10.0/WebPush.dll": {}
         }
       }
     }
@@ -2741,6 +2766,21 @@
         "packageIcon.png"
       ]
     },
+    "Portable.BouncyCastle/1.9.0": {
+      "sha512": "eZZBCABzVOek+id9Xy04HhmgykF0wZg9wpByzrWN7q8qEI0Qen9b7tfd7w8VA3dOeesumMG7C5ZPy0jk7PSRHw==",
+      "type": "package",
+      "path": "portable.bouncycastle/1.9.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net40/BouncyCastle.Crypto.dll",
+        "lib/net40/BouncyCastle.Crypto.xml",
+        "lib/netstandard2.0/BouncyCastle.Crypto.dll",
+        "lib/netstandard2.0/BouncyCastle.Crypto.xml",
+        "portable.bouncycastle.1.9.0.nupkg.sha512",
+        "portable.bouncycastle.nuspec"
+      ]
+    },
     "SQLitePCLRaw.bundle_e_sqlite3/2.1.11": {
       "sha512": "DC4nA7yWnf4UZdgJDF+9Mus4/cb0Y3Sfgi3gDnAoKNAIBwzkskNAbNbyu+u4atT0ruVlZNJfwZmwiEwE5oz9LQ==",
       "type": "package",
@@ -3020,13 +3060,31 @@
         "system.composition.typedparts.nuspec",
         "useSharedDesignerContext.txt"
       ]
+    },
+    "WebPush/1.0.13": {
+      "sha512": "Qyypsk6j+GqncCa/IgbmZLnL7DxqKFGz3jIdquGSLeiD3NtN+HPnIFBMwIJHffDU9ZEztTkaMMYxvW3PJxJL7Q==",
+      "type": "package",
+      "path": "webpush/1.0.13",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net10.0/WebPush.dll",
+        "lib/net48/WebPush.dll",
+        "lib/net8.0/WebPush.dll",
+        "lib/net9.0/WebPush.dll",
+        "lib/netstandard2.1/WebPush.dll",
+        "webpush.1.0.13.nupkg.sha512",
+        "webpush.nuspec"
+      ]
     }
   },
   "projectFileDependencyGroups": {
     "net10.0": [
       "Isopoh.Cryptography.Argon2 >= 2.0.0",
       "Microsoft.EntityFrameworkCore.Design >= 10.0.9",
-      "Microsoft.EntityFrameworkCore.Sqlite >= 10.0.9"
+      "Microsoft.EntityFrameworkCore.Sqlite >= 10.0.9",
+      "WebPush >= 1.0.13"
     ]
   },
   "packageFolders": {
@@ -3085,6 +3143,10 @@
           "Microsoft.EntityFrameworkCore.Sqlite": {
             "target": "Package",
             "version": "[10.0.9, )"
+          },
+          "WebPush": {
+            "target": "Package",
+            "version": "[1.0.13, )"
           }
         },
         "imports": [

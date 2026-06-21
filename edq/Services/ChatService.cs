@@ -1,0 +1,192 @@
+using edq.Data;
+using edq.DTO;
+using edq.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace edq.Services;
+
+public class ChatService : IChatService
+{
+    private readonly ApplicationDbContext _context;
+
+    public ChatService(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<bool> CanAccessChatAsync(int userId, int groupId)
+    {
+        return await _context.GroupPlayers.AnyAsync(gp => gp.GroupId == groupId && gp.PlayerId == userId)
+               || await _context.Groups.AnyAsync(g => g.Id == groupId && g.CreatorId == userId);
+    }
+
+    public async Task<string?> GetGroupNameAsync(int groupId)
+    {
+        var group = await _context.Groups.FindAsync(groupId);
+        return group?.Name;
+    }
+
+    public async Task<List<ChatMessageDto>> GetMessagesAsync(int groupId, int skip, int take)
+    {
+        var messages = await _context.ChatMessages
+            .Include(m => m.Sender)
+            .Where(m => m.GroupId == groupId)
+            .OrderByDescending(m => m.SentAt)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync();
+
+        return messages.Select(m => new ChatMessageDto
+        {
+            Id = m.Id,
+            SenderId = m.SenderId,
+            SenderName = !string.IsNullOrWhiteSpace(m.Sender?.Nickname) ? m.Sender.Nickname : $"{m.Sender?.Name} {m.Sender?.LastName}",
+            SenderInitials = m.Sender?.Initials ?? "",
+            PhotoUrl = m.Sender?.PhotoUrl,
+            MessageText = m.MessageText,
+            SentAt = m.SentAt
+        }).Reverse().ToList();
+    }
+
+    public async Task<PollDto?> CreatePollAsync(int userId, int groupId, string question, List<string> options, int durationMinutes)
+    {
+        var poll = new Poll
+        {
+            GroupId = groupId,
+            CreatorId = userId,
+            Question = question.Trim(),
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddMinutes(durationMinutes > 0 ? durationMinutes : 1440),
+            IsActive = true
+        };
+
+        foreach (var opt in options)
+        {
+            if (!string.IsNullOrWhiteSpace(opt))
+            {
+                poll.Options.Add(new PollOption { OptionText = opt.Trim() });
+            }
+        }
+
+        if (poll.Options.Count < 2)
+        {
+            return null;
+        }
+
+        _context.Polls.Add(poll);
+        await _context.SaveChangesAsync();
+
+        return new PollDto
+        {
+            Id = poll.Id,
+            Question = poll.Question,
+            ExpiresAt = poll.ExpiresAt,
+            Options = poll.Options.Select(o => new PollOptionDto
+            {
+                Id = o.Id,
+                OptionText = o.OptionText,
+                VoteCount = 0,
+                UserVoted = false
+            }).ToList()
+        };
+    }
+
+    public async Task<List<PollDto>> GetActivePollsAsync(int userId, int groupId)
+    {
+        var now = DateTime.UtcNow;
+        var polls = await _context.Polls
+            .Include(p => p.Options)
+                .ThenInclude(o => o.Votes)
+            .Where(p => p.GroupId == groupId && p.IsActive && p.ExpiresAt > now)
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
+
+        return polls.Select(p => new PollDto
+        {
+            Id = p.Id,
+            Question = p.Question,
+            ExpiresAt = p.ExpiresAt,
+            Options = p.Options.Select(o => new PollOptionDto
+            {
+                Id = o.Id,
+                OptionText = o.OptionText,
+                VoteCount = o.Votes.Count,
+                UserVoted = o.Votes.Any(v => v.PlayerId == userId)
+            }).ToList()
+        }).ToList();
+    }
+
+    public async Task<(bool Success, int GroupId, object? UpdatedPollData)> VoteAsync(int userId, int pollId, int optionId)
+    {
+        var poll = await _context.Polls
+            .Include(p => p.Options)
+            .FirstOrDefaultAsync(p => p.Id == pollId);
+
+        if (poll == null || !poll.IsActive || poll.ExpiresAt <= DateTime.UtcNow)
+        {
+            return (false, 0, null);
+        }
+
+        var option = poll.Options.FirstOrDefault(o => o.Id == optionId);
+        if (option == null)
+        {
+            return (false, 0, null);
+        }
+
+        var existingVote = await _context.PollVotes
+            .FirstOrDefaultAsync(v => v.PollId == pollId && v.PlayerId == userId);
+
+        if (existingVote != null)
+        {
+            _context.PollVotes.Remove(existingVote);
+
+            if (existingVote.PollOptionId != optionId)
+            {
+                var newVote = new PollVote
+                {
+                    PollId = pollId,
+                    PollOptionId = optionId,
+                    PlayerId = userId,
+                    VotedAt = DateTime.UtcNow
+                };
+                _context.PollVotes.Add(newVote);
+            }
+        }
+        else
+        {
+            var newVote = new PollVote
+            {
+                PollId = pollId,
+                PollOptionId = optionId,
+                PlayerId = userId,
+                VotedAt = DateTime.UtcNow
+            };
+            _context.PollVotes.Add(newVote);
+        }
+
+        await _context.SaveChangesAsync();
+
+        var updatedOptions = await _context.PollOptions
+            .Include(o => o.Votes)
+            .Where(o => o.PollId == pollId)
+            .Select(o => new
+            {
+                id = o.Id,
+                optionText = o.OptionText,
+                voteCount = o.Votes.Count
+            })
+            .ToListAsync();
+
+        var updatedPollData = new
+        {
+            pollId = poll.Id,
+            options = updatedOptions
+        };
+
+        return (true, poll.GroupId, updatedPollData);
+    }
+}

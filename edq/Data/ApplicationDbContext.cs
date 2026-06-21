@@ -13,11 +13,15 @@ public class ApplicationDbContext : DbContext
     public DbSet<Match> Matches { get; set; }
     public DbSet<MatchPlayer>  MatchPlayers { get; set; }
     public DbSet<Request> Requests { get; set; }
+    public DbSet<ChatMessage> ChatMessages { get; set; }
+    public DbSet<Poll> Polls { get; set; }
+    public DbSet<PollOption> PollOptions { get; set; }
+    public DbSet<PollVote> PollVotes { get; set; }
+    public DbSet<PushSubscriptionEntity> PushSubscriptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
         
         modelBuilder.Entity<GroupPlayer>()
             .HasKey(gj => new { gj.GroupId, gj.PlayerId }); 
@@ -28,6 +32,11 @@ public class ApplicationDbContext : DbContext
         // Previene solicitudes duplicadas concurrentes (ej. clicks rápidos en el frontend)
         modelBuilder.Entity<Request>()
             .HasIndex(s => new { s.GroupId, s.PlayerId })
+            .IsUnique();
+
+        // Enforce unique vote per player per poll
+        modelBuilder.Entity<PollVote>()
+            .HasIndex(v => new { v.PollId, v.PlayerId })
             .IsUnique();
 
         // Configuración de la relación de Creador del Grupo (evitando borrado en cascada cíclico)
