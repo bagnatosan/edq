@@ -98,7 +98,7 @@ public class ChatController : Controller
             return Forbid();
         }
 
-        var pollDto = await _chatService.CreatePollAsync(userId, request.GroupId, request.Question, request.Options, request.DurationMinutes);
+        var pollDto = await _chatService.CreatePollAsync(userId, request.GroupId, request.Question, request.Options, request.DurationMinutes, request.TargetDate);
         if (pollDto == null)
         {
             return BadRequest("No se pudo crear la encuesta.");
@@ -159,5 +159,30 @@ public class ChatController : Controller
         await _hubContext.Clients.Group($"Group_{groupId}").SendAsync("PollUpdated", updatedPollData);
 
         return Ok(new { success = true });
+    }
+
+    // GET: /Chat/GetPollVotersByDate (AJAX)
+    [HttpGet]
+    public async Task<IActionResult> GetPollVotersByDate(int groupId, string date)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var belongs = await _chatService.CanAccessChatAsync(userId, groupId);
+        if (!belongs)
+        {
+            return Forbid();
+        }
+
+        if (!DateTime.TryParse(date, out var queryDate))
+        {
+            return BadRequest("Fecha inválida.");
+        }
+
+        var voterIds = await _chatService.GetPollVotersByDateAsync(groupId, queryDate);
+        return Json(voterIds);
     }
 }

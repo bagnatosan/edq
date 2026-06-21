@@ -36,6 +36,7 @@ interface PollDto {
     createdAt: string;
     expiresAt: string;
     options: PollOptionDto[];
+    targetDate: string | null;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -55,8 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const createPollModal = document.getElementById("createPollModal") as HTMLDivElement | null;
     const createPollCard = document.getElementById("createPollCard") as HTMLDivElement | null;
     const btnCancelPoll = document.getElementById("btnCancelPoll") as HTMLButtonElement | null;
-    const btnAddPollOption = document.getElementById("btnAddPollOption") as HTMLButtonElement | null;
-    const pollOptionsContainer = document.getElementById("pollOptionsContainer") as HTMLDivElement | null;
+    const pollTargetDate = document.getElementById("pollTargetDate") as HTMLInputElement | null;
     const createPollForm = document.getElementById("createPollForm") as HTMLFormElement | null;
     const pollQuestion = document.getElementById("pollQuestion") as HTMLInputElement | null;
     const pollDuration = document.getElementById("pollDuration") as HTMLSelectElement | null;
@@ -272,6 +272,12 @@ document.addEventListener("DOMContentLoaded", () => {
                             <span>📊</span>
                             <span>${escapeHtml(poll.question)}</span>
                         </div>
+                        ${poll.targetDate ? `
+                        <div style="font-size: 11px; color: var(--neon-green); margin-top: -6px; margin-bottom: 12px; display: flex; align-items: center; gap: 4px;">
+                            <span>📅 Partido:</span>
+                            <span style="text-transform: capitalize;">${formatDate(poll.targetDate)}</span>
+                        </div>
+                        ` : ''}
                         <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;" class="poll-options-list">
                             ${optionsHtml}
                         </div>
@@ -324,6 +330,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const scrollToBottom = (): void => {
         chatMessages.scrollTop = chatMessages.scrollHeight;
+    };
+
+    const formatDate = (dateString: string | null): string => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return "";
+        return date.toLocaleDateString("es-ES", {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     };
 
     const formatTime = (dateString: string): string => {
@@ -509,55 +528,28 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    if (createPollModal && createPollCard && btnCancelPoll && btnAddPollOption && pollOptionsContainer) {
+    if (createPollModal && createPollCard && btnCancelPoll && pollTargetDate) {
         const hideModal = () => {
             createPollModal.style.opacity = "0";
             createPollCard.style.transform = "scale(0.9)";
             setTimeout(() => {
                 createPollModal.style.display = "none";
                 if (createPollForm) createPollForm.reset();
-                pollOptionsContainer.innerHTML = `
-                    <input type="text" class="form-control-neon poll-option-input" placeholder="Opción 1" required />
-                    <input type="text" class="form-control-neon poll-option-input" placeholder="Opción 2" required />
-                `;
             }, 250);
         };
 
         btnCancelPoll.addEventListener("click", hideModal);
-        
-        btnAddPollOption.addEventListener("click", () => {
-            const currentInputs = pollOptionsContainer.querySelectorAll(".poll-option-input");
-            if (currentInputs.length >= 6) {
-                showToast("Máximo 6 opciones por encuesta.", true);
-                return;
-            }
-
-            const input = document.createElement("input");
-            input.type = "text";
-            input.className = "form-control-neon poll-option-input";
-            input.placeholder = `Opción ${currentInputs.length + 1}`;
-            input.required = true;
-
-            pollOptionsContainer.appendChild(input);
-            input.focus();
-        });
 
         if (createPollForm && pollQuestion && pollDuration) {
             createPollForm.addEventListener("submit", async (e) => {
                 e.preventDefault();
 
                 const question = pollQuestion.value.trim();
-                const optionInputs = pollOptionsContainer.querySelectorAll(".poll-option-input") as NodeListOf<HTMLInputElement>;
-                const options: string[] = [];
-
-                optionInputs.forEach(input => {
-                    const text = input.value.trim();
-                    if (text) options.push(text);
-                });
-
+                const targetDateVal = pollTargetDate.value;
+                const options = ["Sí"];
                 const duration = parseInt(pollDuration.value);
 
-                if (!question || options.length < 2) return;
+                if (!question || !targetDateVal) return;
 
                 const submitBtn = createPollForm.querySelector('button[type="submit"]') as HTMLButtonElement | null;
                 if (submitBtn) {
@@ -576,7 +568,8 @@ document.addEventListener("DOMContentLoaded", () => {
                             groupId: groupId,
                             question: question,
                             options: options,
-                            durationMinutes: duration
+                            durationMinutes: duration,
+                            targetDate: targetDateVal
                         })
                     });
 

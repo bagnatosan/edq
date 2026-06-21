@@ -1475,3 +1475,380 @@ body {
   background: rgba(205, 127, 50, 0.03);
   border-color: rgba(205, 127, 50, 0.1);
 }
+
+/* ==========================================================================
+   Sección de Perfil de Usuario
+   ========================================================================== */
+
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding-top: 10px;
+}
+
+.profile-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.profile-photo-wrapper {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.profile-avatar-container {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: #1e222b;
+    border: 3px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    position: relative;
+}
+
+.profile-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-avatar-initials {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--neon-green);
+    letter-spacing: 1px;
+}
+
+/* Pencil button on the side - green color like the rest */
+.profile-photo-edit-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--neon-green-solid);
+    border: 3px solid var(--bg-color);
+    color: #0c0c0e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(158, 255, 0, 0.3);
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.profile-photo-edit-btn:hover, .profile-photo-edit-btn:active {
+    transform: scale(1.1);
+    background: var(--neon-green);
+}
+
+.profile-name {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.profile-nickname-badge {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--neon-green);
+    background: rgba(158, 255, 0, 0.08);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(158, 255, 0, 0.15);
+}
+
+.profile-nickname-badge.text-muted {
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Options List */
+.profile-options-list {
+    background: var(--card-bg);
+    border: var(--card-border);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    margin-bottom: 30px;
+}
+
+.profile-option-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.profile-option-item:last-child {
+    border-bottom: none;
+}
+
+.profile-option-item:not(.option-non-clickable):hover,
+.profile-option-item:not(.option-non-clickable):active {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.option-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.option-icon {
+    width: 22px;
+    height: 22px;
+    color: var(--neon-green);
+    stroke-width: 2;
+}
+
+.option-arrow {
+    width: 18px;
+    height: 18px;
+    color: var(--text-secondary);
+    transition: transform 0.2s ease;
+}
+
+.profile-option-item:hover .option-arrow {
+    transform: translateX(3px);
+}
+
+.option-non-clickable {
+    cursor: default;
+}
+
+/* Switch Toggle Premium style */
+.switch-premium {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 26px;
+}
+
+.switch-premium input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #232731;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: .3s;
+    border-radius: 34px;
+}
+
+.switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--text-secondary);
+    transition: .3s;
+    border-radius: 50%;
+}
+
+.switch-premium input:checked + .switch-slider {
+    background-color: rgba(158, 255, 0, 0.15);
+    border-color: var(--neon-green-solid);
+}
+
+.switch-premium input:checked + .switch-slider:before {
+    transform: translateX(20px);
+    background-color: var(--neon-green-solid);
+    box-shadow: 0 0 8px var(--neon-green-glow);
+}
+
+/* Log out button - Red at the bottom */
+.profile-logout-container {
+    margin-top: auto;
+    padding-bottom: 20px;
+}
+
+.btn-logout {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px;
+    border-radius: var(--border-radius-md);
+    background: transparent;
+    border: 1px solid var(--red-alert);
+    color: var(--red-alert);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(255, 77, 77, 0.05);
+}
+
+.btn-logout:hover, .btn-logout:active {
+    background: var(--red-alert-bg);
+    box-shadow: 0 4px 15px rgba(255, 77, 77, 0.15);
+}
+
+.logout-icon {
+    width: 20px;
+    height: 20px;
+    color: currentColor;
+}
+
+/* Modal Styling */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(9, 10, 13, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-backdrop.show {
+    display: flex;
+}
+
+.modal-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--bg-color);
+    border: var(--card-border);
+    border-radius: var(--border-radius-lg);
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modal-card-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.modal-card-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-control-neon {
+    width: 100%;
+    background: #1a1d24;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--border-radius-md);
+    padding: 14px 16px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.form-control-neon:focus {
+    outline: none;
+    border-color: var(--neon-green-solid);
+    box-shadow: 0 0 10px var(--neon-green-glow);
+}
+
+.input-error-msg {
+    display: block;
+    font-size: 12px;
+    color: var(--red-alert);
+    margin-top: 6px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.btn-modal-cancel {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 15px;
+    font-weight: 700;
+    padding: 12px 18px;
+    cursor: pointer;
+    border-radius: var(--border-radius-sm);
+    transition: color 0.2s;
+}
+
+.btn-modal-cancel:hover {
+    color: var(--text-primary);
+}
+
+.btn-modal-save {
+    background: var(--neon-green-solid);
+    border: none;
+    color: #0c0c0e;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 12px 24px;
+    cursor: pointer;
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 4px 12px var(--neon-green-glow);
+    transition: all 0.2s ease;
+}
+
+.btn-modal-save:hover, .btn-modal-save:active {
+    background: var(--neon-green);
+    box-shadow: 0 4px 15px rgba(158, 255, 0, 0.4);
+    transform: translateY(-1px);
+}

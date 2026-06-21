@@ -26,13 +26,13 @@ public class ChatService : IChatService
 
     public async Task<string?> GetGroupNameAsync(int groupId)
     {
-        var group = await _context.Groups.FindAsync(groupId);
+        var group = await _context.Groups.AsNoTracking().FirstOrDefaultAsync(g => g.Id == groupId);
         return group?.Name;
     }
 
     public async Task<List<ChatMessageDto>> GetMessagesAsync(int groupId, int skip, int take)
     {
-        var messages = await _context.ChatMessages
+        var messages = await _context.ChatMessages.AsNoTracking()
             .Include(m => m.Sender)
             .Where(m => m.GroupId == groupId)
             .OrderByDescending(m => m.SentAt)
@@ -52,7 +52,7 @@ public class ChatService : IChatService
         }).Reverse().ToList();
     }
 
-    public async Task<PollDto?> CreatePollAsync(int userId, int groupId, string question, List<string> options, int durationMinutes)
+    public async Task<PollDto?> CreatePollAsync(int userId, int groupId, string question, List<string> options, int durationMinutes, DateTime? targetDate)
     {
         var poll = new Poll
         {
@@ -61,7 +61,8 @@ public class ChatService : IChatService
             Question = question.Trim(),
             CreatedAt = DateTime.UtcNow,
             ExpiresAt = DateTime.UtcNow.AddMinutes(durationMinutes > 0 ? durationMinutes : 1440),
-            IsActive = true
+            IsActive = true,
+            TargetDate = targetDate
         };
 
         foreach (var opt in options)
@@ -72,7 +73,7 @@ public class ChatService : IChatService
             }
         }
 
-        if (poll.Options.Count < 2)
+        if (poll.Options.Count < 1)
         {
             return null;
         }
@@ -80,7 +81,7 @@ public class ChatService : IChatService
         _context.Polls.Add(poll);
         await _context.SaveChangesAsync();
 
-        var creator = await _context.Players.FindAsync(userId);
+        var creator = await _context.Players.AsNoTracking().FirstOrDefaultAsync(p => p.Id == userId);
         var creatorName = creator != null ? (!string.IsNullOrWhiteSpace(creator.Nickname) ? creator.Nickname : $"{creator.Name} {creator.LastName}") : "Desconocido";
 
         return new PollDto
@@ -93,6 +94,7 @@ public class ChatService : IChatService
             Question = poll.Question,
             CreatedAt = poll.CreatedAt,
             ExpiresAt = poll.ExpiresAt,
+            TargetDate = poll.TargetDate,
             Options = poll.Options.Select(o => new PollOptionDto
             {
                 Id = o.Id,
@@ -106,7 +108,7 @@ public class ChatService : IChatService
     public async Task<List<PollDto>> GetActivePollsAsync(int userId, int groupId)
     {
         var now = DateTime.UtcNow;
-        var polls = await _context.Polls
+        var polls = await _context.Polls.AsNoTracking()
             .Include(p => p.Creator)
             .Include(p => p.Options)
                 .ThenInclude(o => o.Votes)
@@ -127,6 +129,7 @@ public class ChatService : IChatService
                 Question = p.Question,
                 CreatedAt = p.CreatedAt,
                 ExpiresAt = p.ExpiresAt,
+                TargetDate = p.TargetDate,
                 Options = p.Options.Select(o => new PollOptionDto
                 {
                     Id = o.Id,
@@ -148,7 +151,7 @@ public class ChatService : IChatService
 
     public async Task<(bool Success, int GroupId, object? UpdatedPollData)> VoteAsync(int userId, int pollId, int optionId)
     {
-        var poll = await _context.Polls
+        var poll = await _context.Polls.AsNoTracking()
             .Include(p => p.Options)
             .FirstOrDefaultAsync(p => p.Id == pollId);
 
@@ -196,7 +199,7 @@ public class ChatService : IChatService
 
         await _context.SaveChangesAsync();
 
-        var updatedOptions = await _context.PollOptions
+        var updatedOptions = await _context.PollOptions.AsNoTracking()
             .Include(o => o.Votes)
                 .ThenInclude(v => v.Player)
             .Where(o => o.PollId == pollId)
@@ -223,5 +226,45 @@ public class ChatService : IChatService
         };
 
         return (true, poll.GroupId, updatedPollData);
+    }
+
+    public async Task<List<int>> GetPollVotersByDateAsync(int groupId, DateTime queryDate)
+    {
+        var targetYear = queryDate.Year;
+        var targetMonth = queryDate.Month;
+        var targetDay = queryDate.Day;
+        var targetHour = queryDate.Hour;
+        var targetMinute = queryDate.Minute;
+
+        var polls = await _context.Polls.AsNoTracking()
+            .Include(p => p.Options)
+                .ThenInclude(o => o.Votes)
+            .Where(p => p.GroupId == groupId && p.TargetDate.HasValue)
+            .ToListAsync();
+
+        var matchingPoll = polls.FirstOrDefault(p =>
+            p.TargetDate!.Value.Year == targetYear &&
+            p.TargetDate.Value.Month == targetMonth &&
+            p.TargetDate.Value.Day == targetDay &&
+            p.TargetDate.Value.Hour == targetHour &&
+            p.TargetDate.Value.Minute == targetMinute);
+
+        if (matchingPoll == null)
+        {
+            return new List<int>();
+        }
+
+        var yesOption = matchingPoll.Options.FirstOrDefault(o => o.OptionText.ToLower().Trim() == "sí" || o.OptionText.ToLower().Trim() == "si");
+        if (yesOption == null)
+        {
+            yesOption = matchingPoll.Options.FirstOrDefault();
+        }
+
+        if (yesOption == null)
+        {
+            return new List<int>();
+        }
+
+        return yesOption.Votes.Select(v => v.PlayerId).ToList();
     }
 }

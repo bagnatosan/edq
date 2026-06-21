@@ -10,7 +10,6 @@ public class HomeController : Controller
     public IActionResult Index()
     {
 
-        throw new SystemException("Error por tener cara de virgo");
         if (User.Identity?.IsAuthenticated == true)
         {
             return RedirectToAction("Explore", "Group");

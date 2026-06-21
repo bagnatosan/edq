@@ -78,7 +78,7 @@ public class AuthService : IAuthService
     public async Task<Player?> LoginAsync(string email, string password)
     {
         // 1. Buscar jugador por correo
-        var jugador = await _context.Players.FirstOrDefaultAsync(p => p.Email == email);
+        var jugador = await _context.Players.AsNoTracking().FirstOrDefaultAsync(p => p.Email == email);
         if (jugador == null)
         {
             return null;
@@ -92,5 +92,36 @@ public class AuthService : IAuthService
         }
 
         return jugador;
+    }
+
+    public async Task<Player?> GetPlayerByIdAsync(int id)
+    {
+        return await _context.Players.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
+    }
+
+    public async Task<bool> UpdatePlayerNicknameAsync(int id, string nickname)
+    {
+        var player = await _context.Players.FirstOrDefaultAsync(p => p.Id == id);
+        if (player == null)
+        {
+            return false;
+        }
+
+        player.Nickname = nickname;
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> UpdatePlayerPhotoAsync(int id, string photoUrl)
+    {
+        var player = await _context.Players.FirstOrDefaultAsync(p => p.Id == id);
+        if (player == null)
+        {
+            return false;
+        }
+
+        player.PhotoUrl = photoUrl;
+        await _context.SaveChangesAsync();
+        return true;
     }
 }

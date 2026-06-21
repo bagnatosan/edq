@@ -21,7 +21,7 @@ public class MatchService : IMatchService
     public async Task<List<UserUpcomingMatchDto>> GetUpcomingMatchesForUserAsync(int userId)
     {
         // 1. Obtener los IDs de los grupos en los que participa el usuario (como creador o miembro)
-        var userGroupIds = await _context.Groups
+        var userGroupIds = await _context.Groups.AsNoTracking()
             .Where(g => g.CreatorId == userId || g.GroupPlayers.Any(gp => gp.PlayerId == userId))
             .Select(g => g.Id)
             .ToListAsync();
@@ -31,12 +31,12 @@ public class MatchService : IMatchService
             return new List<UserUpcomingMatchDto>();
         }
 
-        // 2. Obtener todos los partidos de esos grupos que sean futuros y estén pendientes
-        var upcomingMatches = await _context.Matches
+        // 2. Obtener todos los partidos de esos grupos que estén pendientes
+        var upcomingMatches = await _context.Matches.AsNoTracking()
             .Include(m => m.Group)
             .Include(m => m.MatchPlayers)
                 .ThenInclude(mp => mp.Player)
-            .Where(m => userGroupIds.Contains(m.GroupId) && m.Date > DateTime.UtcNow && m.State == "Pending")
+            .Where(m => userGroupIds.Contains(m.GroupId) && m.State == "Pending")
             .OrderBy(m => m.Date)
             .ToListAsync();
 
@@ -72,7 +72,7 @@ public class MatchService : IMatchService
 
     public async Task<MatchDetailsDto?> GetMatchDetailsAsync(int matchId, int userId)
     {
-        var match = await _context.Matches
+        var match = await _context.Matches.AsNoTracking()
             .Include(m => m.Group)
             .Include(m => m.MatchPlayers)
                 .ThenInclude(mp => mp.Player)
@@ -89,7 +89,7 @@ public class MatchService : IMatchService
         var isCreator = true; // Cualquier miembro del grupo tiene permisos de edición (equivalente a creador para la vista)
 
         // Obtener todos los miembros del grupo para permitir agregar/sacar
-        var groupMembers = await _context.GroupPlayers
+        var groupMembers = await _context.GroupPlayers.AsNoTracking()
             .Include(gp => gp.Player)
             .Where(gp => gp.GroupId == match.GroupId)
             .ToListAsync();

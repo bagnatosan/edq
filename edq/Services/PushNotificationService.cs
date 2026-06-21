@@ -97,12 +97,12 @@ public class PushNotificationService : IPushNotificationService
 
     public async Task SendNotificationToGroupAsync(int groupId, string title, string body, string url, int excludePlayerId = 0)
     {
-        var memberIds = await _context.GroupPlayers
+        var memberIds = await _context.GroupPlayers.AsNoTracking()
             .Where(gp => gp.GroupId == groupId)
             .Select(gp => gp.PlayerId)
             .ToListAsync();
 
-        var group = await _context.Groups.FindAsync(groupId);
+        var group = await _context.Groups.AsNoTracking().FirstOrDefaultAsync(g => g.Id == groupId);
         if (group != null && !memberIds.Contains(group.CreatorId))
         {
             memberIds.Add(group.CreatorId);
@@ -115,7 +115,7 @@ public class PushNotificationService : IPushNotificationService
 
         if (memberIds.Count == 0) return;
 
-        var subscriptions = await _context.PushSubscriptions
+        var subscriptions = await _context.PushSubscriptions.AsNoTracking()
             .Where(s => memberIds.Contains(s.PlayerId))
             .ToListAsync();
 

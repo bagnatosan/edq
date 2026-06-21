@@ -37,6 +37,28 @@ document.addEventListener("DOMContentLoaded", () => {
         matchDateTime.value = `${year}-${month}-${date}T${hours}:${minutes}`;
     };
     setNextFridayDateTime();
+    const checkPollPreselection = () => __awaiter(void 0, void 0, void 0, function* () {
+        const dateVal = matchDateTime.value;
+        if (!dateVal)
+            return;
+        try {
+            const response = yield fetch(`/Chat/GetPollVotersByDate?groupId=${groupId}&date=${encodeURIComponent(dateVal)}`);
+            if (response.ok) {
+                const playerIds = yield response.json();
+                if (playerIds && playerIds.length > 0) {
+                    const checkboxes = playersCheckboxGrid.querySelectorAll('input[name="selectedPlayers"]');
+                    checkboxes.forEach(cb => {
+                        const playerId = parseInt(cb.value);
+                        cb.checked = playerIds.includes(playerId);
+                    });
+                }
+            }
+        }
+        catch (error) {
+            console.error("Error pre-selecting players from poll:", error);
+        }
+    });
+    matchDateTime.addEventListener("change", checkPollPreselection);
     // Cargar los miembros del grupo por AJAX
     const loadGroupMembers = () => __awaiter(void 0, void 0, void 0, function* () {
         try {
@@ -46,6 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = yield response.json();
             groupNameTitle.textContent = `Crear Partido - ${data.groupName}`;
             renderPlayersCheckboxes(data.members);
+            yield checkPollPreselection();
         }
         catch (error) {
             console.error("Error al cargar los miembros:", error);

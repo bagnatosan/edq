@@ -21,4 +21,6 @@ public class Poll
     public bool IsActive { get; set; } = true;
     
     public List<PollOption> Options { get; set; } = new();
+    
+    public DateTime? TargetDate { get; set; }
 }

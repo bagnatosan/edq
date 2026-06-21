@@ -95,14 +95,8 @@
             </div>
 
             <div style="margin-bottom: 16px;">
-                <label class="form-label" style="font-size: 11px; display: flex; justify-content: space-between;">
-                    <span>Opciones de Respuesta</span>
-                    <button type="button" id="btnAddPollOption" style="background: none; border: none; color: var(--neon-green); font-weight: 700; cursor: pointer; padding: 0;">+ Agregar</button>
-                </label>
-                <div id="pollOptionsContainer" style="display: flex; flex-direction: column; gap: 8px;">
-                    <input type="text" class="form-control-neon poll-option-input" placeholder="Opción 1" required />
-                    <input type="text" class="form-control-neon poll-option-input" placeholder="Opción 2" required />
-                </div>
+                <label class="form-label" style="font-size: 11px;">Fecha y Hora del Partido</label>
+                <input type="datetime-local" id="pollTargetDate" class="form-control-neon" required />
             </div>
 
             <div style="margin-bottom: 20px;">

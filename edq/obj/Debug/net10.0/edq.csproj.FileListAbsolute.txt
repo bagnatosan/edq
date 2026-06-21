@@ -218,7 +218,6 @@
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/edq.pdb
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/edq.genruntimeconfig.cache
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/ref/edq.dll
-/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/9flnuhc6xo-{0}-p35frioxvb-p35frioxvb.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/n4yz2p1bdy-{0}-90l7gmxu4s-90l7gmxu4s.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/ascjuncfqn-{0}-k3unl9v34n-k3unl9v34n.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/sdwh7dt9yp-{0}-3y2rstb4jp-3y2rstb4jp.gz
@@ -230,10 +229,12 @@
 /home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/WebPush.dll
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/8fy9rbicfq-{0}-mv2uk0ce6b-mv2uk0ce6b.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/pn8qc0slma-{0}-7z3g89gq9y-7z3g89gq9y.gz
-/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/35t5j8b4ca-{0}-wrm6fh70v6-wrm6fh70v6.gz
-/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/39938q6i2y-{0}-i5b4nio8bs-i5b4nio8bs.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/z4x438jh9m-{0}-ykmqj9tut7-ykmqj9tut7.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/b61zlydoc8-{0}-shcrvd89vd-shcrvd89vd.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/jozni1su0g-{0}-68tl7ugkjp-68tl7ugkjp.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/gka09gfb9a-{0}-rm5zqkh3xf-rm5zqkh3xf.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/e7y5m0fc5w-{0}-arzh4n0ylq-arzh4n0ylq.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/35t5j8b4ca-{0}-n45nb7w5uh-n45nb7w5uh.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/9flnuhc6xo-{0}-428cfm4sgq-428cfm4sgq.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/zh0xhe7jst-{0}-vfee39losn-vfee39losn.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/39938q6i2y-{0}-op1ycdlxhz-op1ycdlxhz.gz

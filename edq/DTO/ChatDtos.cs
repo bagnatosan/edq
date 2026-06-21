@@ -42,6 +42,7 @@ public class PollDto
     public string Question { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime ExpiresAt { get; set; }
+    public DateTime? TargetDate { get; set; }
     public List<PollOptionDto> Options { get; set; } = new();
 }
 
@@ -51,6 +52,7 @@ public class CreatePollRequestDto
     public string Question { get; set; } = string.Empty;
     public List<string> Options { get; set; } = new();
     public int DurationMinutes { get; set; } = 1440;
+    public DateTime? TargetDate { get; set; }
 }
 
 public class VoteRequestDto

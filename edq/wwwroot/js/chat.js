@@ -22,8 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const createPollModal = document.getElementById("createPollModal");
     const createPollCard = document.getElementById("createPollCard");
     const btnCancelPoll = document.getElementById("btnCancelPoll");
-    const btnAddPollOption = document.getElementById("btnAddPollOption");
-    const pollOptionsContainer = document.getElementById("pollOptionsContainer");
+    const pollTargetDate = document.getElementById("pollTargetDate");
     const createPollForm = document.getElementById("createPollForm");
     const pollQuestion = document.getElementById("pollQuestion");
     const pollDuration = document.getElementById("pollDuration");
@@ -208,6 +207,12 @@ document.addEventListener("DOMContentLoaded", () => {
                             <span>📊</span>
                             <span>${escapeHtml(poll.question)}</span>
                         </div>
+                        ${poll.targetDate ? `
+                        <div style="font-size: 11px; color: var(--neon-green); margin-top: -6px; margin-bottom: 12px; display: flex; align-items: center; gap: 4px;">
+                            <span>📅 Partido:</span>
+                            <span style="text-transform: capitalize;">${formatDate(poll.targetDate)}</span>
+                        </div>
+                        ` : ''}
                         <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;" class="poll-options-list">
                             ${optionsHtml}
                         </div>
@@ -256,6 +261,19 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     const scrollToBottom = () => {
         chatMessages.scrollTop = chatMessages.scrollHeight;
+    };
+    const formatDate = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        if (isNaN(date.getTime()))
+            return "";
+        return date.toLocaleDateString("es-ES", {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     };
     const formatTime = (dateString) => {
         const date = new Date(dateString);
@@ -424,7 +442,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-    if (createPollModal && createPollCard && btnCancelPoll && btnAddPollOption && pollOptionsContainer) {
+    if (createPollModal && createPollCard && btnCancelPoll && pollTargetDate) {
         const hideModal = () => {
             createPollModal.style.opacity = "0";
             createPollCard.style.transform = "scale(0.9)";
@@ -432,40 +450,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 createPollModal.style.display = "none";
                 if (createPollForm)
                     createPollForm.reset();
-                pollOptionsContainer.innerHTML = `
-                    <input type="text" class="form-control-neon poll-option-input" placeholder="Opción 1" required />
-                    <input type="text" class="form-control-neon poll-option-input" placeholder="Opción 2" required />
-                `;
             }, 250);
         };
         btnCancelPoll.addEventListener("click", hideModal);
-        btnAddPollOption.addEventListener("click", () => {
-            const currentInputs = pollOptionsContainer.querySelectorAll(".poll-option-input");
-            if (currentInputs.length >= 6) {
-                showToast("Máximo 6 opciones por encuesta.", true);
-                return;
-            }
-            const input = document.createElement("input");
-            input.type = "text";
-            input.className = "form-control-neon poll-option-input";
-            input.placeholder = `Opción ${currentInputs.length + 1}`;
-            input.required = true;
-            pollOptionsContainer.appendChild(input);
-            input.focus();
-        });
         if (createPollForm && pollQuestion && pollDuration) {
             createPollForm.addEventListener("submit", (e) => __awaiter(void 0, void 0, void 0, function* () {
                 e.preventDefault();
                 const question = pollQuestion.value.trim();
-                const optionInputs = pollOptionsContainer.querySelectorAll(".poll-option-input");
-                const options = [];
-                optionInputs.forEach(input => {
-                    const text = input.value.trim();
-                    if (text)
-                        options.push(text);
-                });
+                const targetDateVal = pollTargetDate.value;
+                const options = ["Sí"];
                 const duration = parseInt(pollDuration.value);
-                if (!question || options.length < 2)
+                if (!question || !targetDateVal)
                     return;
                 const submitBtn = createPollForm.querySelector('button[type="submit"]');
                 if (submitBtn) {
@@ -483,7 +478,8 @@ document.addEventListener("DOMContentLoaded", () => {
                             groupId: groupId,
                             question: question,
                             options: options,
-                            durationMinutes: duration
+                            durationMinutes: duration,
+                            targetDate: targetDateVal
                         })
                     });
                     if (!response.ok)

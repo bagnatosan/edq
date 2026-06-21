@@ -21,7 +21,7 @@ public class GroupService : IGroupService
     public async Task<(List<GroupDto> MyGroups, List<GroupDto> OtherGroups)> GetGroupsAsync(int userId, string? search, int skip, int take)
     {
         // 1. Mis Grupos (Creador o miembro regular)
-        var myGroupsQuery = _context.Groups
+        var myGroupsQuery = _context.Groups.AsNoTracking()
             .Include(g => g.Creator)
             .Include(g => g.GroupPlayers)
             .Where(g => g.CreatorId == userId || g.GroupPlayers.Any(gp => gp.PlayerId == userId));
@@ -42,7 +42,7 @@ public class GroupService : IGroupService
         }).ToList();
 
         // 2. Otros Grupos (Descubrir) - Paginado y Filtrable
-        var otherGroupsQuery = _context.Groups
+        var otherGroupsQuery = _context.Groups.AsNoTracking()
             .Include(g => g.Creator)
             .Include(g => g.GroupPlayers)
             .Where(g => g.CreatorId != userId && !g.GroupPlayers.Any(gp => gp.PlayerId == userId));
@@ -62,7 +62,7 @@ public class GroupService : IGroupService
         var otherGroupIds = otherGroups.Select(g => g.Id).ToList();
 
         // Obtener el estado de solicitudes del usuario actual para estos grupos
-        var userRequests = await _context.Requests
+        var userRequests = await _context.Requests.AsNoTracking()
             .Where(r => r.PlayerId == userId && otherGroupIds.Contains(r.GroupId))
             .ToDictionaryAsync(r => r.GroupId, r => r.State);
 
@@ -101,7 +101,7 @@ public class GroupService : IGroupService
             return JoinRequestResult.AlreadyMember;
         }
 
-        var realUser = await _context.Players.FindAsync(userId);
+        var realUser = await _context.Players.AsNoTracking().FirstOrDefaultAsync(p => p.Id == userId);
         if (realUser == null)
         {
             return JoinRequestResult.GroupNotFound;
@@ -193,7 +193,7 @@ public class GroupService : IGroupService
 
     public async Task<GroupDashboardDto?> GetGroupDashboardDataAsync(int userId, int groupId)
     {
-        var group = await _context.Groups
+        var group = await _context.Groups.AsNoTracking()
             .Include(g => g.Creator)
             .FirstOrDefaultAsync(g => g.Id == groupId);
 
@@ -211,13 +211,13 @@ public class GroupService : IGroupService
         }
 
         // Obtener miembros del grupo
-        var groupPlayers = await _context.GroupPlayers
+        var groupPlayers = await _context.GroupPlayers.AsNoTracking()
             .Include(gp => gp.Player)
             .Where(gp => gp.GroupId == groupId)
             .ToListAsync();
 
         // Obtener partidos finalizados para calcular winrates
-        var completedMatches = await _context.Matches
+        var completedMatches = await _context.Matches.AsNoTracking()
             .Include(m => m.MatchPlayers)
             .Where(m => m.GroupId == groupId && m.State != "Pending")
             .ToListAsync();
@@ -283,7 +283,7 @@ public class GroupService : IGroupService
         List<PendingRequestDto>? pendingRequests = null;
         if (isCreator)
         {
-            pendingRequests = await _context.Requests
+            pendingRequests = await _context.Requests.AsNoTracking()
                 .Include(r => r.Player)
                 .Where(r => r.GroupId == groupId && r.State == "Pending")
                 .OrderBy(r => r.DateRequest)
@@ -300,10 +300,10 @@ public class GroupService : IGroupService
         }
 
         // Obtener próximo partido
-        var upcomingMatch = await _context.Matches
+        var upcomingMatch = await _context.Matches.AsNoTracking()
             .Include(m => m.MatchPlayers)
                 .ThenInclude(mp => mp.Player)
-            .Where(m => m.GroupId == groupId && m.Date > DateTime.UtcNow && m.State == "Pending")
+            .Where(m => m.GroupId == groupId && m.State == "Pending")
             .OrderBy(m => m.Date)
             .FirstOrDefaultAsync();
 
@@ -414,7 +414,7 @@ public class GroupService : IGroupService
 
     public async Task<bool> UpdateMemberScoresAsync(int userId, int groupId, List<MemberScoreUpdateDto> updates)
     {
-        var group = await _context.Groups.FindAsync(groupId);
+        var group = await _context.Groups.AsNoTracking().FirstOrDefaultAsync(g => g.Id == groupId);
         if (group == null || group.CreatorId != userId)
         {
             return false;
@@ -437,7 +437,7 @@ public class GroupService : IGroupService
 
     public async Task<bool> CreateTemporaryPlayerAsync(int userId, int groupId, string name, string lastName, byte initialScore)
     {
-        var group = await _context.Groups.FindAsync(groupId);
+        var group = await _context.Groups.AsNoTracking().FirstOrDefaultAsync(g => g.Id == groupId);
         if (group == null || group.CreatorId != userId)
         {
             return false;
@@ -475,7 +475,7 @@ public class GroupService : IGroupService
             return null;
         }
 
-        var matches = await _context.Matches
+        var matches = await _context.Matches.AsNoTracking()
             .Include(m => m.MatchPlayers)
                 .ThenInclude(mp => mp.Player)
             .Where(m => m.GroupId == groupId && m.State != "Pending")
@@ -528,7 +528,7 @@ public class GroupService : IGroupService
     public async Task<bool> RemoveMemberAsync(int userId, int groupId, int playerId)
     {
         // 1. Validar que el usuario que remueve sea el creador del grupo
-        var group = await _context.Groups.FindAsync(groupId);
+        var group = await _context.Groups.AsNoTracking().FirstOrDefaultAsync(g => g.Id == groupId);
         if (group == null || group.CreatorId != userId)
         {
             return false;
@@ -553,7 +553,7 @@ public class GroupService : IGroupService
         _context.GroupPlayers.Remove(gp);
 
         // 5. Eliminarlo de participaciones en partidos pendientes (futuros) de este grupo
-        var pendingMatchIds = await _context.Matches
+        var pendingMatchIds = await _context.Matches.AsNoTracking()
             .Where(m => m.GroupId == groupId && m.State == "Pending")
             .Select(m => m.Id)
             .ToListAsync();
@@ -608,7 +608,7 @@ public class GroupService : IGroupService
 
     public async Task<bool> IsGroupCreatorAsync(int userId, int groupId)
     {
-        var group = await _context.Groups.FindAsync(groupId);
+        var group = await _context.Groups.AsNoTracking().FirstOrDefaultAsync(g => g.Id == groupId);
         return group != null && group.CreatorId == userId;
     }
 }

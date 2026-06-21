@@ -23,7 +23,7 @@ namespace edq.Services
             var lessDifference = int.MaxValue;
             
             
-            var players = await _context.GroupPlayers
+            var players = await _context.GroupPlayers.AsNoTracking()
                 .Where(p => p.GroupId == grupoId && playerId.Contains(p.PlayerId))
                 .Select( p => new { p.PlayerId, p.Score })
                 .ToListAsync();
