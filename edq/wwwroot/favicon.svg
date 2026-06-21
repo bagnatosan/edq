@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="100%" height="100%">
+  <defs>
+    <!-- Gradiente verde neón a cian -->
+    <linearGradient id="navGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#39ff14" />
+      <stop offset="100%" stop-color="#00f2fe" />
+    </linearGradient>
+  </defs>
+  <g transform="translate(40, 40)">
+    <!-- Círculo exterior -->
+    <circle cx="0" cy="0" r="30" fill="url(#navGradient)"/>
+    
+    <!-- Balanza -->
+    <path d="M -15,-5 L 15,-5" fill="none" stroke="#121212" stroke-width="4" stroke-linecap="round"/>
+    <path d="M -6,15 L 6,15 M 0,15 L 0,-10" fill="none" stroke="#121212" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="-15" cy="5" r="5" fill="#121212"/>
+    <circle cx="15" cy="5" r="5" fill="#121212"/>
+  </g>
+</svg>
