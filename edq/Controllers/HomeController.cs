@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using edq.Models;
+using edq.DTO;
 
 namespace edq.Controllers;
 
@@ -8,6 +9,8 @@ public class HomeController : Controller
 {
     public IActionResult Index()
     {
+
+        throw new SystemException("Error por tener cara de virgo");
         if (User.Identity?.IsAuthenticated == true)
         {
             return RedirectToAction("Explore", "Group");
@@ -21,8 +24,15 @@ public class HomeController : Controller
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    public IActionResult Error(string? message)
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        var exceptionHandlerPathFeature = HttpContext.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
+        var errorMsg = message ?? exceptionHandlerPathFeature?.Error?.Message ?? "Algo salió mal en el servidor. Por favor, vuelve a intentarlo.";
+
+        return View(new ErrorViewModel 
+        { 
+            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+            ErrorMessage = errorMsg
+        });
     }
 }

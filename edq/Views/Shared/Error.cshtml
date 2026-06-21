@@ -1,25 +1,448 @@
-﻿@model ErrorViewModel
+@model edq.DTO.ErrorViewModel
 @{
     ViewData["Title"] = "Error";
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<div class="error-container">
+    <!-- Escenario de la pelota (Sin el jugador, solo el balón cayendo al error) -->
+    <div class="ball-stage">
+        <!-- Pelota de fútbol con física y deformación por impacto -->
+        <div class="ball-wrapper">
+            <svg class="ball-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="46" fill="#ffffff" stroke="var(--bg-color-deep)" stroke-width="6"/>
+                <!-- Pentágono central -->
+                <polygon points="50,35 62,44 57,58 43,58 38,44" fill="var(--bg-color-deep)"/>
+                <!-- Gajos -->
+                <path d="M50 35L50 4" stroke="var(--bg-color-deep)" stroke-width="5" stroke-linecap="round"/>
+                <path d="M62 44L92 32" stroke="var(--bg-color-deep)" stroke-width="5" stroke-linecap="round"/>
+                <path d="M57 58L76 90" stroke="var(--bg-color-deep)" stroke-width="5" stroke-linecap="round"/>
+                <path d="M43 58L24 90" stroke="var(--bg-color-deep)" stroke-width="5" stroke-linecap="round"/>
+                <path d="M38 44L8 32" stroke="var(--bg-color-deep)" stroke-width="5" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
 
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
-}
+    <!-- Tarjeta de Error (Contenedor que recibe e interactúa con la pelota) -->
+    <div class="error-card card">
+        <!-- Error Badge (Actúa como el "embudo/mezclador" donde cae la pelota) -->
+        <div class="error-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        </div>
+        <h1 class="error-title-main">Hubo un error:</h1>
+        <p class="error-message-text">
+            @(Model.ErrorMessage ?? "Ocurrió un problema inesperado. Por favor, intenta de nuevo más tarde.")
+        </p>
+    </div>
 
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>
+    <!-- Botones de Acción -->
+    <div class="error-actions">
+        <a href="/" class="btn btn-primary btn-error-retry">
+            <span>Volver al Inicio</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+        </a>
+        
+        @if (Model.ShowRequestId)
+        {
+            <button class="btn-details-toggle" onclick="toggleDetails()">
+                <span>Ver detalles técnicos</span>
+                <svg id="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div id="technical-details" class="technical-details-panel">
+                <p><strong>Request ID:</strong> <code>@Model.RequestId</code></p>
+                <p class="tech-hint">Proporciona este ID al administrador del sistema para rastrear el problema.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    /* Contenedor Principal Centrado */
+    .error-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 120px);
+        padding: 10px 0;
+        text-align: center;
+        overflow: visible; /* Permitir que la pelota viaje libremente */
+    }
+
+    /* Escenario de la Pelota */
+    .ball-stage {
+        position: relative;
+        width: 100%;
+        height: 120px;
+        margin-bottom: 24px;
+        overflow: visible;
+    }
+
+    /* Pelota de fútbol (Animada con ciclo de caída en error, mezcla y disparo de regreso) */
+    .ball-wrapper {
+        position: absolute;
+        width: 36px;
+        height: 36px;
+        left: 50%;
+        margin-left: -18px; /* Centrado exacto horizontal */
+        bottom: 40px;
+        z-index: 9; /* Por encima de la tarjeta */
+        transform-origin: 50% 50%;
+        animation: ball-cycle 4.0s infinite;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45));
+    }
+
+    .ball-svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Tarjeta de Error */
+    .error-card {
+        background: rgba(26, 29, 36, 0.75);
+        border: 1px solid rgba(255, 77, 77, 0.35);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 77, 77, 0.1);
+        border-radius: var(--border-radius-lg);
+        padding: 24px 20px;
+        width: 100%;
+        max-width: 380px;
+        margin-bottom: 24px;
+        position: relative;
+        overflow: visible; /* Permite que el badge y la pelota resalten */
+    }
+
+    .error-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--red-alert);
+        border-radius: var(--border-radius-lg) 0 0 var(--border-radius-lg);
+    }
+
+    /* Icono de Error (Mezclador) */
+    .error-badge {
+        width: 48px;
+        height: 48px;
+        background: var(--red-alert-bg);
+        border: 1px solid rgba(255, 77, 77, 0.35);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: -48px auto 16px auto; /* Flota sobre el borde superior */
+        color: var(--red-alert);
+        filter: drop-shadow(0 0 5px rgba(255, 77, 77, 0.3));
+        position: relative;
+        z-index: 5;
+        animation: badge-mixer 4.0s infinite ease-in-out;
+    }
+
+    .error-badge svg {
+        width: 24px;
+        height: 24px;
+        animation: icon-mixer-spin 4.0s infinite linear;
+    }
+
+    .error-title-main {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 10px;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .error-message-text {
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        font-family: 'Inter', sans-serif;
+        word-wrap: break-word;
+        max-height: 120px;
+        overflow-y: auto;
+        padding: 0 4px;
+    }
+
+    .error-message-text::-webkit-scrollbar {
+        width: 4px;
+    }
+    .error-message-text::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+    }
+
+    /* Acciones */
+    .error-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: 100%;
+        max-width: 380px;
+    }
+
+    .btn-error-retry {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: var(--neon-green-solid);
+        color: #0c0c0e !important;
+        font-weight: 800;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-size: 15px;
+        font-family: 'Outfit', sans-serif;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 4px 15px var(--neon-green-glow);
+        width: 80%;
+    }
+
+    .btn-error-retry:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(158, 255, 0, 0.4);
+    }
+
+    .btn-error-retry svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .btn-details-toggle {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .btn-details-toggle svg {
+        width: 16px;
+        height: 16px;
+        transition: transform 0.3s ease;
+    }
+
+    .btn-details-toggle.open svg {
+        transform: rotate(180deg);
+    }
+
+    .technical-details-panel {
+        display: none;
+        background: rgba(15, 17, 21, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: var(--border-radius-md);
+        padding: 14px;
+        width: 80%;
+        text-align: left;
+        font-family: 'Inter', sans-serif;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .technical-details-panel p {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+    }
+
+    .technical-details-panel code {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 2px 6px;
+        border-radius: 4px;
+        color: var(--neon-green);
+        font-family: monospace;
+        word-break: break-all;
+    }
+
+    .tech-hint {
+        color: var(--text-muted) !important;
+        font-style: italic;
+    }
+
+    /* ==========================================================================
+       KEYFRAMES CON HISTORIA / NARRATIVA (CAÍDA -> MEZCLA INMEDIATA -> VOLVER ARRIBA)
+       ========================================================================== */
+
+    /* 1. PELOTA: Ciclo de 4.0 segundos con mezcla instantánea */
+    @@keyframes ball-cycle {
+        0% {
+            /* Ball at apex, glowing neon-green */
+            transform: translateY(-110px) scale(1, 1) rotate(0deg);
+            filter: drop-shadow(0 0 10px var(--neon-green-glow));
+            opacity: 1;
+            /* Caída libre acelerada por gravedad */
+            animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+        }
+        26% {
+            /* Just before touching the badge */
+            transform: translateY(80px) scale(1, 1) rotate(140deg);
+            filter: drop-shadow(0 0 10px var(--neon-green-glow));
+            opacity: 1;
+            animation-timing-function: linear;
+        }
+        28% {
+            /* ¡Contacto con el badge! Se mezcla de inmediato (se achica y se hace invisible) */
+            transform: translateY(96px) scale(0.6, 0.6) rotate(160deg);
+            filter: drop-shadow(0 0 15px rgba(255, 77, 77, 0.6));
+            opacity: 0.3; /* Se desvanece de inmediato */
+            animation-timing-function: ease-out;
+        }
+        30% {
+            /* Desaparece completamente antes de llegar a la mitad del badge para no asomar por abajo */
+            transform: translateY(102px) scale(0, 0) rotate(180deg);
+            opacity: 0;
+        }
+        36% {
+            /* Inside the badge: completely hidden & mixing */
+            transform: translateY(102px) scale(0);
+            opacity: 0;
+        }
+        66% {
+            /* Finish mixing inside error card, prepare to shoot up */
+            transform: translateY(102px) scale(0);
+            filter: drop-shadow(0 0 20px var(--red-alert));
+            opacity: 0;
+            /* Disparo rápido hacia arriba */
+            animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        76% {
+            /* Shoots up rapidly, transition to neon green */
+            transform: translateY(-40px) scale(0.85, 1.15) rotate(480deg);
+            filter: drop-shadow(0 0 15px var(--neon-green-glow));
+            opacity: 1;
+            /* Desaceleración gradual hacia el pico */
+            animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+        }
+        90% {
+            /* Reaches apex and stabilizes */
+            transform: translateY(-110px) scale(1, 1) rotate(720deg);
+            filter: drop-shadow(0 0 10px var(--neon-green-glow));
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(-110px) scale(1, 1) rotate(720deg);
+            filter: drop-shadow(0 0 10px var(--neon-green-glow));
+            opacity: 1;
+        }
+    }
+
+    /* 2. ERROR BADGE: Cambia de color y gira como licuadora apenas la pelota lo toca (28% del ciclo) */
+    @@keyframes badge-mixer {
+        0%, 27% {
+            background: var(--red-alert-bg);
+            border-color: rgba(255, 77, 77, 0.35);
+            transform: scale(1);
+            color: var(--red-alert);
+        }
+        28% {
+            /* Pelota toca el badge: inicio inmediato de la mezcla */
+            background: rgba(255, 77, 77, 0.5);
+            border-color: var(--red-alert);
+            transform: scale(1.15);
+            box-shadow: 0 0 15px var(--red-alert);
+        }
+        36% {
+            /* Mezclando (Naranja) */
+            background: rgba(241, 196, 15, 0.35);
+            border-color: #f1c40f;
+            color: #f1c40f;
+            transform: scale(1.08);
+            box-shadow: 0 0 15px rgba(241, 196, 15, 0.4);
+        }
+        48% {
+            /* Mezclando (Verde Neón - Curación) */
+            background: rgba(158, 255, 0, 0.35);
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+            transform: scale(1.2);
+            box-shadow: 0 0 20px var(--neon-green-glow);
+        }
+        58% {
+            /* Mezclando (Rojo) */
+            background: rgba(255, 77, 77, 0.45);
+            border-color: var(--red-alert);
+            color: var(--red-alert);
+            transform: scale(1.08);
+            box-shadow: 0 0 15px var(--red-alert);
+        }
+        64% {
+            /* Preparar salida */
+            background: rgba(158, 255, 0, 0.4);
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+            transform: scale(1.15);
+            box-shadow: 0 0 20px var(--neon-green-glow);
+        }
+        67% {
+            /* Pelota disparada: fin de mezcla */
+            background: var(--red-alert-bg);
+            border-color: rgba(255, 77, 77, 0.35);
+            transform: scale(0.9);
+            color: var(--red-alert);
+        }
+        68%, 100% {
+            background: var(--red-alert-bg);
+            border-color: rgba(255, 77, 77, 0.35);
+            transform: scale(1);
+            color: var(--red-alert);
+            box-shadow: none;
+        }
+    }
+
+    /* 3. ICONO DE ADVERTENCIA: Gira rápidamente durante el mezclado al tocar la pelota (28% al 67%) */
+    @@keyframes icon-mixer-spin {
+        0%, 27% {
+            transform: rotate(0deg);
+        }
+        28%, 65% {
+            /* Giro continuo de licuadora */
+            transform: rotate(1080deg);
+        }
+        66%, 100% {
+            transform: rotate(1080deg);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    function toggleDetails() {
+        var panel = document.getElementById("technical-details");
+        var button = document.querySelector(".btn-details-toggle");
+        var isHidden = window.getComputedStyle(panel).display === "none";
+        
+        if (isHidden) {
+            panel.style.display = "block";
+            button.classList.add("open");
+        } else {
+            panel.style.display = "none";
+            button.classList.remove("open");
+        }
+    }
+</script>
