@@ -1,0 +1,159 @@
+@model edq.DTO.MatchDetailsDto
+
+@{
+    ViewData["Title"] = Model.IsCreator ? "Editar Partido" : "Detalles del Partido";
+}
+
+@Html.AntiForgeryToken()
+
+<input type="hidden" id="matchIdInput" value="@Model.MatchId" />
+<input type="hidden" id="groupIdInput" value="@Model.GroupId" />
+<input type="hidden" id="isCreatorInput" value="@(Model.IsCreator ? "true" : "false")" />
+
+<!-- Navegación y Encabezado -->
+<div class="dashboard-header-nav" style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+    <a href="/Group/Dashboard?groupId=@Model.GroupId" class="btn-back-arrow" style="color: var(--text-primary); text-decoration: none; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: background-color 0.2s;">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+    </a>
+    <h1 class="hero-title" style="font-size: 20px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">
+        @(Model.IsCreator ? "Editar Partido" : "Detalles de Partido") - @Model.GroupName
+    </h1>
+</div>
+
+@if (Model.State != "Pending")
+{
+    <!-- Banner de Partido Finalizado -->
+    <div class="card" style="border-color: var(--neon-green-glow); background: rgba(158, 255, 0, 0.02); margin-bottom: 20px; text-align: center; padding: 16px;">
+        <h2 style="color: var(--neon-green); font-size: 16px; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 1px;">Partido Finalizado</h2>
+        <div style="font-size: 28px; font-weight: 900; color: var(--text-primary); margin-bottom: 4px;">
+            @Model.State
+        </div>
+        <p style="color: var(--text-secondary); font-size: 13px; margin: 0;">Jugado el @Model.Date.ToString("dd/MM/yyyy HH:mm") hs</p>
+    </div>
+}
+
+<div style="display: grid; grid-template-columns: 1fr; gap: 20px; @(Model.IsCreator ? "" : "pointer-events: none; opacity: 0.85;")">
+    
+    <!-- CARD 1: Programación y Fecha -->
+    <div class="card">
+        <div class="card-header-flex">
+            <h2 class="card-title">Programación del Partido</h2>
+            <span class="card-subtitle-badge">FECHA</span>
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label">Fecha y Hora</label>
+            <input type="datetime-local" id="matchDateTime" class="form-control-neon" value="@Model.Date.ToString("yyyy-MM-ddTHH:mm")" @(Model.IsCreator && Model.State == "Pending" ? "" : "disabled") />
+        </div>
+    </div>
+
+    <!-- CARD 2: Convocados y Equipos -->
+    <div class="card active-neon">
+        <div class="card-header-flex">
+            <h2 class="card-title" style="color: var(--neon-green);">Equipos y Convocados</h2>
+            <span class="card-subtitle-badge" style="color: var(--neon-green);">BALANCEADO</span>
+        </div>
+
+        @if (Model.IsCreator && Model.State == "Pending")
+        {
+            <div style="margin-bottom: 16px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.04);">
+                <div style="font-size: 12px; font-weight: 800; color: var(--text-primary); text-transform: uppercase; margin-bottom: 8px;">Convocatoria de Jugadores</div>
+                <div id="membersCheckboxList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 4px;">
+                    <!-- Checkboxes generados por JS -->
+                </div>
+                <button type="button" id="btnRebalance" class="btn-outline-neon" style="margin-top: 12px; width: 100%; justify-content: center; padding: 10px;">
+                    🔄 Volver a Emparejar
+                </button>
+            </div>
+        }
+
+        <!-- Visualización de los equipos actuales -->
+        <div class="teams-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: var(--border-radius-md); border: 1px solid rgba(255,255,255,0.04);">
+            <div style="border-right: 1px solid rgba(255,255,255,0.06); padding-right: 8px;">
+                <div style="font-size: 12px; font-weight: 800; color: var(--neon-green); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                    <span>Equipo A</span>
+                    <span id="countTeamA" style="font-size: 10px; background: rgba(158, 255, 0, 0.1); padding: 2px 6px; border-radius: 4px;">0</span>
+                </div>
+                <div id="teamAList" style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--text-secondary);">
+                    <!-- JS list -->
+                </div>
+            </div>
+            <div style="padding-left: 8px;">
+                <div style="font-size: 12px; font-weight: 800; color: var(--neon-green); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                    <span>Equipo B</span>
+                    <span id="countTeamB" style="font-size: 10px; background: rgba(158, 255, 0, 0.1); padding: 2px 6px; border-radius: 4px;">0</span>
+                </div>
+                <div id="teamBList" style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--text-secondary);">
+                    <!-- JS list -->
+                </div>
+            </div>
+        </div>
+
+        @if (Model.IsCreator && Model.State == "Pending")
+        {
+            <button type="button" id="btnSaveChanges" class="btn-neon" style="margin-top: 16px; width: 100%; justify-content: center;">
+                💾 Guardar Cambios del Partido
+            </button>
+        }
+    </div>
+
+    @if (Model.IsCreator && Model.State == "Pending")
+    {
+        <!-- CARD 3: Finalizar Partido -->
+        <div class="card" style="border-color: rgba(255, 255, 255, 0.05);">
+            <div class="card-header-flex">
+                <h2 class="card-title">Cargar Resultado del Partido</h2>
+                <span class="card-subtitle-badge">FINALIZAR</span>
+            </div>
+
+            <form id="finishMatchForm" onsubmit="return false;" style="display: flex; flex-direction: column; gap: 16px;">
+                <!-- Ganador -->
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Resultado / Ganador</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                        <label class="form-label-neon-radio" style="display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid rgba(255,255,255,0.08); padding: 10px; border-radius: var(--border-radius-sm); cursor: pointer; text-align: center;">
+                            <input type="radio" name="matchWinner" value="A" checked style="accent-color: var(--neon-green-solid);" />
+                            <span>Ganó A</span>
+                        </label>
+                        <label class="form-label-neon-radio" style="display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid rgba(255,255,255,0.08); padding: 10px; border-radius: var(--border-radius-sm); cursor: pointer; text-align: center;">
+                            <input type="radio" name="matchWinner" value="Empate" style="accent-color: var(--neon-green-solid);" />
+                            <span>Empate</span>
+                        </label>
+                        <label class="form-label-neon-radio" style="display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid rgba(255,255,255,0.08); padding: 10px; border-radius: var(--border-radius-sm); cursor: pointer; text-align: center;">
+                            <input type="radio" name="matchWinner" value="B" style="accent-color: var(--neon-green-solid);" />
+                            <span>Ganó B</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Goal Difference -->
+                <div id="goalsAheadContainer" class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="display: flex; justify-content: space-between;">
+                        <span>Goles de Diferencia (Goles Arriba)</span>
+                        <span id="goalsAheadVal" style="color: var(--neon-green); font-weight: 800;">1</span>
+                    </label>
+                    <input type="range" id="goalsAhead" min="1" max="10" value="1" style="width: 100%; accent-color: var(--neon-green-solid);" />
+                </div>
+
+                <!-- Vista Previa del Marcador -->
+                <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.04); text-align: center;">
+                    <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Marcador Calculado</span>
+                    <div id="calculatedScore" style="font-size: 22px; font-weight: 900; color: var(--neon-green);">
+                        Equipo A 4 - 2 Equipo B
+                    </div>
+                    <span id="scoreWarning" style="color: #ff3838; font-size: 12px; display: none; margin-top: 4px; font-weight: 700;"></span>
+                </div>
+
+                <button type="submit" id="btnFinishMatch" class="btn-neon" style="margin-top: 10px; width: 100%; justify-content: center; background: linear-gradient(135deg, #ff9e00 0%, #ff6000 100%); border-color: #ff9e00; box-shadow: 0 0 10px rgba(255, 120, 0, 0.2);">
+                    🏁 Finalizar y Registrar Partido
+                </button>
+            </form>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/edit-match.js" asp-append-version="true"></script>
+}

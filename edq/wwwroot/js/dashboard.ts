@@ -118,6 +118,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     : `<div style="font-style: italic; color: var(--text-muted);">Sin jugadores</div>`;
 
                 upcomingMatchCard.style.display = "block";
+
+                upcomingMatchCard.style.cursor = "pointer";
+                upcomingMatchCard.onclick = () => {
+                    window.location.href = `/Match/Edit?matchId=${data.upcomingMatch?.id}`;
+                };
             } else {
                 if (upcomingMatchCard) upcomingMatchCard.style.display = "none";
             }

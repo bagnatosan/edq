@@ -82,6 +82,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Qcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/home/santiago/Documentos/GitHub/edq/edq/Views/Match/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTWF0Y2gvRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/home/santiago/Documentos/GitHub/edq/edq/Views/Match/Upcoming.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTWF0Y2gvVXBjb21pbmcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 

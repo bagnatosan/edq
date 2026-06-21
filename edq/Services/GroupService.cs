@@ -605,6 +605,12 @@ public class GroupService : IGroupService
 
         return group.Id;
     }
+
+    public async Task<bool> IsGroupCreatorAsync(int userId, int groupId)
+    {
+        var group = await _context.Groups.FindAsync(groupId);
+        return group != null && group.CreatorId == userId;
+    }
 }
 
 

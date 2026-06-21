@@ -370,7 +370,8 @@ public class GroupController : Controller
             return Forbid();
         }
 
-        return Json(data);
+        var isCreator = await _groupService.IsGroupCreatorAsync(userId, groupId);
+        return Json(new { isCreator = isCreator, matches = data });
     }
 
     // GET: /Group/AdminPanel

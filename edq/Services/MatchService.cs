@@ -69,4 +69,101 @@ public class MatchService : IMatchService
 
         return result;
     }
+
+    public async Task<MatchDetailsDto?> GetMatchDetailsAsync(int matchId, int userId)
+    {
+        var match = await _context.Matches
+            .Include(m => m.Group)
+            .Include(m => m.MatchPlayers)
+                .ThenInclude(mp => mp.Player)
+            .FirstOrDefaultAsync(m => m.Id == matchId);
+
+        if (match == null) return null;
+
+        // Validar acceso: el usuario debe ser creador o miembro del grupo
+        var isMember = await _context.GroupPlayers.AnyAsync(gp => gp.GroupId == match.GroupId && gp.PlayerId == userId)
+                       || match.Group?.CreatorId == userId;
+
+        if (!isMember) return null;
+
+        var isCreator = match.Group?.CreatorId == userId;
+
+        // Obtener todos los miembros del grupo para permitir agregar/sacar
+        var groupMembers = await _context.GroupPlayers
+            .Include(gp => gp.Player)
+            .Where(gp => gp.GroupId == match.GroupId)
+            .ToListAsync();
+
+        return new MatchDetailsDto
+        {
+            MatchId = match.Id,
+            GroupId = match.GroupId,
+            GroupName = match.Group?.Name ?? "Grupo Desconocido",
+            Date = match.Date,
+            State = match.State,
+            IsCreator = isCreator,
+            MatchPlayers = match.MatchPlayers.Select(mp => new MatchPlayerDetailsDto
+            {
+                PlayerId = mp.PlayerId,
+                Name = mp.Player != null ? $"{mp.Player.Name} {mp.Player.LastName}" : "Desconocido",
+                Nickname = mp.Player != null ? (string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Name : mp.Player.Nickname) : "Desconocido",
+                Team = mp.Team
+            }).ToList(),
+            GroupMembers = groupMembers.Select(gm => new GroupMemberDetailsDto
+            {
+                PlayerId = gm.PlayerId,
+                Name = gm.Player != null ? $"{gm.Player.Name} {gm.Player.LastName}" : "Desconocido",
+                Nickname = gm.Player != null ? (string.IsNullOrWhiteSpace(gm.Player.Nickname) ? gm.Player.Name : gm.Player.Nickname) : "Desconocido",
+                Score = gm.Score
+            }).ToList()
+        };
+    }
+
+    public async Task<bool> UpdateMatchPlayersAsync(int matchId, int userId, List<MatchPlayerUpdateDto> players, DateTime date)
+    {
+        var match = await _context.Matches
+            .Include(m => m.Group)
+            .Include(m => m.MatchPlayers)
+            .FirstOrDefaultAsync(m => m.Id == matchId);
+
+        if (match == null) return false;
+
+        // Solo el creador del grupo puede editar el partido
+        if (match.Group?.CreatorId != userId) return false;
+
+        // Actualizar fecha
+        match.Date = date;
+
+        // Actualizar jugadores
+        _context.MatchPlayers.RemoveRange(match.MatchPlayers);
+
+        foreach (var p in players)
+        {
+            _context.MatchPlayers.Add(new MatchPlayer
+            {
+                MatchId = matchId,
+                PlayerId = p.PlayerId,
+                Team = p.Team
+            });
+        }
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> FinishMatchAsync(int matchId, int userId, string scoreState)
+    {
+        var match = await _context.Matches
+            .Include(m => m.Group)
+            .FirstOrDefaultAsync(m => m.Id == matchId);
+
+        if (match == null) return false;
+
+        // Solo el creador del grupo puede finalizar el partido
+        if (match.Group?.CreatorId != userId) return false;
+
+        match.State = scoreState;
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }

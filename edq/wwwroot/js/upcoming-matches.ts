@@ -53,9 +53,9 @@ document.addEventListener("DOMContentLoaded", () => {
             matchCard.style.padding = "16px";
             matchCard.style.cursor = "pointer";
             
-            // Redirigir al dashboard del grupo al clickear el partido
+            // Redirigir al detalle del partido al clickear el partido
             matchCard.addEventListener("click", () => {
-                window.location.href = `/Group/Dashboard?groupId=${match.groupId}`;
+                window.location.href = `/Match/Edit?matchId=${match.matchId}`;
             });
 
             // Encabezado del partido (Nombre del Grupo y badge de Convocado)

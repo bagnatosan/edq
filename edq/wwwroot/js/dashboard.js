@@ -82,6 +82,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     ? data.upcomingMatch.team2.map(p => `<div>• ${escapeHtml(p)}</div>`).join("")
                     : `<div style="font-style: italic; color: var(--text-muted);">Sin jugadores</div>`;
                 upcomingMatchCard.style.display = "block";
+                upcomingMatchCard.style.cursor = "pointer";
+                upcomingMatchCard.onclick = () => {
+                    window.location.href = `/Match/Edit?matchId=${data.upcomingMatch.id}`;
+                };
             }
             else {
                 if (upcomingMatchCard)

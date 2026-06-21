@@ -18,5 +18,6 @@ public interface IGroupService
     Task<bool> UpdateGroupNameAsync(int userId, int groupId, string newName);
     Task<bool> RemoveMemberAsync(int userId, int groupId, int playerId);
     Task<int> CreateGroupAsync(int creatorId, string name);
+    Task<bool> IsGroupCreatorAsync(int userId, int groupId);
 }
 

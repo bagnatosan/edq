@@ -17,16 +17,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const groupId = parseInt(groupIdInput.value);
     if (isNaN(groupId)) return;
 
+    interface MatchHistoryResponse {
+        isCreator: boolean;
+        matches: MatchHistoryItem[];
+    }
+
     // Cargar historial de partidos por AJAX
     const loadMatchHistory = async (): Promise<void> => {
         try {
             const response = await fetch(`/Group/GetMatchHistoryData?groupId=${groupId}`);
             if (!response.ok) throw new Error("Error al obtener el historial de partidos.");
 
-            const data: MatchHistoryItem[] = await response.json();
+            const data: MatchHistoryResponse = await response.json();
 
             // Renderizar listado de partidos
-            renderHistoryList(data);
+            renderHistoryList(data.matches, data.isCreator);
 
         } catch (error) {
             console.error("Error cargando historial de partidos:", error);
@@ -35,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Renderizar la lista de partidos jugados
-    const renderHistoryList = (matches: MatchHistoryItem[]): void => {
+    const renderHistoryList = (matches: MatchHistoryItem[], isCreator: boolean): void => {
         if (!matchesHistoryList || !matchesCountBadge) return;
         matchesHistoryList.innerHTML = "";
 
@@ -93,6 +98,12 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
 
             matchCard.appendChild(teamsRow);
+
+            matchCard.style.cursor = "pointer";
+            matchCard.onclick = () => {
+                window.location.href = `/Match/Edit?matchId=${match.matchId}`;
+            };
+
             matchesHistoryList.appendChild(matchCard);
         });
     };

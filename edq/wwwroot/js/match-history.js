@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error("Error al obtener el historial de partidos.");
             const data = yield response.json();
             // Renderizar listado de partidos
-            renderHistoryList(data);
+            renderHistoryList(data.matches, data.isCreator);
         }
         catch (error) {
             console.error("Error cargando historial de partidos:", error);
@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     // Renderizar la lista de partidos jugados
-    const renderHistoryList = (matches) => {
+    const renderHistoryList = (matches, isCreator) => {
         if (!matchesHistoryList || !matchesCountBadge)
             return;
         matchesHistoryList.innerHTML = "";
@@ -84,6 +84,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `;
             matchCard.appendChild(teamsRow);
+            matchCard.style.cursor = "pointer";
+            matchCard.onclick = () => {
+                window.location.href = `/Match/Edit?matchId=${match.matchId}`;
+            };
             matchesHistoryList.appendChild(matchCard);
         });
     };
