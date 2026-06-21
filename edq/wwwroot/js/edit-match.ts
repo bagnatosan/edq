@@ -49,6 +49,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const scoreWarning = document.getElementById("scoreWarning") as HTMLSpanElement | null;
     const btnFinishMatch = document.getElementById("btnFinishMatch") as HTMLButtonElement | null;
 
+    // Nuevos elementos para la modalidad Goles Totales
+    const btnModeAhead = document.getElementById("btnModeAhead") as HTMLButtonElement | null;
+    const btnModeTotal = document.getElementById("btnModeTotal") as HTMLButtonElement | null;
+    const matchResultMode = document.getElementById("matchResultMode") as HTMLInputElement | null;
+    const totalGoalsContainer = document.getElementById("totalGoalsContainer") as HTMLDivElement | null;
+    const goalsTeamA = document.getElementById("goalsTeamA") as HTMLInputElement | null;
+    const goalsTeamAVal = document.getElementById("goalsTeamAVal") as HTMLSpanElement | null;
+    const goalsTeamB = document.getElementById("goalsTeamB") as HTMLInputElement | null;
+    const goalsTeamBVal = document.getElementById("goalsTeamBVal") as HTMLSpanElement | null;
+
     if (!matchIdInput || !groupIdInput || !isCreatorInput) return;
 
     const matchId = parseInt(matchIdInput.value);
@@ -269,50 +279,112 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Lógica para el Marcador en Tiempo Real
+    // Lógica para el Marcador en Tiempo Real y modalidad de carga
     const initResultCalculations = (): void => {
-        if (!goalsAhead || !calculatedScore || !scoreWarning || !btnFinishMatch) return;
+        if (!goalsAhead || !calculatedScore || !scoreWarning || !btnFinishMatch || !btnModeAhead || !btnModeTotal || !matchResultMode || !totalGoalsContainer || !goalsTeamA || !goalsTeamAVal || !goalsTeamB || !goalsTeamBVal) return;
+
+        // Cambiar a modalidad Goles Arriba
+        btnModeAhead.addEventListener("click", () => {
+            matchResultMode.value = "ahead";
+            btnModeAhead.style.background = "var(--neon-green-solid)";
+            btnModeAhead.style.color = "#090a0d";
+            btnModeTotal.style.background = "transparent";
+            btnModeTotal.style.color = "var(--neon-green)";
+            
+            if (goalsAheadContainer) goalsAheadContainer.style.display = "block";
+            if (totalGoalsContainer) totalGoalsContainer.style.display = "none";
+            updateScoreCalculation();
+        });
+
+        // Cambiar a modalidad Goles Totales
+        btnModeTotal.addEventListener("click", () => {
+            matchResultMode.value = "total";
+            btnModeTotal.style.background = "var(--neon-green-solid)";
+            btnModeTotal.style.color = "#090a0d";
+            btnModeAhead.style.background = "transparent";
+            btnModeAhead.style.color = "var(--neon-green)";
+            
+            if (goalsAheadContainer) goalsAheadContainer.style.display = "none";
+            if (totalGoalsContainer) totalGoalsContainer.style.display = "block";
+            updateScoreCalculation();
+        });
 
         const updateScoreCalculation = (): void => {
+            const mode = matchResultMode.value;
             const winnerInput = document.querySelector('input[name="matchWinner"]:checked') as HTMLInputElement | null;
             const winner = winnerInput ? winnerInput.value : "A";
-
-            // Si es empate, la diferencia no aplica
-            if (winner === "Empate") {
-                if (goalsAheadContainer) {
-                    goalsAheadContainer.style.opacity = "0.3";
-                    goalsAhead.disabled = true;
-                }
-                if (goalsAheadVal) goalsAheadVal.textContent = "-";
-                
-                scoreWarning.style.display = "none";
-                calculatedScore.textContent = `Equipo A 0 - 0 Equipo B`;
-                btnFinishMatch.disabled = false;
-                return;
-            }
-
-            // Si no es empate
-            if (goalsAheadContainer) {
-                goalsAheadContainer.style.opacity = "1";
-                goalsAhead.disabled = false;
-            }
-            const arriba = parseInt(goalsAhead.value) || 1;
-            if (goalsAheadVal) goalsAheadVal.textContent = arriba.toString();
 
             scoreWarning.style.display = "none";
             btnFinishMatch.disabled = false;
 
-            if (winner === "A") {
-                calculatedScore.textContent = `Equipo A ${arriba} - 0 Equipo B`;
+            if (mode === "ahead") {
+                if (goalsAheadContainer) {
+                    goalsAheadContainer.style.opacity = "1";
+                    goalsAhead.disabled = false;
+                }
+                
+                if (winner === "Empate") {
+                    if (goalsAheadContainer) {
+                        goalsAheadContainer.style.opacity = "0.3";
+                        goalsAhead.disabled = true;
+                    }
+                    if (goalsAheadVal) goalsAheadVal.textContent = "-";
+                    calculatedScore.textContent = `Equipo A 0 - 0 Equipo B`;
+                } else {
+                    const arriba = parseInt(goalsAhead.value) || 1;
+                    if (goalsAheadVal) goalsAheadVal.textContent = arriba.toString();
+
+                    if (winner === "A") {
+                        calculatedScore.textContent = `Equipo A ${arriba} - 0 Equipo B`;
+                    } else {
+                        calculatedScore.textContent = `Equipo A 0 - ${arriba} Equipo B`;
+                    }
+                }
             } else {
-                calculatedScore.textContent = `Equipo A 0 - ${arriba} Equipo B`;
+                const golesA = parseInt(goalsTeamA.value) || 0;
+                const golesB = parseInt(goalsTeamB.value) || 0;
+
+                if (goalsTeamAVal) goalsTeamAVal.textContent = golesA.toString();
+                if (goalsTeamBVal) goalsTeamBVal.textContent = golesB.toString();
+
+                calculatedScore.textContent = `Equipo A ${golesA} - ${golesB} Equipo B`;
+
+                // Sincronizar radio buttons del ganador
+                const radioA = document.querySelector('input[name="matchWinner"][value="A"]') as HTMLInputElement | null;
+                const radioB = document.querySelector('input[name="matchWinner"][value="B"]') as HTMLInputElement | null;
+                const radioEmpate = document.querySelector('input[name="matchWinner"][value="Empate"]') as HTMLInputElement | null;
+
+                if (golesA > golesB) {
+                    if (radioA) radioA.checked = true;
+                } else if (golesA < golesB) {
+                    if (radioB) radioB.checked = true;
+                } else {
+                    if (radioEmpate) radioEmpate.checked = true;
+                }
             }
         };
 
         goalsAhead.addEventListener("input", updateScoreCalculation);
+        goalsTeamA.addEventListener("input", updateScoreCalculation);
+        goalsTeamB.addEventListener("input", updateScoreCalculation);
         
         document.querySelectorAll('input[name="matchWinner"]').forEach(radio => {
-            radio.addEventListener("change", updateScoreCalculation);
+            radio.addEventListener("change", () => {
+                if (matchResultMode.value === "total") {
+                    const winner = (radio as HTMLInputElement).value;
+                    const golesA = parseInt(goalsTeamA.value) || 0;
+                    const golesB = parseInt(goalsTeamB.value) || 0;
+
+                    if (winner === "Empate") {
+                        goalsTeamB.value = golesA.toString();
+                    } else if (winner === "A" && golesA <= golesB) {
+                        goalsTeamA.value = (golesB + 1).toString();
+                    } else if (winner === "B" && golesB <= golesA) {
+                        goalsTeamB.value = (golesA + 1).toString();
+                    }
+                }
+                updateScoreCalculation();
+            });
         });
 
         // Ejecutar cálculo inicial
@@ -323,18 +395,32 @@ document.addEventListener("DOMContentLoaded", () => {
     if (finishMatchForm) {
         finishMatchForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            if (!goalsAhead || !btnFinishMatch) return;
+            if (!goalsAhead || !goalsTeamA || !goalsTeamB || !matchResultMode || !btnFinishMatch) return;
 
             const winnerInput = document.querySelector('input[name="matchWinner"]:checked') as HTMLInputElement | null;
             const winner = winnerInput ? winnerInput.value : "A";
+            const mode = matchResultMode.value;
 
             btnFinishMatch.disabled = true;
             btnFinishMatch.textContent = "Guardando resultado...";
 
+            let goalsAheadValNum = 0;
+            let totalGoalsValNum = 0;
+
+            if (mode === "ahead") {
+                goalsAheadValNum = winner === "Empate" ? 0 : parseInt(goalsAhead.value);
+                totalGoalsValNum = goalsAheadValNum;
+            } else {
+                const golesA = parseInt(goalsTeamA.value) || 0;
+                const golesB = parseInt(goalsTeamB.value) || 0;
+                totalGoalsValNum = golesA + golesB;
+                goalsAheadValNum = Math.abs(golesA - golesB);
+            }
+
             const payload = {
                 matchId: matchId,
-                totalGoals: winner === "Empate" ? 0 : parseInt(goalsAhead.value),
-                goalsAhead: winner === "Empate" ? 0 : parseInt(goalsAhead.value),
+                totalGoals: totalGoalsValNum,
+                goalsAhead: goalsAheadValNum,
                 winner: winner
             };
 

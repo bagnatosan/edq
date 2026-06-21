@@ -114,15 +114,21 @@ public class MatchController : Controller
 
         int score1 = 0;
         int score2 = 0;
-        if (request.Winner == "A")
+
+        if (request.Winner == "Empate")
         {
-            score1 = request.GoalsAhead;
-            score2 = 0;
+            score1 = request.TotalGoals / 2;
+            score2 = request.TotalGoals / 2;
+        }
+        else if (request.Winner == "A")
+        {
+            score1 = (request.TotalGoals + request.GoalsAhead) / 2;
+            score2 = request.TotalGoals - score1;
         }
         else if (request.Winner == "B")
         {
-            score1 = 0;
-            score2 = request.GoalsAhead;
+            score2 = (request.TotalGoals + request.GoalsAhead) / 2;
+            score1 = request.TotalGoals - score2;
         }
 
         var scoreState = $"{score1}-{score2}";

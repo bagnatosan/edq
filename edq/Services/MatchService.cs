@@ -86,7 +86,7 @@ public class MatchService : IMatchService
 
         if (!isMember) return null;
 
-        var isCreator = match.Group?.CreatorId == userId;
+        var isCreator = true; // Cualquier miembro del grupo tiene permisos de edición (equivalente a creador para la vista)
 
         // Obtener todos los miembros del grupo para permitir agregar/sacar
         var groupMembers = await _context.GroupPlayers
@@ -128,8 +128,10 @@ public class MatchService : IMatchService
 
         if (match == null) return false;
 
-        // Solo el creador del grupo puede editar el partido
-        if (match.Group?.CreatorId != userId) return false;
+        // Cualquier miembro del grupo puede editar el partido
+        var isMember = await _context.GroupPlayers.AnyAsync(gp => gp.GroupId == match.GroupId && gp.PlayerId == userId)
+                       || match.Group?.CreatorId == userId;
+        if (!isMember) return false;
 
         // Actualizar fecha
         match.Date = date;
@@ -159,8 +161,10 @@ public class MatchService : IMatchService
 
         if (match == null) return false;
 
-        // Solo el creador del grupo puede finalizar el partido
-        if (match.Group?.CreatorId != userId) return false;
+        // Cualquier miembro del grupo puede finalizar el partido
+        var isMember = await _context.GroupPlayers.AnyAsync(gp => gp.GroupId == match.GroupId && gp.PlayerId == userId)
+                       || match.Group?.CreatorId == userId;
+        if (!isMember) return false;
 
         match.State = scoreState;
         await _context.SaveChangesAsync();

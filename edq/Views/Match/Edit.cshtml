@@ -109,6 +109,20 @@
             </div>
 
             <form id="finishMatchForm" onsubmit="return false;" style="display: flex; flex-direction: column; gap: 16px;">
+                <!-- Modalidad de Marcador -->
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Modalidad de Marcador</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <button type="button" id="btnModeAhead" class="btn-outline-neon" style="justify-content: center; padding: 10px; font-size: 11px; font-weight: 800; text-transform: uppercase; background: var(--neon-green-solid); color: #090a0d;">
+                            Goles Arriba
+                        </button>
+                        <button type="button" id="btnModeTotal" class="btn-outline-neon" style="justify-content: center; padding: 10px; font-size: 11px; font-weight: 800; text-transform: uppercase; background: transparent; color: var(--neon-green);">
+                            Goles Totales
+                        </button>
+                    </div>
+                    <input type="hidden" id="matchResultMode" value="ahead" />
+                </div>
+
                 <!-- Ganador -->
                 <div class="form-group" style="margin-bottom: 0;">
                     <label class="form-label">Resultado / Ganador</label>
@@ -135,6 +149,26 @@
                         <span id="goalsAheadVal" style="color: var(--neon-green); font-weight: 800;">1</span>
                     </label>
                     <input type="range" id="goalsAhead" min="1" max="10" value="1" style="width: 100%; accent-color: var(--neon-green-solid);" />
+                </div>
+
+                <!-- Goles por Equipo (Modalidad Goles Totales, inicialmente oculto) -->
+                <div id="totalGoalsContainer" class="form-group" style="margin-bottom: 0; display: none;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div>
+                            <label class="form-label" style="display: flex; justify-content: space-between;">
+                                <span>Goles Equipo A</span>
+                                <span id="goalsTeamAVal" style="color: var(--neon-green); font-weight: 800;">2</span>
+                            </label>
+                            <input type="range" id="goalsTeamA" min="0" max="15" value="2" style="width: 100%; accent-color: var(--neon-green-solid);" />
+                        </div>
+                        <div>
+                            <label class="form-label" style="display: flex; justify-content: space-between;">
+                                <span>Goles Equipo B</span>
+                                <span id="goalsTeamBVal" style="color: var(--neon-green); font-weight: 800;">2</span>
+                            </label>
+                            <input type="range" id="goalsTeamB" min="0" max="15" value="2" style="width: 100%; accent-color: var(--neon-green-solid);" />
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Vista Previa del Marcador -->
