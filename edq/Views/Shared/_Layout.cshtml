@@ -22,14 +22,18 @@
                 <!-- Logotipo del Navbar cargado directamente -->
                 <img src="~/images/logo_navbar.svg" alt="edq." class="navbar-logo" />
             </div>
-            <div class="app-header-right">
-                <!-- Icono de Campana para notificaciones -->
-                <button class="header-icon-btn" aria-label="Notificaciones">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </button>
-            </div>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <div class="app-header-right">
+                    <!-- Icono de Campana para notificaciones -->
+                    <button class="header-icon-btn" aria-label="Notificaciones">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            }
+            
         </header>
 
         <!-- Contenedor principal scrollable para las vistas -->

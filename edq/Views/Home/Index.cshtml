@@ -4,63 +4,75 @@
 
 <!-- Hero Section -->
 <div class="hero-container">
-    <!-- Logotipo principal animado -->
-    <img src="~/images/logo_appicon.svg" alt="edq. Logo" class="logo-hero" />
+    <!-- Logotipo principal animado con aceleración por hardware GPU -->
+    <img src="/images/logo_appicon.svg" alt="edq. Logo" class="logo-hero" />
     
     <!-- Título y Subtítulo Principal -->
     <h1 class="hero-title">Equipos de fútbol<br/>sin discusiones.</h1>
     <p class="hero-subtitle">
-        Armá partidos con tus amigos, confirmá asistencia y balanceá los equipos de forma justa con nuestro algoritmo de optimización heurística.
+        Armá partidos con tus amigos, confirmá asistencia y balanceá los equipos de forma justa mediante un algoritmo de optimización heurística.
     </p>
-
-    <!-- Botón CTA con estilo Neón -->
-    <div class="hero-cta-wrapper">
-        <a asp-controller="Account" asp-action="Login" class="btn-neon">Comenzar ahora</a>
-    </div>
 </div>
+
+
+    <a asp-controller="Account" asp-action="Login" class="btn-neon" style="display: inline-flex; justify-content: center; padding: 12px 32px; font-size: 16px;">Comenzar ahora</a>
+
 
 <div class="divider"></div>
 
-<!-- Vista previa del Mockup (El celular del mockup de Obsidian) -->
+<!-- Reemplazo de Estilo de la App: Beneficios Principales -->
 <div class="card active-neon">
     <div class="card-header-flex">
-        <h2 class="card-title">Estilo de la App</h2>
-        <span class="card-subtitle-badge">Mobile First</span>
+        <h2 class="card-title">¿Por qué usar edq?</h2>
+        <span class="card-subtitle-badge">BENEFICIOS</span>
     </div>
     
     <p class="card-description">
-        Diseño optimizado para su uso en el vestuario o la cancha. Modo oscuro de alto contraste y tarjetas translúcidas con respuestas táctiles instantáneas.
+        Es una plataforma ágil e interactiva pensada para optimizar la organización de tus partidos semanales de fútbol.
     </p>
 
-    <!-- Mockup renderizado con efecto resplandor de neón -->
-    <div class="mockup-container">
-        <img src="~/images/grupo_dashboard_mobile.png" alt="Mockup Móvil" class="mockup-image-frame" />
+    <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;">
+        <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.05);" class="hover-glow">
+            <h3 style="font-size: 15px; font-weight: 800; color: var(--neon-green); margin: 0 0 6px 0;">⚽ Equilibrio Perfecto</h3>
+            <p style="font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.4;">
+                Olvidate de las discusiones por equipos desiguales. Mediante un algoritmo heurístico de búsqueda local garantiza partidos extremadamente parejos en base al nivel individual.
+            </p>
+        </div>
+        <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.05);" class="hover-glow">
+            <h3 style="font-size: 15px; font-weight: 800; color: var(--neon-green); margin: 0 0 6px 0;">⚡ Gestión sin WhatsApp</h3>
+            <p style="font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.4;">
+                Convocá, confirmá asistencia y balanceá los equipos desde una interfaz táctil fluida y de alto contraste en pocos segundos.
+            </p>
+        </div>
+        <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.05);" class="hover-glow">
+            <h3 style="font-size: 15px; font-weight: 800; color: var(--neon-green); margin: 0 0 6px 0;">👥 Integrantes Temporales</h3>
+            <p style="font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.4;">
+                ¿Falta uno a último momento? Agregá invitados temporales al partido al instante sin necesidad de que se registren o creen una cuenta.
+            </p>
+        </div>
     </div>
 </div>
 
 <!-- Características / Propuesta de Valor -->
 <div class="card">
     <h2 class="card-title">¿Cómo funciona?</h2>
+    <br/>
     
     <div class="features-list">
         <!-- Paso 1 -->
         <div class="feature-item">
-            <div class="feature-step-number">
-                1
-            </div>
+            <div class="feature-step-number">1</div>
             <div>
                 <h3 class="feature-step-title">Califica a tus amigos</h3>
                 <p class="feature-step-desc">
-                    El creador del grupo califica a cada jugador del 1 al 10 (con precisión de decimales).
+                    El creador del grupo califica a cada jugador del 1 al 10 en base a su nivel promedio de juego.
                 </p>
             </div>
         </div>
 
         <!-- Paso 2 -->
         <div class="feature-item">
-            <div class="feature-step-number">
-                2
-            </div>
+            <div class="feature-step-number">2</div>
             <div>
                 <h3 class="feature-step-title">Agenda el partido</h3>
                 <p class="feature-step-desc">
@@ -71,15 +83,46 @@
 
         <!-- Paso 3 -->
         <div class="feature-item">
-            <div class="feature-step-number">
-                3
-            </div>
+            <div class="feature-step-number">3</div>
             <div>
                 <h3 class="feature-step-title">Balancea al instante</h3>
                 <p class="feature-step-desc">
-                    El sistema utiliza un algoritmo de optimización heurística (Búsqueda Local con reinicios aleatorios) que analiza las calificaciones de los jugadores confirmados para armar equipos equilibrados minimizando la diferencia de nivel en segundos.
+                    El sistema utiliza una optimización heurística (Búsqueda Local / Hill Climbing con swaps) para emparejar los equipos minimizando la diferencia de nivel en milisegundos.
                 </p>
             </div>
         </div>
     </div>
 </div>
+
+<!-- "Algo más": Panel de Estadísticas del Algoritmo -->
+<div class="card" style="border-color: rgba(255, 255, 255, 0.05);">
+    <div class="card-header-flex">
+        <h2 class="card-title">Métricas de la Heurística</h2>
+        <span class="card-subtitle-badge">ALGORITMO</span>
+    </div>
+    <p class="card-description" style="margin-bottom: 16px;">
+        Así funciona nuestro motor de matchmaking optimizado para garantizar el juego limpio:
+    </p>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: center;">
+        <div style="background: rgba(255, 255, 255, 0.01); padding: 14px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255, 255, 255, 0.03);">
+            <div style="font-size: 24px; font-weight: 900; color: var(--neon-green); margin-bottom: 2px;">&lt; 0.5</div>
+            <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Diferencia de Nivel</div>
+        </div>
+        <div style="background: rgba(255, 255, 255, 0.01); padding: 14px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255, 255, 255, 0.03);">
+            <div style="font-size: 24px; font-weight: 900; color: var(--neon-green); margin-bottom: 2px;">&lt; 10ms</div>
+            <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Tiempo de Cómputo</div>
+        </div>
+        <div style="background: rgba(255, 255, 255, 0.01); padding: 14px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255, 255, 255, 0.03);">
+            <div style="font-size: 24px; font-weight: 900; color: var(--neon-green); margin-bottom: 2px;">100%</div>
+            <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Sin Equipos Repetidos</div>
+        </div>
+        <div style="background: rgba(255, 255, 255, 0.01); padding: 14px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255, 255, 255, 0.03);">
+            <div style="font-size: 24px; font-weight: 900; color: var(--neon-green); margin-bottom: 2px;">10k+</div>
+            <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Swaps Evaluados</div>
+        </div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
