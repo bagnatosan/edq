@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using edq.Models;
 
 namespace edq.Controllers;
 
@@ -472,7 +473,20 @@ public class GroupController : Controller
 
     public async Task<IActionResult> GenerateMatch([FromBody] BalanceMatchRequestDto request)
     {
-        await _matchmakingService.BalanceTeamsAsync(request.PlayerIds, request.GroupId);
+        var teamsBalanced = await _matchmakingService.BalanceTeamsAsync
+            (request.PlayerIds, request.GroupId);
+
+        var success = await _matchmakingService.CreateMatchAsync(request.GroupId, request.Date, request.PlayerIds, teamsBalanced);
+
+        if (success)
+        {
+            return Ok("Partido creado correctamente");
+        }
+
+        else
+        {
+            return BadRequest("No se pudo crear el partido");
+        }
     }
 }
 

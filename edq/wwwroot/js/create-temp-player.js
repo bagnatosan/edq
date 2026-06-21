@@ -89,9 +89,11 @@ document.addEventListener("DOMContentLoaded", () => {
             tempPlayerScore.value = "6";
             if (tempPlayerScoreVal)
                 tempPlayerScoreVal.textContent = "6";
-            setTimeout(() => {
-                window.location.href = `/Group/AdminPanel?groupId=${groupId}`;
-            }, 1500);
+            // Habilitar botón para poder crear otro
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "➕ Crear e Integrar al Grupo";
+            }
         }
         catch (error) {
             console.error("Error creando jugador temporal:", error);

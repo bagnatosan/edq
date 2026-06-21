@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
             matchmakingLoadingCard.style.transform = "scale(1)";
             // Animación de barra de progreso simulada
             let currentProgress = 0;
-            const progressSpeed = 30; // 30ms por tick
+            const progressSpeed = 60; // 60ms por tick
             const targetSimulatedProgress = 95;
             const progressInterval = setInterval(() => {
                 if (currentProgress < targetSimulatedProgress) {
@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }, progressSpeed);
             try {
                 // Realizar llamada al backend para balancear y crear el partido
-                const response = yield fetch(`/Group/BalanceAndCreateMatch`, {
+                const response = yield fetch(`/Group/GenerateMatch`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -161,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     },
                     body: JSON.stringify({
                         groupId: groupId,
-                        dateTime: matchDateTime.value,
+                        date: matchDateTime.value,
                         playerIds: selectedIds
                     })
                 });

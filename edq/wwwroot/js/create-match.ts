@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Animación de barra de progreso simulada
             let currentProgress = 0;
-            const progressSpeed = 30; // 30ms por tick
+            const progressSpeed = 60; // 60ms por tick (duplica la duración de la animación)
             const targetSimulatedProgress = 95;
             
             const progressInterval = setInterval(() => {
@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             try {
                 // Realizar llamada al backend para balancear y crear el partido
-                const response = await fetch(`/Group/BalanceAndCreateMatch`, {
+                const response = await fetch(`/Group/GenerateMatch`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -189,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     },
                     body: JSON.stringify({
                         groupId: groupId,
-                        dateTime: matchDateTime.value,
+                        date: matchDateTime.value,
                         playerIds: selectedIds
                     })
                 });
