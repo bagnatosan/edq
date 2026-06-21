@@ -100,6 +100,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 avatarContent = `<span class="avatar-initials" style="font-size: 13px;">${escapeHtml(member.initials)}</span>`;
             }
 
+            const hasNickname = member.nickname && member.nickname !== member.name;
+            const nicknameHtml = hasNickname ? `
+                        <div style="font-size: 11px; color: var(--text-secondary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                            @${escapeHtml(member.nickname)}
+                        </div>
+            ` : '';
+
             row.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
                     <div class="avatar-container" style="width: 38px; height: 38px; margin-bottom: 0; flex-shrink: 0;">
@@ -109,9 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
                             ${escapeHtml(member.name)}
                         </div>
-                        <div style="font-size: 11px; color: var(--text-secondary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
-                            @${escapeHtml(member.nickname)}
-                        </div>
+                        ${nicknameHtml}
                     </div>
                 </div>
                 

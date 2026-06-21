@@ -199,6 +199,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 avatarContent = `<span class="avatar-initials">${escapeHtml(req.initials)}</span>`;
             }
 
+            const hasNickname = req.nickname && req.nickname !== req.name;
+            const nicknameHtml = hasNickname ? `
+                        <span class="request-nickname">@${escapeHtml(req.nickname)}</span>
+            ` : '';
+
             requestItem.innerHTML = `
                 <div class="request-user-info">
                     <div class="avatar-container" style="width: 40px; height: 40px; margin-bottom: 0; flex-shrink: 0;">
@@ -206,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                     <div class="request-details">
                         <span class="request-name">${escapeHtml(req.name)}</span>
-                        <span class="request-nickname">@${escapeHtml(req.nickname)}</span>
+                        ${nicknameHtml}
                     </div>
                 </div>
                 <div class="request-actions">
@@ -300,6 +305,13 @@ document.addEventListener("DOMContentLoaded", () => {
             else if (position === 2) positionSymbol = "🥈";
             else if (position === 3) positionSymbol = "🥉";
 
+            const hasNickname = member.nickname && member.nickname !== member.name;
+            const nicknameHtml = hasNickname ? `
+                        <div class="ranking-nickname">
+                            @${escapeHtml(member.nickname)}
+                        </div>
+            ` : '';
+
             rankingItem.innerHTML = `
                 <div class="ranking-player-info">
                     <span class="ranking-position">${positionSymbol}</span>
@@ -310,9 +322,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="ranking-name" style="display: flex; align-items: center; gap: 6px;">
                             ${escapeHtml(member.name)}
                         </div>
-                        <div class="ranking-nickname">
-                            @${escapeHtml(member.nickname)}
-                        </div>
+                        ${nicknameHtml}
                     </div>
                 </div>
                 <div class="ranking-winrate-pill">

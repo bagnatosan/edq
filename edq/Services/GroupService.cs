@@ -34,7 +34,7 @@ public class GroupService : IGroupService
         {
             Id = g.Id,
             Name = g.Name,
-            CreatorName = g.Creator != null ? (g.Creator.Nickname ?? $"{g.Creator.Name} {g.Creator.LastName}") : "Desconocido",
+            CreatorName = g.Creator != null ? $"{g.Creator.Name} {g.Creator.LastName}" : "Desconocido",
             MemberCount = g.GroupPlayers.Count,
             IsCreator = g.CreatorId == userId,
             IsMember = true,
@@ -70,7 +70,7 @@ public class GroupService : IGroupService
         {
             Id = g.Id,
             Name = g.Name,
-            CreatorName = g.Creator != null ? (g.Creator.Nickname ?? $"{g.Creator.Name} {g.Creator.LastName}") : "Desconocido",
+            CreatorName = g.Creator != null ? $"{g.Creator.Name} {g.Creator.LastName}" : "Desconocido",
             MemberCount = g.GroupPlayers.Count,
             IsCreator = false,
             IsMember = false,
@@ -268,7 +268,7 @@ public class GroupService : IGroupService
             {
                 Id = gp.PlayerId,
                 Name = $"{gp.Player!.Name} {gp.Player.LastName}",
-                Nickname = gp.Player.Nickname ?? gp.Player.Name,
+                Nickname = !string.IsNullOrWhiteSpace(gp.Player.Nickname) ? gp.Player.Nickname : $"{gp.Player.Name} {gp.Player.LastName}",
                 PhotoUrl = gp.Player.PhotoUrl,
                 Initials = gp.Player.Initials,
                 Score = gp.Score,
@@ -292,7 +292,7 @@ public class GroupService : IGroupService
                     RequestId = r.Id,
                     PlayerId = r.PlayerId,
                     Name = $"{r.Player!.Name} {r.Player.LastName}",
-                    Nickname = r.Player.Nickname ?? r.Player.Name,
+                    Nickname = !string.IsNullOrWhiteSpace(r.Player.Nickname) ? r.Player.Nickname : $"{r.Player.Name} {r.Player.LastName}",
                     PhotoUrl = r.Player.PhotoUrl,
                     Initials = r.Player.Initials
                 })
@@ -316,11 +316,11 @@ public class GroupService : IGroupService
                 .ToList();
 
             var team1 = teams.Count > 0 
-                ? teams[0].Select(mp => mp.Player != null ? (mp.Player.Nickname ?? mp.Player.Name) : "Desconocido").ToList() 
+                ? teams[0].Select(mp => mp.Player != null ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : $"{mp.Player.Name} {mp.Player.LastName}") : "Desconocido").ToList() 
                 : new List<string>();
 
             var team2 = teams.Count > 1 
-                ? teams[1].Select(mp => mp.Player != null ? (mp.Player.Nickname ?? mp.Player.Name) : "Desconocido").ToList() 
+                ? teams[1].Select(mp => mp.Player != null ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : $"{mp.Player.Name} {mp.Player.LastName}") : "Desconocido").ToList() 
                 : new List<string>();
 
             upcomingMatchDto = new UpcomingMatchDto
@@ -489,11 +489,11 @@ public class GroupService : IGroupService
                 .ToList();
 
             var team1 = teams.Count > 0 
-                ? teams[0].Select(mp => mp.Player != null ? (mp.Player.Nickname ?? mp.Player.Name) : "Desconocido").ToList() 
+                ? teams[0].Select(mp => mp.Player != null ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : $"{mp.Player.Name} {mp.Player.LastName}") : "Desconocido").ToList() 
                 : new List<string>();
 
             var team2 = teams.Count > 1 
-                ? teams[1].Select(mp => mp.Player != null ? (mp.Player.Nickname ?? mp.Player.Name) : "Desconocido").ToList() 
+                ? teams[1].Select(mp => mp.Player != null ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : $"{mp.Player.Name} {mp.Player.LastName}") : "Desconocido").ToList() 
                 : new List<string>();
 
             return new MatchHistoryDto

@@ -84,7 +84,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 upcomingMatchCard.style.display = "block";
                 upcomingMatchCard.style.cursor = "pointer";
                 upcomingMatchCard.onclick = () => {
-                    window.location.href = `/Match/Edit?matchId=${data.upcomingMatch.id}`;
+                    var _a;
+                    window.location.href = `/Match/Edit?matchId=${(_a = data.upcomingMatch) === null || _a === void 0 ? void 0 : _a.id}`;
                 };
             }
             else {
@@ -155,6 +156,10 @@ document.addEventListener("DOMContentLoaded", () => {
             else {
                 avatarContent = `<span class="avatar-initials">${escapeHtml(req.initials)}</span>`;
             }
+            const hasNickname = req.nickname && req.nickname !== req.name;
+            const nicknameHtml = hasNickname ? `
+                        <span class="request-nickname">@${escapeHtml(req.nickname)}</span>
+            ` : '';
             requestItem.innerHTML = `
                 <div class="request-user-info">
                     <div class="avatar-container" style="width: 40px; height: 40px; margin-bottom: 0; flex-shrink: 0;">
@@ -162,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                     <div class="request-details">
                         <span class="request-name">${escapeHtml(req.name)}</span>
-                        <span class="request-nickname">@${escapeHtml(req.nickname)}</span>
+                        ${nicknameHtml}
                     </div>
                 </div>
                 <div class="request-actions">
@@ -245,6 +250,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 positionSymbol = "🥈";
             else if (position === 3)
                 positionSymbol = "🥉";
+            const hasNickname = member.nickname && member.nickname !== member.name;
+            const nicknameHtml = hasNickname ? `
+                        <div class="ranking-nickname">
+                            @${escapeHtml(member.nickname)}
+                        </div>
+            ` : '';
             rankingItem.innerHTML = `
                 <div class="ranking-player-info">
                     <span class="ranking-position">${positionSymbol}</span>
@@ -255,9 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="ranking-name" style="display: flex; align-items: center; gap: 6px;">
                             ${escapeHtml(member.name)}
                         </div>
-                        <div class="ranking-nickname">
-                            @${escapeHtml(member.nickname)}
-                        </div>
+                        ${nicknameHtml}
                     </div>
                 </div>
                 <div class="ranking-winrate-pill">

@@ -49,11 +49,11 @@ public class MatchService : IMatchService
                 .ToList();
 
             var team1 = teams.Count > 0
-                ? teams[0].Select(mp => mp.Player != null ? (mp.Player.Nickname ?? mp.Player.Name) : "Desconocido").ToList()
+                ? teams[0].Select(mp => mp.Player != null ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : $"{mp.Player.Name} {mp.Player.LastName}") : "Desconocido").ToList()
                 : new List<string>();
 
             var team2 = teams.Count > 1
-                ? teams[1].Select(mp => mp.Player != null ? (mp.Player.Nickname ?? mp.Player.Name) : "Desconocido").ToList()
+                ? teams[1].Select(mp => mp.Player != null ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : $"{mp.Player.Name} {mp.Player.LastName}") : "Desconocido").ToList()
                 : new List<string>();
 
             return new UserUpcomingMatchDto
@@ -106,14 +106,14 @@ public class MatchService : IMatchService
             {
                 PlayerId = mp.PlayerId,
                 Name = mp.Player != null ? $"{mp.Player.Name} {mp.Player.LastName}" : "Desconocido",
-                Nickname = mp.Player != null ? (string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Name : mp.Player.Nickname) : "Desconocido",
+                Nickname = mp.Player != null ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : $"{mp.Player.Name} {mp.Player.LastName}") : "Desconocido",
                 Team = mp.Team
             }).ToList(),
             GroupMembers = groupMembers.Select(gm => new GroupMemberDetailsDto
             {
                 PlayerId = gm.PlayerId,
                 Name = gm.Player != null ? $"{gm.Player.Name} {gm.Player.LastName}" : "Desconocido",
-                Nickname = gm.Player != null ? (string.IsNullOrWhiteSpace(gm.Player.Nickname) ? gm.Player.Name : gm.Player.Nickname) : "Desconocido",
+                Nickname = gm.Player != null ? (!string.IsNullOrWhiteSpace(gm.Player.Nickname) ? gm.Player.Nickname : $"{gm.Player.Name} {gm.Player.LastName}") : "Desconocido",
                 Score = gm.Score
             }).ToList()
         };

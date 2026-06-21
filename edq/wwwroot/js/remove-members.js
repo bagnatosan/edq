@@ -138,6 +138,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     </button>
                 `;
             }
+            const hasNickname = member.nickname && member.nickname !== member.name;
+            const nicknameHtml = hasNickname ? `
+                        <span class="request-nickname">@${escapeHtml(member.nickname)}</span>
+            ` : '';
             row.innerHTML = `
                 <div class="request-user-info">
                     <div class="avatar-container" style="width: 38px; height: 38px; margin-bottom: 0; flex-shrink: 0;">
@@ -145,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                     <div class="request-details">
                         <span class="request-name">${escapeHtml(member.name)}</span>
-                        <span class="request-nickname">@${escapeHtml(member.nickname)}</span>
+                        ${nicknameHtml}
                     </div>
                 </div>
                 <div class="request-actions">
