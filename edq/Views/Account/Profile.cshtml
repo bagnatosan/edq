@@ -55,13 +55,27 @@
             </svg>
         </button>
 
+        <!-- Ajustes de notificaciones -->
+        <button class="profile-option-item" id="btnConfigurarNotificaciones" style="display: none;">
+            <div class="option-left">
+                <svg class="option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                <span>Ajustes de notificaciones</span>
+            </div>
+            <svg class="option-arrow" viewBox="0 0 24 24">
+                <polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+        </button>
+
         <!-- Administrar notificaciones -->
         <div class="profile-option-item option-non-clickable">
             <div class="option-left">
                 <svg class="option-icon" viewBox="0 0 24 24">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-linejoin="round" fill="none"/>
                 </svg>
-                <span>Administrar notificaciones</span>
+                <span>Activar notificaciones</span>
             </div>
             <!-- Switch Toggle Switch Premium -->
             <label class="switch-premium">
@@ -100,6 +114,57 @@
         <div class="modal-actions">
             <button class="btn-modal-cancel" id="btnCancelApodo">Cancelar</button>
             <button class="btn-modal-save" id="btnSaveApodo">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Configuración de Notificaciones -->
+<div class="modal-backdrop" id="modalConfigNotificacionesBackdrop">
+    <div class="modal-card">
+        <h3 class="modal-card-title">Configuración de Notificaciones</h3>
+        <p class="modal-card-desc">Elegí qué notificaciones querés recibir en tu dispositivo.</p>
+        
+        <div class="notification-settings-list">
+            <!-- Creación de partidos -->
+            <div class="notification-setting-row">
+                <div class="setting-info">
+                    <span class="setting-title">Creación de partidos</span>
+                    <span class="setting-desc">Notificar cuando se crea un partido y estoy convocado.</span>
+                </div>
+                <label class="switch-premium">
+                    <input type="checkbox" id="chkNotifyMatchCreation" @(Model.NotifyMatchCreation ? "checked" : "") />
+                    <span class="switch-slider"></span>
+                </label>
+            </div>
+            
+            <!-- Modificación de partidos -->
+            <div class="notification-setting-row">
+                <div class="setting-info">
+                    <span class="setting-title">Modificación de partidos</span>
+                    <span class="setting-desc">Notificar cuando cambie un partido en el que estoy convocado.</span>
+                </div>
+                <label class="switch-premium">
+                    <input type="checkbox" id="chkNotifyMatchModification" @(Model.NotifyMatchModification ? "checked" : "") />
+                    <span class="switch-slider"></span>
+                </label>
+            </div>
+            
+            <!-- Chat y Encuestas -->
+            <div class="notification-setting-row">
+                <div class="setting-info">
+                    <span class="setting-title">Chat y Encuestas</span>
+                    <span class="setting-desc">Notificar mensajes nuevos y encuestas creadas en los grupos.</span>
+                </div>
+                <label class="switch-premium">
+                    <input type="checkbox" id="chkNotifyChat" @(Model.NotifyChat ? "checked" : "") />
+                    <span class="switch-slider"></span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="modal-actions" style="margin-top: 24px;">
+            <button class="btn-modal-cancel" id="btnCancelConfigNotificaciones">Cancelar</button>
+            <button class="btn-modal-save" id="btnSaveConfigNotificaciones">Guardar</button>
         </div>
     </div>
 </div>

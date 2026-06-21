@@ -95,7 +95,7 @@ public class PushNotificationService : IPushNotificationService
         }
     }
 
-    public async Task SendNotificationToGroupAsync(int groupId, string title, string body, string url, int excludePlayerId = 0)
+    public async Task SendNotificationToGroupAsync(int groupId, string title, string body, string url, int excludePlayerId = 0, NotificationType type = NotificationType.Default)
     {
         var memberIds = await _context.GroupPlayers.AsNoTracking()
             .Where(gp => gp.GroupId == groupId)
@@ -115,16 +115,111 @@ public class PushNotificationService : IPushNotificationService
 
         if (memberIds.Count == 0) return;
 
+        List<int> filteredMemberIds;
+        switch (type)
+        {
+            case NotificationType.MatchCreation:
+                filteredMemberIds = await _context.Players.AsNoTracking()
+                    .Where(p => memberIds.Contains(p.Id) && p.NotifyMatchCreation)
+                    .Select(p => p.Id)
+                    .ToListAsync();
+                break;
+            case NotificationType.MatchModification:
+                filteredMemberIds = await _context.Players.AsNoTracking()
+                    .Where(p => memberIds.Contains(p.Id) && p.NotifyMatchModification)
+                    .Select(p => p.Id)
+                    .ToListAsync();
+                break;
+            case NotificationType.Chat:
+                filteredMemberIds = await _context.Players.AsNoTracking()
+                    .Where(p => memberIds.Contains(p.Id) && p.NotifyChat)
+                    .Select(p => p.Id)
+                    .ToListAsync();
+                break;
+            default:
+                filteredMemberIds = memberIds;
+                break;
+        }
+
+        if (filteredMemberIds.Count == 0) return;
+
         var subscriptions = await _context.PushSubscriptions.AsNoTracking()
-            .Where(s => memberIds.Contains(s.PlayerId))
+            .Where(s => filteredMemberIds.Contains(s.PlayerId))
             .ToListAsync();
 
         var groupName = group?.Name ?? "Grupo";
         var finalTitle = $"[{groupName}] {title}";
+        var finalBody = body.Replace("{groupName}", groupName);
 
         foreach (var sub in subscriptions)
         {
-            _ = SendNotificationAsync(sub, finalTitle, body, url);
+            _ = SendNotificationAsync(sub, finalTitle, finalBody, url);
+        }
+    }
+
+    public async Task SendMatchCreationNotificationAsync(int creatorId, int groupId, System.Collections.Generic.List<int> convocadoPlayerIds, System.DateTime date)
+    {
+        var creator = await _context.Players.AsNoTracking().FirstOrDefaultAsync(p => p.Id == creatorId);
+        var creatorName = creator != null ? (!string.IsNullOrWhiteSpace(creator.Nickname) ? creator.Nickname : $"{creator.Name} {creator.LastName}") : "Un administrador";
+        
+        var group = await _context.Groups.AsNoTracking().FirstOrDefaultAsync(g => g.Id == groupId);
+        var groupName = group?.Name ?? "Grupo";
+
+        var targets = await _context.Players.AsNoTracking()
+            .Where(p => convocadoPlayerIds.Contains(p.Id) && p.Id != creatorId && p.NotifyMatchCreation)
+            .Select(p => p.Id)
+            .ToListAsync();
+
+        if (targets.Count == 0) return;
+
+        var subscriptions = await _context.PushSubscriptions.AsNoTracking()
+            .Where(s => targets.Contains(s.PlayerId))
+            .ToListAsync();
+
+        var title = $"[{groupName}] ⚽ Convocatoria";
+        var body = $"{creatorName} creó un partido el día {date.ToLocalTime():dd/MM/yyyy} y estás convocado.";
+        var url = "/Match/Upcoming";
+
+        foreach (var sub in subscriptions)
+        {
+            _ = SendNotificationAsync(sub, title, body, url);
+        }
+    }
+
+    public async Task SendMatchModificationNotificationAsync(int modifierId, int matchId)
+    {
+        var match = await _context.Matches.AsNoTracking()
+            .Include(m => m.MatchPlayers)
+            .FirstOrDefaultAsync(m => m.Id == matchId);
+
+        if (match == null) return;
+
+        var group = await _context.Groups.AsNoTracking().FirstOrDefaultAsync(g => g.Id == match.GroupId);
+        var groupName = group?.Name ?? "Grupo";
+
+        var modifier = await _context.Players.AsNoTracking().FirstOrDefaultAsync(p => p.Id == modifierId);
+        var modifierName = modifier != null ? (!string.IsNullOrWhiteSpace(modifier.Nickname) ? modifier.Nickname : $"{modifier.Name} {modifier.LastName}") : "Un administrador";
+
+        var convocadoPlayerIds = match.MatchPlayers.Select(mp => mp.PlayerId).ToList();
+
+        var targets = await _context.Players.AsNoTracking()
+            .Where(p => convocadoPlayerIds.Contains(p.Id) && p.Id != modifierId && p.NotifyMatchModification)
+            .Select(p => p.Id)
+            .ToListAsync();
+
+        if (targets.Count == 0) return;
+
+        var subscriptions = await _context.PushSubscriptions.AsNoTracking()
+            .Where(s => targets.Contains(s.PlayerId))
+            .ToListAsync();
+
+        var title = $"[{groupName}] 🔄 Partido modificado";
+        var body = $"{modifierName} modificó el partido del día {match.Date.ToLocalTime():dd/MM/yyyy}.";
+        var url = "/Match/Upcoming";
+
+        foreach (var sub in subscriptions)
+        {
+            _ = SendNotificationAsync(sub, title, body, url);
         }
     }
 

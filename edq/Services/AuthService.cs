@@ -124,4 +124,20 @@ public class AuthService : IAuthService
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<bool> UpdatePlayerNotificationSettingsAsync(int id, bool creation, bool modification, bool chat)
+    {
+        var player = await _context.Players.FirstOrDefaultAsync(p => p.Id == id);
+        if (player == null)
+        {
+            return false;
+        }
+
+        player.NotifyMatchCreation = creation;
+        player.NotifyMatchModification = modification;
+        player.NotifyChat = chat;
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }

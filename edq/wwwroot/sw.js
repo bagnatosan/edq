@@ -86,6 +86,20 @@ self.addEventListener('push', event => {
     }
   };
 
+  // Enviar mensaje a todas las pestañas abiertas para actualizar la campana en tiempo real
+  if (self.clients) {
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'PUSH_RECEIVED',
+          title: data.title,
+          body: data.body,
+          url: data.url || '/'
+        });
+      });
+    });
+  }
+
   event.waitUntil(
     self.registration.showNotification(data.title, options)
   );

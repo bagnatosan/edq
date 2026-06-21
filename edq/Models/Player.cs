@@ -26,6 +26,10 @@ public class Player
     [Required]
     public string Password { get; set; } = string.Empty;
 
+    public bool NotifyMatchCreation { get; set; } = true;
+    public bool NotifyMatchModification { get; set; } = true;
+    public bool NotifyChat { get; set; } = true;
+
     // Iniciales calculadas al vuelo (no guardadas en base de datos)
     [System.ComponentModel.DataAnnotations.Schema.NotMapped]
     public string Initials => 

@@ -11,4 +11,5 @@ public interface IAuthService
     Task<Player?> GetPlayerByIdAsync(int id);
     Task<bool> UpdatePlayerNicknameAsync(int id, string nickname);
     Task<bool> UpdatePlayerPhotoAsync(int id, string photoUrl);
+    Task<bool> UpdatePlayerNotificationSettingsAsync(int id, bool creation, bool modification, bool chat);
 }

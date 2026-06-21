@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace edq.Controllers;
 
 [Authorize]
+[Route("Push/[action]")]
 public class PushSubscriptionController : Controller
 {
     private readonly IPushNotificationService _pushService;
@@ -18,6 +19,7 @@ public class PushSubscriptionController : Controller
 
     // GET: /Push/PublicKey
     [HttpGet]
+    [AllowAnonymous]
     public IActionResult PublicKey()
     {
         var key = _pushService.GetVapidPublicKey();

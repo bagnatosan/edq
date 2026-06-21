@@ -1,5 +1,6 @@
 using edq.Data;
 using edq.Models;
+using edq.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +14,12 @@ namespace edq.Hubs;
 public class ChatHub : Hub
 {
     private readonly ApplicationDbContext _context;
+    private readonly IPushNotificationService _pushService;
 
-    public ChatHub(ApplicationDbContext context)
+    public ChatHub(ApplicationDbContext context, IPushNotificationService pushService)
     {
         _context = context;
+        _pushService = pushService;
     }
 
     public async Task JoinGroupChat(int groupId)
@@ -83,5 +86,15 @@ public class ChatHub : Hub
             messageText = msg.MessageText,
             sentAt = msg.SentAt.ToString("o")
         });
+
+        // Enviar notificación Push en segundo plano
+        _ = _pushService.SendNotificationToGroupAsync(
+            groupId,
+            "💬 Nuevo mensaje",
+            "Se escribió en el chat del grupo {groupName}.",
+            $"/Group/Chat?groupId={groupId}",
+            userId,
+            NotificationType.Chat
+        );
     }
 }

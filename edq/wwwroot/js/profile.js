@@ -32,6 +32,23 @@ document.addEventListener("DOMContentLoaded", () => {
         return outputArray;
     }
 
+    // Helper: Show styled toast notifications
+    const showToast = (message, isError = false) => {
+        const toast = document.createElement("div");
+        toast.className = `toast-notification ${isError ? 'toast-error' : 'toast-success'}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        // Trigger reflow
+        toast.offsetHeight;
+        toast.classList.add("show");
+        
+        setTimeout(() => {
+            toast.classList.remove("show");
+            setTimeout(() => toast.remove(), 400);
+        }, 3000);
+    };
+
     // ==========================================
     // 1. GESTIÓN DE FOTO DE PERFIL
     // ==========================================
@@ -145,6 +162,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // 3. ADMINISTRAR NOTIFICACIONES PUSH
     // ==========================================
     if (switchNotifications) {
+        const updateSettingsButtonVisibility = (active) => {
+            const btn = document.getElementById("btnConfigurarNotificaciones");
+            if (btn) {
+                btn.style.display = active ? "flex" : "none";
+            }
+        };
+
         const setupPushSwitch = async () => {
             if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
                 switchNotifications.disabled = true;
@@ -159,6 +183,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const reg = await navigator.serviceWorker.ready;
                 const subscription = await reg.pushManager.getSubscription();
                 switchNotifications.checked = !!subscription;
+                updateSettingsButtonVisibility(!!subscription);
 
                 switchNotifications.addEventListener("change", async () => {
                     var _a, _b;
@@ -170,6 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (permission !== 'granted') {
                             alert("Permiso de notificaciones denegado. Habilitalo en los ajustes del navegador.");
                             switchNotifications.checked = false;
+                            updateSettingsButtonVisibility(false);
                             return;
                         }
 
@@ -178,11 +204,13 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (!keyResponse.ok) {
                             alert("No se pudo obtener la clave del servidor push.");
                             switchNotifications.checked = false;
+                            updateSettingsButtonVisibility(false);
                             return;
                         }
                         const vapidKey = await keyResponse.text();
                         if (!vapidKey) {
                             switchNotifications.checked = false;
+                            updateSettingsButtonVisibility(false);
                             return;
                         }
 
@@ -218,6 +246,8 @@ document.addEventListener("DOMContentLoaded", () => {
                             if (!regResponse.ok) {
                                 throw new Error("El servidor rechazó el registro de la suscripción.");
                             }
+
+                            updateSettingsButtonVisibility(true);
                         } catch (subErr) {
                             console.error("Error al suscribirse:", subErr);
                             // Deshacer local
@@ -226,6 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 await currentSub.unsubscribe();
                             }
                             switchNotifications.checked = false;
+                            updateSettingsButtonVisibility(false);
                             alert("Error al activar las notificaciones push en el servidor.");
                         }
                     } else {
@@ -248,11 +279,13 @@ document.addEventListener("DOMContentLoaded", () => {
                                 // Desuscribir en el navegador
                                 await sub.unsubscribe();
                             }
+                            updateSettingsButtonVisibility(false);
                         } catch (unsubErr) {
                             console.error("Error al desuscribirse:", unsubErr);
                             alert("Ocurrió un error al desactivar las notificaciones push.");
                             // Revertir estado switch
                             switchNotifications.checked = true;
+                            updateSettingsButtonVisibility(true);
                         }
                     }
                 });
@@ -263,5 +296,65 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         setupPushSwitch();
+    }
+
+    // ==========================================
+    // 4. CONFIGURACIÓN DE PREFERENCIAS DE NOTIFICACIÓN
+    // ==========================================
+    const btnConfigurarNotificaciones = document.getElementById("btnConfigurarNotificaciones");
+    const modalConfigNotificacionesBackdrop = document.getElementById("modalConfigNotificacionesBackdrop");
+    const btnCancelConfigNotificaciones = document.getElementById("btnCancelConfigNotificaciones");
+    const btnSaveConfigNotificaciones = document.getElementById("btnSaveConfigNotificaciones");
+
+    const chkNotifyMatchCreation = document.getElementById("chkNotifyMatchCreation");
+    const chkNotifyMatchModification = document.getElementById("chkNotifyMatchModification");
+    const chkNotifyChat = document.getElementById("chkNotifyChat");
+
+    if (btnConfigurarNotificaciones && modalConfigNotificacionesBackdrop && btnCancelConfigNotificaciones && btnSaveConfigNotificaciones) {
+        btnConfigurarNotificaciones.addEventListener("click", () => {
+            modalConfigNotificacionesBackdrop.classList.add("show");
+        });
+
+        const closeConfigModal = () => {
+            modalConfigNotificacionesBackdrop.classList.remove("show");
+        };
+
+        btnCancelConfigNotificaciones.addEventListener("click", closeConfigModal);
+        modalConfigNotificacionesBackdrop.addEventListener("click", (e) => {
+            if (e.target === modalConfigNotificacionesBackdrop) {
+                closeConfigModal();
+            }
+        });
+
+        btnSaveConfigNotificaciones.addEventListener("click", async () => {
+            const creation = chkNotifyMatchCreation ? chkNotifyMatchCreation.checked : true;
+            const modification = chkNotifyMatchModification ? chkNotifyMatchModification.checked : true;
+            const chat = chkNotifyChat ? chkNotifyChat.checked : true;
+
+            try {
+                const response = await fetch("/Account/UpdateNotificationSettings", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "RequestVerificationToken": getVerificationToken()
+                    },
+                    body: JSON.stringify({
+                        notifyMatchCreation: creation,
+                        notifyMatchModification: modification,
+                        notifyChat: chat
+                    })
+                });
+
+                if (response.ok) {
+                    closeConfigModal();
+                    showToast("Cambios guardados correctamente", false);
+                } else {
+                    showToast("Error al actualizar la configuración de notificaciones.", true);
+                }
+            } catch (err) {
+                console.error("Error al guardar configuración de notificaciones:", err);
+                showToast("Ocurrió un error de red al guardar los cambios.", true);
+            }
+        });
     }
 });

@@ -214,4 +214,29 @@ public class AccountController : Controller
             return StatusCode(500, new { message = "Error al procesar la imagen: " + ex.Message });
         }
     }
+
+    // POST: /Account/UpdateNotificationSettings
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> UpdateNotificationSettings([FromBody] NotificationSettingsDto model)
+    {
+        if (model == null)
+        {
+            return BadRequest(new { message = "Datos inválidos." });
+        }
+
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+        {
+            return Unauthorized();
+        }
+
+        var success = await _authService.UpdatePlayerNotificationSettingsAsync(userId, model.NotifyMatchCreation, model.NotifyMatchModification, model.NotifyChat);
+        if (!success)
+        {
+            return BadRequest(new { message = "No se pudieron actualizar los ajustes." });
+        }
+
+        return Ok(new { success = true });
+    }
 }

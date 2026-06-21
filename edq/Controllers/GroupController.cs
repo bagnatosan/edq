@@ -513,7 +513,7 @@ public class GroupController : Controller
 
         if (success)
         {
-            _ = _pushService.SendNotificationToGroupAsync(request.GroupId, "⚽ Nuevo Partido!", $"Se programó un nuevo partido para el {request.Date.ToLocalTime():dd/MM HH:mm} hs.", "/Match/Upcoming", userId);
+            _ = _pushService.SendMatchCreationNotificationAsync(userId, request.GroupId, request.PlayerIds, request.Date);
             return Ok("Partido creado correctamente");
         }
         else

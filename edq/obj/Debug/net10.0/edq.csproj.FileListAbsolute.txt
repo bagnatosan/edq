@@ -224,10 +224,8 @@
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/8o1p1ndg8z-{0}-rhag89u5ua-rhag89u5ua.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/hyiiw9gq10-{0}-cq6d9g8vj4-cq6d9g8vj4.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/1m8qta0b2r-{0}-ojqac90086-ojqac90086.gz
-/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/15508tqiwp-{0}-0zxi9a1aca-0zxi9a1aca.gz
 /home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/BouncyCastle.Crypto.dll
 /home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/WebPush.dll
-/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/8fy9rbicfq-{0}-mv2uk0ce6b-mv2uk0ce6b.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/pn8qc0slma-{0}-7z3g89gq9y-7z3g89gq9y.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/z4x438jh9m-{0}-ykmqj9tut7-ykmqj9tut7.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/b61zlydoc8-{0}-shcrvd89vd-shcrvd89vd.gz
@@ -236,5 +234,7 @@
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/e7y5m0fc5w-{0}-arzh4n0ylq-arzh4n0ylq.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/35t5j8b4ca-{0}-n45nb7w5uh-n45nb7w5uh.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/9flnuhc6xo-{0}-428cfm4sgq-428cfm4sgq.gz
-/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/zh0xhe7jst-{0}-vfee39losn-vfee39losn.gz
-/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/39938q6i2y-{0}-op1ycdlxhz-op1ycdlxhz.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/39938q6i2y-{0}-n5jdzhsyls-n5jdzhsyls.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/zh0xhe7jst-{0}-7podphnu98-7podphnu98.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/8fy9rbicfq-{0}-4wm7vihqsv-4wm7vihqsv.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/15508tqiwp-{0}-7evdcnygy4-7evdcnygy4.gz

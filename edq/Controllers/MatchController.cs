@@ -13,11 +13,13 @@ public class MatchController : Controller
 {
     private readonly IMatchService _matchService;
     private readonly IMatchmakingService _matchmakingService;
+    private readonly IPushNotificationService _pushService;
 
-    public MatchController(IMatchService matchService, IMatchmakingService matchmakingService)
+    public MatchController(IMatchService matchService, IMatchmakingService matchmakingService, IPushNotificationService pushService)
     {
         _matchService = matchService;
         _matchmakingService = matchmakingService;
+        _pushService = pushService;
     }
 
     // GET: /Match/Upcoming
@@ -98,6 +100,8 @@ public class MatchController : Controller
         {
             return BadRequest("No se pudo actualizar el partido.");
         }
+
+        _ = _pushService.SendMatchModificationNotificationAsync(userId, request.MatchId);
 
         return Ok(new { success = true });
     }

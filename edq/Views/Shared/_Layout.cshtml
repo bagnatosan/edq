@@ -31,12 +31,24 @@
             @if (User.Identity?.IsAuthenticated == true)
             {
                 <div class="app-header-right">
-                    <!-- Icono de Campana para notificaciones -->
-                    <button class="header-icon-btn" aria-label="Notificaciones">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </button>
+                    <!-- Icono de Campana para notificaciones con menú desplegable -->
+                    <div class="notifications-menu-container">
+                        <button class="header-icon-btn" id="btnNotificationsToggle" aria-label="Notificaciones">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                        </button>
+                        <div class="notifications-dropdown" id="notificationsDropdown">
+                            <div class="notifications-dropdown-header">
+                                <span>Notificaciones</span>
+                                <button class="btn-clear-notifications" id="btnClearNotifications">Limpiar todo</button>
+                            </div>
+                            <div class="notifications-dropdown-list" id="notificationsDropdownList">
+                                <div class="notifications-empty">No tienes notificaciones</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             }
             

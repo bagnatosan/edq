@@ -1,5 +1,6 @@
 using edq.DTO;
 using edq.Hubs;
+using edq.Models;
 using edq.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -113,7 +114,8 @@ public class ChatController : Controller
             "📊 Nueva Encuesta",
             $"Se creó la encuesta: \"{request.Question}\"",
             $"/Group/Chat?groupId={request.GroupId}",
-            userId
+            userId,
+            NotificationType.Chat
         );
 
         return Json(pollDto);
