@@ -35,7 +35,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (error) {
             console.error("Error cargando historial de partidos:", error);
-            alert("No se pudo cargar el historial de partidos.");
+            if (matchesHistoryList) {
+                matchesHistoryList.innerHTML = `<div style="text-align: center; color: var(--red-alert); padding: 40px 20px;">No se pudo cargar el historial de partidos.</div>`;
+            }
         }
     };
 

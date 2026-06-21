@@ -86,7 +86,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         catch (error) {
             console.error("Error cargando grupos:", error);
-            alert("Ocurrió un error al cargar los grupos.");
         }
         finally {
             isLoading = false;

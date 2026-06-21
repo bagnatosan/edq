@@ -25,7 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (error) {
             console.error("Error cargando partidos futuros:", error);
-            alert("No se pudieron cargar los próximos partidos.");
+            if (upcomingMatchesList) {
+                upcomingMatchesList.innerHTML = `<div style="text-align: center; color: var(--red-alert); padding: 40px 20px;">No se pudieron cargar los próximos partidos.</div>`;
+            }
         }
     };
 

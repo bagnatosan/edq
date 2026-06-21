@@ -42,8 +42,7 @@ public class ChatController : Controller
 
         if (groupId <= 0)
         {
-            var (myGroups, _) = await _groupService.GetGroupsAsync(userId, null, 0, 1000);
-            return View("~/Views/Group/ChatList.cshtml", myGroups);
+            return View("~/Views/Group/ChatList.cshtml");
         }
 
         var belongs = await _chatService.CanAccessChatAsync(userId, groupId);

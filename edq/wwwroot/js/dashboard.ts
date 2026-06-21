@@ -132,7 +132,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (error) {
             console.error("Error al cargar datos del dashboard:", error);
-            alert("No se pudieron cargar los datos del grupo.");
         }
     };
 
