@@ -239,3 +239,4 @@
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/8fy9rbicfq-{0}-4wm7vihqsv-4wm7vihqsv.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/15508tqiwp-{0}-7evdcnygy4-7evdcnygy4.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/6vpjo7m7oy-{0}-tf1komhz1c-tf1komhz1c.gz
+/home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/SixLabors.ImageSharp.dll

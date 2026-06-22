@@ -12,6 +12,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using Microsoft.AspNetCore.Authorization;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats.Webp;
 
 namespace edq.Controllers;
 
@@ -190,14 +193,26 @@ public class AccountController : Controller
                 Directory.CreateDirectory(carpetaDestino);
             }
 
-            // Generar nombre de archivo único
-            string nombreUnico = Guid.NewGuid().ToString() + "_" + Path.GetFileName(photo.FileName);
+            // Generar nombre de archivo único con extensión .webp para máxima compresión
+            string nombreUnico = Guid.NewGuid().ToString() + ".webp";
             string rutaFisicaCompleta = Path.Combine(carpetaDestino, nombreUnico);
 
-            // Guardar físicamente
-            using (var stream = new FileStream(rutaFisicaCompleta, FileMode.Create))
+            // Procesar y guardar la imagen de forma optimizada
+            using (var image = await Image.LoadAsync(photo.OpenReadStream()))
             {
-                await photo.CopyToAsync(stream);
+                // Redimensionar si excede 300px manteniendo la relación de aspecto
+                image.Mutate(x => x.Resize(new ResizeOptions
+                {
+                    Size = new Size(300, 300),
+                    Mode = ResizeMode.Max
+                }));
+
+                // Guardar como WebP con calidad del 75%
+                var encoder = new WebpEncoder
+                {
+                    Quality = 75
+                };
+                await image.SaveAsync(rutaFisicaCompleta, encoder);
             }
 
             string photoUrl = "/images/profiles/" + nombreUnico;

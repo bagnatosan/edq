@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using edq.Models;
 using edq.DTO;
 
 namespace edq.Controllers;
@@ -26,7 +25,7 @@ public class HomeController : Controller
     public IActionResult Error(string? message)
     {
         var exceptionHandlerPathFeature = HttpContext.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
-        var errorMsg = message ?? exceptionHandlerPathFeature?.Error?.Message ?? "Algo salió mal en el servidor. Por favor, vuelve a intentarlo.";
+        var errorMsg = message ?? exceptionHandlerPathFeature?.Error.Message ?? "Algo salió mal en el servidor. Por favor, vuelve a intentarlo.";
 
         return View(new ErrorViewModel 
         { 
