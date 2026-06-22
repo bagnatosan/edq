@@ -18,6 +18,7 @@ builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
 builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
 builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddSignalR();
 
 

@@ -22,11 +22,13 @@ public class AccountController : Controller
 {
     private readonly IAuthService _authService;
     private readonly IWebHostEnvironment _environment;
+    private readonly IEmailService _emailService;
 
-    public AccountController(IAuthService authService, IWebHostEnvironment environment)
+    public AccountController(IAuthService authService, IWebHostEnvironment environment, IEmailService emailService)
     {
         _authService = authService;
         _environment = environment;
+        _emailService = emailService;
     }
 
     // GET: /Account/Login
@@ -253,5 +255,177 @@ public class AccountController : Controller
         }
 
         return Ok(new { success = true });
+    }
+
+    // GET: /Account/ForgotPassword
+    [HttpGet]
+    public IActionResult ForgotPassword()
+    {
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return RedirectToAction("Explore", "Group");
+        }
+        return View();
+    }
+
+    // POST: /Account/ForgotPassword
+    [HttpPost]
+    public async Task<IActionResult> ForgotPassword(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            ModelState.AddModelError(string.Empty, "El correo electrónico es obligatorio.");
+            return View();
+        }
+
+        var exists = await _authService.EmailExistsAsync(email.Trim());
+        if (!exists)
+        {
+            ModelState.AddModelError(string.Empty, "El correo electrónico no está registrado.");
+            return View();
+        }
+
+        // Generar un código de verificación de tipo ushort (1000 - 9999)
+        ushort recoveryCode = (ushort)Random.Shared.Next(1000, 10000);
+
+        // Guardar temporalmente en TempData
+        TempData["ResetEmail"] = email.Trim();
+        TempData["ResetCode"] = (int)recoveryCode;
+        TempData.Keep();
+
+        try
+        {
+            // Enviar el correo electrónico
+            string subject = "Código de recuperación de contraseña - edq.";
+            string body = $@"
+                <div style='font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;'>
+                    <h2 style='color: #8aff00;'>Recuperación de Contraseña</h2>
+                    <p>Hola,</p>
+                    <p>Recibimos una solicitud para restablecer tu contraseña en edq.</p>
+                    <p>Tu código de recuperación es:</p>
+                    <div style='background-color: #f9f9f9; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 2px; color: #333;'>
+                        {recoveryCode}
+                    </div>
+                    <p style='color: #666; font-size: 12px; margin-top: 20px;'>Si no solicitaste este cambio, puedes ignorar este correo.</p>
+                </div>";
+
+            await _emailService.SendEmailAsync(email.Trim(), subject, body);
+            
+            return RedirectToAction("VerifyCode");
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError(string.Empty, $"Error al enviar el correo: {ex.Message}. Por favor verifica las credenciales de SmtpSettings en appsettings.json.");
+            return View();
+        }
+    }
+
+    // GET: /Account/VerifyCode
+    [HttpGet]
+    public IActionResult VerifyCode()
+    {
+        var email = TempData["ResetEmail"]?.ToString();
+        if (string.IsNullOrEmpty(email))
+        {
+            return RedirectToAction("ForgotPassword");
+        }
+
+        ViewBag.Email = email;
+        TempData.Keep();
+        return View();
+    }
+
+    // POST: /Account/VerifyCode
+    [HttpPost]
+    public IActionResult VerifyCode(ushort? code)
+    {
+        var email = TempData["ResetEmail"]?.ToString();
+        var savedCodeObj = TempData["ResetCode"];
+
+        if (string.IsNullOrEmpty(email) || savedCodeObj == null)
+        {
+            return RedirectToAction("ForgotPassword");
+        }
+
+        ViewBag.Email = email;
+        TempData.Keep();
+
+        if (code == null)
+        {
+            ModelState.AddModelError(string.Empty, "El código es obligatorio.");
+            return View();
+        }
+
+        ushort savedCode = (ushort)(int)savedCodeObj;
+        if (code != savedCode)
+        {
+            ModelState.AddModelError(string.Empty, "Código incorrecto.");
+            return View();
+        }
+
+        // Autorizar cambio de contraseña
+        TempData["CodeVerified"] = true;
+        TempData.Keep();
+
+        return RedirectToAction("ResetPassword");
+    }
+
+    // GET: /Account/ResetPassword
+    [HttpGet]
+    public IActionResult ResetPassword()
+    {
+        var email = TempData["ResetEmail"]?.ToString();
+        var verified = TempData["CodeVerified"] as bool?;
+
+        if (string.IsNullOrEmpty(email) || verified != true)
+        {
+            return RedirectToAction("ForgotPassword");
+        }
+
+        TempData.Keep();
+        return View();
+    }
+
+    // POST: /Account/ResetPassword
+    [HttpPost]
+    public async Task<IActionResult> ResetPassword(string newPassword, string confirmPassword)
+    {
+        var email = TempData["ResetEmail"]?.ToString();
+        var verified = TempData["CodeVerified"] as bool?;
+
+        if (string.IsNullOrEmpty(email) || verified != true)
+        {
+            return RedirectToAction("ForgotPassword");
+        }
+
+        TempData.Keep();
+
+        if (string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
+        {
+            ModelState.AddModelError(string.Empty, "Ambos campos son obligatorios.");
+            return View();
+        }
+
+        if (newPassword != confirmPassword)
+        {
+            ModelState.AddModelError(string.Empty, "Las contraseñas no coinciden.");
+            return View();
+        }
+
+        var success = await _authService.ResetPasswordAsync(email, newPassword);
+        if (!success)
+        {
+            ModelState.AddModelError(string.Empty, "No se pudo restablecer la contraseña. El usuario no fue encontrado.");
+            return View();
+        }
+
+        // Limpiar TempData
+        TempData.Remove("ResetEmail");
+        TempData.Remove("ResetCode");
+        TempData.Remove("CodeVerified");
+
+        TempData["SuccessMessage"] = "Contraseña restablecida correctamente. Ya puedes iniciar sesión.";
+
+        return RedirectToAction("Login");
     }
 }

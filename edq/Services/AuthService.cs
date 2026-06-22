@@ -140,4 +140,23 @@ public class AuthService : IAuthService
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<bool> EmailExistsAsync(string email)
+    {
+        return await _context.Players.AnyAsync(p => p.Email == email);
+    }
+
+    public async Task<bool> ResetPasswordAsync(string email, string newPassword)
+    {
+        var player = await _context.Players.FirstOrDefaultAsync(p => p.Email == email);
+        if (player == null)
+        {
+            return false;
+        }
+
+        // Hashear usando Argon2id
+        player.Password = Argon2.Hash(newPassword);
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }
