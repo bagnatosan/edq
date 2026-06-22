@@ -232,7 +232,6 @@
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/jozni1su0g-{0}-68tl7ugkjp-68tl7ugkjp.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/gka09gfb9a-{0}-rm5zqkh3xf-rm5zqkh3xf.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/e7y5m0fc5w-{0}-arzh4n0ylq-arzh4n0ylq.gz
-/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/39938q6i2y-{0}-n5jdzhsyls-n5jdzhsyls.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/zh0xhe7jst-{0}-7podphnu98-7podphnu98.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/8fy9rbicfq-{0}-4wm7vihqsv-4wm7vihqsv.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/15508tqiwp-{0}-7evdcnygy4-7evdcnygy4.gz
@@ -240,3 +239,5 @@
 /home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/SixLabors.ImageSharp.dll
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/9flnuhc6xo-{0}-1oq963kw94-1oq963kw94.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/35t5j8b4ca-{0}-5rjk8eqccw-5rjk8eqccw.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/39938q6i2y-{0}-uqwkjbbjyf-uqwkjbbjyf.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/sudnjedor1-{0}-6l7zkfz444-6l7zkfz444.gz

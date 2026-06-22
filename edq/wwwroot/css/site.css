@@ -2010,3 +2010,35 @@ body {
     color: var(--text-muted);
     font-size: 12px;
 }
+
+/* Neon green button loading spinner */
+@keyframes spin-loader {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+.btn-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(12, 12, 14, 0.2);
+    border-top-color: #0c0c0e;
+    border-radius: 50%;
+    animation: spin-loader 0.8s linear infinite;
+    pointer-events: none;
+    z-index: 5;
+    box-sizing: border-box;
+}
+.btn-neon.btn-loading {
+    position: relative !important;
+    overflow: hidden !important;
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.85;
+}
+.btn-neon.btn-loading .btn-text {
+    opacity: 0 !important;
+    transition: opacity 0.2s ease;
+}
