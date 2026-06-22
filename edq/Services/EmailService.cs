@@ -26,11 +26,7 @@ public class EmailService : IEmailService
         var senderName = smtpSettings["SenderName"];
         var senderEmail = smtpSettings["SenderEmail"];
 
-        if (string.IsNullOrEmpty(server) || string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || 
-            username == "TU-CORREO@gmail.com" || password == "TU-CONTRASEÑA-DE-APLICACION")
-        {
-            throw new InvalidOperationException("La configuración SMTP está incompleta en appsettings.json. Por favor, edita el archivo con tus credenciales reales.");
-        }
+        
 
         int port = int.TryParse(portStr, out var p) ? p : 587;
         bool enableSsl = !bool.TryParse(enableSslStr, out var ssl) || ssl;

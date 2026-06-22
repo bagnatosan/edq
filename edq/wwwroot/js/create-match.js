@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 document.addEventListener("DOMContentLoaded", () => {
     const groupIdInput = document.getElementById("groupIdInput");
     const groupNameTitle = document.getElementById("groupNameTitle");
@@ -37,14 +28,11 @@ document.addEventListener("DOMContentLoaded", () => {
         matchDateTime.value = `${year}-${month}-${date}T${hours}:${minutes}`;
     };
     setNextFridayDateTime();
-    const checkPollPreselection = () => __awaiter(void 0, void 0, void 0, function* () {
-        const dateVal = matchDateTime.value;
-        if (!dateVal)
-            return;
+    const checkPollPreselection = async () => {
         try {
-            const response = yield fetch(`/Chat/GetPollVotersByDate?groupId=${groupId}&date=${encodeURIComponent(dateVal)}`);
+            const response = await fetch(`/Chat/GetLatestPollVoters?groupId=${groupId}`);
             if (response.ok) {
-                const playerIds = yield response.json();
+                const playerIds = await response.json();
                 if (playerIds && playerIds.length > 0) {
                     const checkboxes = playersCheckboxGrid.querySelectorAll('input[name="selectedPlayers"]');
                     checkboxes.forEach(cb => {
@@ -57,24 +45,23 @@ document.addEventListener("DOMContentLoaded", () => {
         catch (error) {
             console.error("Error pre-selecting players from poll:", error);
         }
-    });
-    matchDateTime.addEventListener("change", checkPollPreselection);
+    };
     // Cargar los miembros del grupo por AJAX
-    const loadGroupMembers = () => __awaiter(void 0, void 0, void 0, function* () {
+    const loadGroupMembers = async () => {
         try {
-            const response = yield fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
+            const response = await fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
             if (!response.ok)
                 throw new Error("Error al obtener miembros del grupo.");
-            const data = yield response.json();
+            const data = await response.json();
             groupNameTitle.textContent = `Crear Partido - ${data.groupName}`;
             renderPlayersCheckboxes(data.members);
-            yield checkPollPreselection();
+            await checkPollPreselection();
         }
         catch (error) {
             console.error("Error al cargar los miembros:", error);
             alert("No se pudieron cargar los miembros del grupo.");
         }
-    });
+    };
     // Renderizar los checkboxes
     const renderPlayersCheckboxes = (members) => {
         if (!playersCheckboxGrid)
@@ -128,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const loadingPercent = document.getElementById("loadingPercent");
     // Botones de Envío
     if (btnBalanceAndCreate) {
-        btnBalanceAndCreate.addEventListener("click", () => __awaiter(void 0, void 0, void 0, function* () {
+        btnBalanceAndCreate.addEventListener("click", async () => {
             const checkboxes = document.querySelectorAll('input[name="selectedPlayers"]:checked');
             const selectedIds = [];
             checkboxes.forEach(cb => {
@@ -162,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
             matchmakingLoadingCard.style.transform = "scale(1)";
             // Animación de barra de progreso simulada
             let currentProgress = 0;
-            const progressSpeed = 60; // 60ms por tick
+            const progressSpeed = 60; // 60ms por tick (duplica la duración de la animación)
             const targetSimulatedProgress = 95;
             const progressInterval = setInterval(() => {
                 if (currentProgress < targetSimulatedProgress) {
@@ -176,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }, progressSpeed);
             try {
                 // Realizar llamada al backend para balancear y crear el partido
-                const response = yield fetch(`/Group/GenerateMatch`, {
+                const response = await fetch(`/Group/GenerateMatch`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -190,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 clearInterval(progressInterval);
                 if (!response.ok) {
-                    const errorText = yield response.text();
+                    const errorText = await response.text();
                     throw new Error(errorText || "Error al balancear y crear el partido.");
                 }
                 // Completar al 100% de inmediato
@@ -223,7 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Mostrar error con toast premium
                 showToast(error.message || "No se pudo crear el partido balanceado.", true);
             }
-        }));
+        });
     }
     // Helper Toast
     const showToast = (message, isError = false) => {

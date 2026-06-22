@@ -51,10 +51,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setNextFridayDateTime();
 
     const checkPollPreselection = async (): Promise<void> => {
-        const dateVal = matchDateTime.value;
-        if (!dateVal) return;
         try {
-            const response = await fetch(`/Chat/GetPollVotersByDate?groupId=${groupId}&date=${encodeURIComponent(dateVal)}`);
+            const response = await fetch(`/Chat/GetLatestPollVoters?groupId=${groupId}`);
             if (response.ok) {
                 const playerIds: number[] = await response.json();
                 if (playerIds && playerIds.length > 0) {
@@ -69,8 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error pre-selecting players from poll:", error);
         }
     };
-
-    matchDateTime.addEventListener("change", checkPollPreselection);
 
     // Cargar los miembros del grupo por AJAX
     const loadGroupMembers = async (): Promise<void> => {

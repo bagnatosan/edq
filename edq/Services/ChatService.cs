@@ -228,43 +228,36 @@ public class ChatService : IChatService
         return (true, poll.GroupId, updatedPollData);
     }
 
-    public async Task<List<int>> GetPollVotersByDateAsync(int groupId, DateTime queryDate)
+    public async Task<List<int>> GetLatestPollVotersAsync(int groupId)
     {
-        var targetYear = queryDate.Year;
-        var targetMonth = queryDate.Month;
-        var targetDay = queryDate.Day;
-        var targetHour = queryDate.Hour;
-        var targetMinute = queryDate.Minute;
-
-        var polls = await _context.Polls.AsNoTracking()
+        // Obtener la última encuesta del grupo, incluyendo opciones y votos
+        var latestPoll = await _context.Polls.AsNoTracking()
             .Include(p => p.Options)
                 .ThenInclude(o => o.Votes)
-            .Where(p => p.GroupId == groupId && p.TargetDate.HasValue)
-            .ToListAsync();
+            .Where(p => p.GroupId == groupId)
+            .OrderByDescending(p => p.CreatedAt)
+            .FirstOrDefaultAsync();
 
-        var matchingPoll = polls.FirstOrDefault(p =>
-            p.TargetDate!.Value.Year == targetYear &&
-            p.TargetDate.Value.Month == targetMonth &&
-            p.TargetDate.Value.Day == targetDay &&
-            p.TargetDate.Value.Hour == targetHour &&
-            p.TargetDate.Value.Minute == targetMinute);
-
-        if (matchingPoll == null)
+        if (latestPoll == null || !latestPoll.Options.Any())
         {
             return new List<int>();
         }
 
-        var yesOption = matchingPoll.Options.FirstOrDefault(o => o.OptionText.ToLower().Trim() == "sí" || o.OptionText.ToLower().Trim() == "si");
-        if (yesOption == null)
-        {
-            yesOption = matchingPoll.Options.FirstOrDefault();
-        }
-
-        if (yesOption == null)
+        // Encontrar el máximo número de votos entre las opciones
+        var maxVotes = latestPoll.Options.Max(o => o.Votes.Count);
+        if (maxVotes == 0)
         {
             return new List<int>();
         }
 
-        return yesOption.Votes.Select(v => v.PlayerId).ToList();
+        // Seleccionar todos los PlayerId que votaron por las opciones que obtuvieron el máximo de votos
+        var voterIds = latestPoll.Options
+            .Where(o => o.Votes.Count == maxVotes)
+            .SelectMany(o => o.Votes)
+            .Select(v => v.PlayerId)
+            .Distinct()
+            .ToList();
+
+        return voterIds;
     }
 }

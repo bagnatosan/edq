@@ -528,33 +528,83 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    if (createPollModal && createPollCard && btnCancelPoll && pollTargetDate) {
+    const btnAddPollOption = document.getElementById("btnAddPollOption") as HTMLButtonElement | null;
+    const pollOptionsContainer = document.getElementById("pollOptionsContainer") as HTMLDivElement | null;
+
+    if (createPollModal && createPollCard && btnCancelPoll) {
         const hideModal = () => {
             createPollModal.style.opacity = "0";
             createPollCard.style.transform = "scale(0.9)";
             setTimeout(() => {
                 createPollModal.style.display = "none";
                 if (createPollForm) createPollForm.reset();
+                if (pollOptionsContainer) {
+                    pollOptionsContainer.innerHTML = `
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="text" class="form-control-neon poll-option-input" placeholder="Opción 1" required style="flex: 1; margin-bottom: 0;" />
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="text" class="form-control-neon poll-option-input" placeholder="Opción 2" required style="flex: 1; margin-bottom: 0;" />
+                        </div>
+                    `;
+                }
             }, 250);
         };
 
         btnCancelPoll.addEventListener("click", hideModal);
+
+        if (btnAddPollOption && pollOptionsContainer) {
+            btnAddPollOption.addEventListener("click", () => {
+                const optionIndex = pollOptionsContainer.children.length + 1;
+                const optionDiv = document.createElement("div");
+                optionDiv.style.display = "flex";
+                optionDiv.style.gap = "8px";
+                optionDiv.style.alignItems = "center";
+                
+                optionDiv.innerHTML = `
+                    <input type="text" class="form-control-neon poll-option-input" placeholder="Opción ${optionIndex}" required style="flex: 1; margin-bottom: 0;" />
+                    <button type="button" class="btn-remove-option" style="background: none; border: none; color: var(--red-alert); font-size: 18px; cursor: pointer; padding: 0 4px; display: flex; align-items: center; justify-content: center; height: 38px; line-height: 1;">×</button>
+                `;
+                
+                const btnRemove = optionDiv.querySelector(".btn-remove-option") as HTMLButtonElement | null;
+                if (btnRemove) {
+                    btnRemove.addEventListener("click", () => {
+                        optionDiv.remove();
+                        const inputs = pollOptionsContainer.querySelectorAll(".poll-option-input") as NodeListOf<HTMLInputElement>;
+                        inputs.forEach((input, index) => {
+                            input.placeholder = `Opción ${index + 1}`;
+                        });
+                    });
+                }
+                
+                pollOptionsContainer.appendChild(optionDiv);
+            });
+        }
 
         if (createPollForm && pollQuestion && pollDuration) {
             createPollForm.addEventListener("submit", async (e) => {
                 e.preventDefault();
 
                 const question = pollQuestion.value.trim();
-                const targetDateVal = pollTargetDate.value;
-                const options = ["Sí"];
                 const duration = parseInt(pollDuration.value);
 
-                if (!question || !targetDateVal) return;
+                const optionInputs = document.querySelectorAll(".poll-option-input") as NodeListOf<HTMLInputElement>;
+                const options: string[] = [];
+                optionInputs.forEach(input => {
+                    const val = input.value.trim();
+                    if (val) options.push(val);
+                });
+
+                if (!question) return;
+                if (options.length < 2) {
+                    showToast("Por favor, ingresa al menos 2 opciones.", true);
+                    return;
+                }
 
                 const submitBtn = createPollForm.querySelector('button[type="submit"]') as HTMLButtonElement | null;
                 if (submitBtn) {
                     submitBtn.disabled = true;
-                    submitBtn.textContent = "Lanzando...";
+                    submitBtn.textContent = "Creando...";
                 }
 
                 try {
@@ -569,13 +619,13 @@ document.addEventListener("DOMContentLoaded", () => {
                             question: question,
                             options: options,
                             durationMinutes: duration,
-                            targetDate: targetDateVal
+                            targetDate: null
                         })
                     });
 
                     if (!response.ok) throw new Error("No se pudo crear la encuesta.");
 
-                    showToast("¡Encuesta lanzada correctamente!", false);
+                    showToast("¡Encuesta creada correctamente!", false);
                     hideModal();
 
                 } catch (error) {
@@ -584,7 +634,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 } finally {
                     if (submitBtn) {
                         submitBtn.disabled = false;
-                        submitBtn.textContent = "Lanzar";
+                        submitBtn.textContent = "Crear";
                     }
                 }
             });

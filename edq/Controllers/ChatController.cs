@@ -163,9 +163,9 @@ public class ChatController : Controller
         return Ok(new { success = true });
     }
 
-    // GET: /Chat/GetPollVotersByDate (AJAX)
+    // GET: /Chat/GetLatestPollVoters (AJAX)
     [HttpGet]
-    public async Task<IActionResult> GetPollVotersByDate(int groupId, string date)
+    public async Task<IActionResult> GetLatestPollVoters(int groupId)
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdString, out var userId))
@@ -179,12 +179,7 @@ public class ChatController : Controller
             return Forbid();
         }
 
-        if (!DateTime.TryParse(date, out var queryDate))
-        {
-            return BadRequest("Fecha inválida.");
-        }
-
-        var voterIds = await _chatService.GetPollVotersByDateAsync(groupId, queryDate);
+        var voterIds = await _chatService.GetLatestPollVotersAsync(groupId);
         return Json(voterIds);
     }
 }

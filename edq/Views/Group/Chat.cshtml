@@ -90,13 +90,22 @@
         
         <form id="createPollForm">
             <div style="margin-bottom: 12px;">
-                <label class="form-label" style="font-size: 11px;">Pregunta</label>
-                <input type="text" id="pollQuestion" placeholder="¿Quién asiste al partido?" class="form-control-neon" required />
+                <label class="form-label" style="font-size: 11px;">Pregunta / Texto</label>
+                <input type="text" id="pollQuestion" placeholder="¿Qué día jugamos?" class="form-control-neon" required />
             </div>
 
+            <!-- Contenedor para Opciones Dinámicas -->
             <div style="margin-bottom: 16px;">
-                <label class="form-label" style="font-size: 11px;">Fecha y Hora del Partido</label>
-                <input type="datetime-local" id="pollTargetDate" class="form-control-neon" required />
+                <label class="form-label" style="font-size: 11px;">Opciones de Respuesta</label>
+                <div id="pollOptionsContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="text" class="form-control-neon poll-option-input" placeholder="Opción 1" required style="flex: 1; margin-bottom: 0;" />
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="text" class="form-control-neon poll-option-input" placeholder="Opción 2" required style="flex: 1; margin-bottom: 0;" />
+                    </div>
+                </div>
+                <button type="button" id="btnAddPollOption" class="btn-outline-neon" style="margin-top: 8px; font-size: 11px; padding: 6px 12px; width: auto; align-self: flex-start; height: auto;">＋ Agregar Opción</button>
             </div>
 
             <div style="margin-bottom: 20px;">
@@ -111,7 +120,7 @@
 
             <div style="display: flex; gap: 10px;">
                 <button type="button" id="btnCancelPoll" class="btn-outline-neon" style="flex: 1; justify-content: center; padding: 10px;">Cancelar</button>
-                <button type="submit" class="btn-neon" style="flex: 1; justify-content: center; padding: 10px;">Lanzar</button>
+                <button type="submit" class="btn-neon" style="flex: 1; justify-content: center; padding: 10px;">Crear</button>
             </div>
         </form>
     </div>
