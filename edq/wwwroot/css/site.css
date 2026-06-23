@@ -2271,6 +2271,13 @@ body {
   border-top: var(--card-border);
   background: transparent;
   width: 100%;
+  padding: 0;
+  line-height: 1;
+}
+.app-footer-desktop span {
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
 }
 
 @media (min-width: 1025px) {
@@ -2286,7 +2293,7 @@ body {
     border-top: 1px solid rgba(255, 255, 255, 0.05);
   }
   .app-content.with-nav {
-    padding-bottom: 24px !important;
+    padding-bottom: 0 !important;
   }
   .chat-input-area {
     bottom: 20px !important; /* Dado que el footer hace scroll, el input del chat se ubica cómodamente abajo de todo */
