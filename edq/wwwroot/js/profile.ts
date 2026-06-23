@@ -81,11 +81,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 } else {
                     const errData = await response.json();
-                    alert(errData.message || "Error al actualizar la foto de perfil.");
+                    showToast(errData.message || "Error al actualizar la foto de perfil.", true);
                 }
             } catch (err) {
                 console.error("Error al subir foto:", err);
-                alert("Ocurrió un error al subir la imagen.");
+                showToast("Ocurrió un error al subir la imagen.", true);
             } finally {
                 filePhotoInput.value = ""; // Limpiar
             }
@@ -192,7 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         // Solicitar permiso
                         const permission = await Notification.requestPermission();
                         if (permission !== 'granted') {
-                            alert("Permiso de notificaciones denegado. Habilitalo en los ajustes del navegador.");
+                            showToast("Permiso de notificaciones denegado. Habilítalo en los ajustes del navegador.", true);
                             switchNotifications.checked = false;
                             updateSettingsButtonVisibility(false);
                             return;
@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         // Obtener clave VAPID pública
                         const keyResponse = await fetch('/Push/PublicKey');
                         if (!keyResponse.ok) {
-                            alert("No se pudo obtener la clave del servidor push.");
+                            showToast("No se pudo obtener la clave del servidor push.", true);
                             switchNotifications.checked = false;
                             updateSettingsButtonVisibility(false);
                             return;
@@ -256,7 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             }
                             switchNotifications.checked = false;
                             updateSettingsButtonVisibility(false);
-                            alert("Error al activar las notificaciones push en el servidor.");
+                            showToast("Error al activar las notificaciones push en el servidor.", true);
                         }
                     } else {
                         // Desuscribir
@@ -281,7 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             updateSettingsButtonVisibility(false);
                         } catch (unsubErr) {
                             console.error("Error al desuscribirse:", unsubErr);
-                            alert("Ocurrió un error al desactivar las notificaciones push.");
+                            showToast("Ocurrió un error al desactivar las notificaciones push.", true);
                             // Revertir estado switch
                             switchNotifications.checked = true;
                             updateSettingsButtonVisibility(true);

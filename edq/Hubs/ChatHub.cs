@@ -90,8 +90,8 @@ public class ChatHub : Hub
         // Enviar notificación Push en segundo plano
         _ = _pushService.SendNotificationToGroupAsync(
             groupId,
-            "💬 Nuevo mensaje",
-            "Se escribió en el chat del grupo {groupName}.",
+            "💬",
+            $"{senderName}: {msg.MessageText}",
             $"/Group/Chat?groupId={groupId}",
             userId,
             NotificationType.Chat

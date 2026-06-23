@@ -20,6 +20,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnMatchHistory = document.getElementById("btnMatchHistory");
     if (!groupIdInput || !groupNameTitle || !membersCarousel || !membersCountBadge || !requestsList || !rankingList)
         return;
+    // Helper: Show styled toast notifications
+    const showToast = (message, isError = false) => {
+        const toast = document.createElement("div");
+        toast.className = `toast-notification ${isError ? 'toast-error' : 'toast-success'}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        // Trigger reflow
+        toast.offsetHeight;
+        toast.classList.add("show");
+        setTimeout(() => {
+            toast.classList.remove("show");
+            setTimeout(() => toast.remove(), 400);
+        }, 3000);
+    };
     const groupId = parseInt(groupIdInput.value);
     if (isNaN(groupId))
         return;
@@ -29,8 +43,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
             if (!response.ok) {
                 if (response.status === 403) {
-                    alert("No tienes permiso para ver este grupo.");
-                    window.location.href = "/Group/Explore";
+                    showToast("No tienes permiso para ver este grupo.", true);
+                    setTimeout(() => {
+                        window.location.href = "/Group/Explore";
+                    }, 1500);
                     return;
                 }
                 throw new Error("Error al obtener datos del grupo.");
@@ -207,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         catch (error) {
             console.error("Error al procesar solicitud:", error);
-            alert(error.message || "No se pudo procesar la solicitud.");
+            showToast(error.message || "No se pudo procesar la solicitud.", true);
             buttons.forEach(btn => btn.disabled = false);
         }
     };

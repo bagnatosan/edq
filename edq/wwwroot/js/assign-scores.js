@@ -31,8 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
             if (!response.ok) {
                 if (response.status === 403) {
-                    alert("No tienes permisos de administrador.");
-                    window.location.href = `/Group/Dashboard?groupId=${groupId}`;
+                    showToast("No tienes permisos de administrador.", true);
+                    setTimeout(() => {
+                        window.location.href = `/Group/Dashboard?groupId=${groupId}`;
+                    }, 1500);
                     return;
                 }
                 throw new Error("Error al obtener los miembros del grupo.");

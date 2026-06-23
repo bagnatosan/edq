@@ -9,6 +9,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const noResultsMessage = document.getElementById("noResultsMessage");
     if (!myGroupsList || !myGroupsEmptyMessage || !otherGroupsList || !loadingIndicator || !noResultsMessage)
         return;
+    // Helper: Show styled toast notifications
+    const showToast = (message, isError = false) => {
+        const toast = document.createElement("div");
+        toast.className = `toast-notification ${isError ? 'toast-error' : 'toast-success'}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        // Trigger reflow
+        toast.offsetHeight;
+        toast.classList.add("show");
+        setTimeout(() => {
+            toast.classList.remove("show");
+            setTimeout(() => toast.remove(), 400);
+        }, 3000);
+    };
     let currentSearch = "";
     let skip = 0;
     const take = 15;
@@ -162,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
             if (response.status === 409) {
-                alert("Ya has enviado una solicitud para este grupo.");
+                showToast("Ya has enviado una solicitud para este grupo.", true);
                 setButtonStateRequested(buttonElement);
                 return;
             }
@@ -177,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (parent) {
                     parent.innerHTML = `<span class="badge-status badge-status-member">✓ Eres Miembro</span>`;
                 }
-                alert("¡Te has unido automáticamente al grupo ya que habías sido pre-registrado por el administrador!");
+                showToast("¡Te has unido automáticamente al grupo ya que habías sido pre-registrado por el administrador!", false);
                 // Recargar el listado para mover el grupo a 'Mis Grupos' en tiempo real
                 setTimeout(() => {
                     skip = 0;
@@ -191,7 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         catch (error) {
             console.error("Error al enviar solicitud:", error);
-            alert(error.message || "Error al solicitar unión al grupo.");
+            showToast(error.message || "Error al solicitar unión al grupo.", true);
             buttonElement.disabled = false;
             buttonElement.textContent = "Solicitar Unión";
             buttonElement.style.opacity = "1";

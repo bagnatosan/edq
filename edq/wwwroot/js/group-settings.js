@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btnSaveSettings.addEventListener("click", async () => {
         const newName = groupNameInput.value.trim();
         if (!newName) {
-            alert("El nombre del grupo no puede estar vacío.");
+            showToast("El nombre del grupo no puede estar vacío.", true);
             return;
         }
         btnSaveSettings.disabled = true;
