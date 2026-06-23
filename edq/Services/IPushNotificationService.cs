@@ -9,7 +9,7 @@ public interface IPushNotificationService
     Task SendNotificationAsync(PushSubscriptionEntity subscription, string title, string body, string url);
     Task SendNotificationToGroupAsync(int groupId, string title, string body, string url, int excludePlayerId = 0, NotificationType type = NotificationType.Default);
     Task SendMatchCreationNotificationAsync(int creatorId, int groupId, System.Collections.Generic.List<int> convocadoPlayerIds, System.DateTime date);
-    Task SendMatchModificationNotificationAsync(int modifierId, int matchId);
+    Task SendMatchModificationNotificationAsync(int? modifierId, int matchId);
     Task<bool> SubscribePlayerAsync(int playerId, string endpoint, string p256dh, string auth);
     Task<bool> UnsubscribePlayerAsync(int playerId, string endpoint);
 }

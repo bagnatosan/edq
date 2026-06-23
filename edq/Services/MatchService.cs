@@ -14,7 +14,7 @@ public class MatchService : IMatchService
         _context = context;
     }
 
-    public async Task<List<UserUpcomingMatchDto>> GetUpcomingMatchesForUserAsync(int userId)
+    public async Task<List<UserUpcomingMatchDto>> GetUpcomingMatchesForUserAsync(int? userId)
     {
         // 1. Obtener los IDs de los grupos en los que participa el usuario (como creador o miembro)
         var userGroupIds = await _context.Groups.AsNoTracking()
@@ -66,7 +66,7 @@ public class MatchService : IMatchService
         return result;
     }
 
-    public async Task<MatchDetailsDto?> GetMatchDetailsAsync(int matchId, int userId)
+    public async Task<MatchDetailsDto?> GetMatchDetailsAsync(int matchId, int? userId)
     {
         var match = await _context.Matches.AsNoTracking()
             .Include(m => m.Group)
@@ -115,7 +115,7 @@ public class MatchService : IMatchService
         };
     }
 
-    public async Task<bool> UpdateMatchPlayersAsync(int matchId, int userId, List<MatchPlayerUpdateDto> players, DateTime date)
+    public async Task<bool> UpdateMatchPlayersAsync(int matchId, int? userId, List<MatchPlayerUpdateDto> players, DateTime date)
     {
         var match = await _context.Matches
             .Include(m => m.Group)
@@ -149,8 +149,30 @@ public class MatchService : IMatchService
         return true;
     }
 
-    public async Task<bool> FinishMatchAsync(int matchId, int userId, string scoreState)
+    public async Task<bool> FinishMatchAsync(int matchId, int? userId, string winner , int totalGoals , int goalsAhead)
     {
+        
+        int score1 = 0;
+        int score2 = 0;
+
+        if (winner == "Empate")
+        {
+            score1 = totalGoals / 2;
+            score2 = totalGoals / 2;
+        }
+        else if (winner == "A")
+        {
+            score1 = (totalGoals + goalsAhead) / 2;
+            score2 = totalGoals - score1;
+        }
+        else if (winner == "B")
+        {
+            score2 = (totalGoals + goalsAhead) / 2;
+            score1 = totalGoals - score2;
+        }
+
+        var scoreState = $"{score1}-{score2}";
+        
         var match = await _context.Matches
             .Include(m => m.Group)
             .FirstOrDefaultAsync(m => m.Id == matchId);

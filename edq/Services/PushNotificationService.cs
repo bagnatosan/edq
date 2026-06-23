@@ -186,7 +186,7 @@ public class PushNotificationService : IPushNotificationService
         }
     }
 
-    public async Task SendMatchModificationNotificationAsync(int modifierId, int matchId)
+    public async Task SendMatchModificationNotificationAsync(int? modifierId, int matchId)
     {
         var match = await _context.Matches.AsNoTracking()
             .Include(m => m.MatchPlayers)

@@ -3,8 +3,6 @@ using edq.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using System;
 
 namespace edq.Controllers;
 
@@ -28,17 +26,28 @@ public class MatchController : Controller
     {
         return View();
     }
+    
+    private int? GetUserId()
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+        if (int.TryParse(userIdString, out var userId))
+        {
+            return  userId;
+        }
+        else
+        {
+            return null;
+        }
+    }
+    
     // GET: /Match/GetUpcomingMatches (AJAX)
     [HttpGet]
     public async Task<IActionResult> GetUpcomingMatches()
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
-        {
-            return Unauthorized();
-        }
-
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
+        
         var matches = await _matchService.GetUpcomingMatchesForUserAsync(userId);
         return Json(matches);
     }
@@ -47,11 +56,8 @@ public class MatchController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(int matchId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
-        {
-            return Unauthorized();
-        }
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
 
         var details = await _matchService.GetMatchDetailsAsync(matchId, userId);
         if (details == null)
@@ -70,11 +76,8 @@ public class MatchController : Controller
     [HttpGet]
     public async Task<IActionResult> GetMatchDetails(int matchId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
-        {
-            return Unauthorized();
-        }
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
 
         var details = await _matchService.GetMatchDetailsAsync(matchId, userId);
         if (details == null)
@@ -89,11 +92,8 @@ public class MatchController : Controller
     [HttpPost]
     public async Task<IActionResult> UpdateMatch([FromBody] UpdateMatchRequestDto request)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
-        {
-            return Unauthorized();
-        }
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
 
         var success = await _matchService.UpdateMatchPlayersAsync(request.MatchId, userId, request.Players, request.Date);
         if (!success)
@@ -101,7 +101,7 @@ public class MatchController : Controller
             return BadRequest("No se pudo actualizar el partido.");
         }
 
-        _ = _pushService.SendMatchModificationNotificationAsync(userId, request.MatchId);
+        await _pushService.SendMatchModificationNotificationAsync(userId, request.MatchId);
 
         return Ok(new { success = true });
     }
@@ -110,34 +110,11 @@ public class MatchController : Controller
     [HttpPost]
     public async Task<IActionResult> FinishMatch([FromBody] FinishMatchRequestDto request)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
-        {
-            return Unauthorized();
-        }
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
 
-        int score1 = 0;
-        int score2 = 0;
-
-        if (request.Winner == "Empate")
-        {
-            score1 = request.TotalGoals / 2;
-            score2 = request.TotalGoals / 2;
-        }
-        else if (request.Winner == "A")
-        {
-            score1 = (request.TotalGoals + request.GoalsAhead) / 2;
-            score2 = request.TotalGoals - score1;
-        }
-        else if (request.Winner == "B")
-        {
-            score2 = (request.TotalGoals + request.GoalsAhead) / 2;
-            score1 = request.TotalGoals - score2;
-        }
-
-        var scoreState = $"{score1}-{score2}";
-
-        var success = await _matchService.FinishMatchAsync(request.MatchId, userId, scoreState);
+        var success = await _matchService.FinishMatchAsync(request.MatchId, userId, request.Winner , request.TotalGoals , request.GoalsAhead);
+        
         if (!success)
         {
             return BadRequest("No se pudo finalizar el partido.");
@@ -145,6 +122,7 @@ public class MatchController : Controller
 
         return Ok(new { success = true });
     }
+    
 
     // POST: /Match/BalancePlayers (AJAX)
     [HttpPost]
@@ -155,13 +133,12 @@ public class MatchController : Controller
             return BadRequest("Debes seleccionar al menos dos jugadores.");
         }
 
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
-        {
-            return Unauthorized();
-        }
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
 
         var teamsBalanced = await _matchmakingService.BalanceTeamsAsync(request.PlayerIds, request.GroupId);
         return Ok(teamsBalanced);
     }
+
+    
 }
