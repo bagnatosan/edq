@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 document.addEventListener("DOMContentLoaded", () => {
     const groupIdInput = document.getElementById("groupIdInput");
     const groupNameTitle = document.getElementById("groupNameTitle");
@@ -79,9 +70,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 3000);
     };
     // Cargar datos por AJAX
-    const loadGroupData = () => __awaiter(void 0, void 0, void 0, function* () {
+    const loadGroupData = async () => {
         try {
-            const response = yield fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
+            const response = await fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
             if (!response.ok) {
                 if (response.status === 403) {
                     showToast("No tienes permisos de administrador.", true);
@@ -92,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 throw new Error("Error al obtener los miembros del grupo.");
             }
-            const data = yield response.json();
+            const data = await response.json();
             // 1. Título
             groupNameTitle.textContent = `Eliminar Jugadores - ${data.groupName}`;
             // 2. Renderizar listado de jugadores
@@ -102,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error cargando jugadores:", error);
             showToast("Ocurrió un error al cargar la lista de jugadores.", true);
         }
-    });
+    };
     // Renderizar miembros en forma de lista eliminable
     const renderMembersList = (members, creatorId) => {
         if (!membersRemoveList || !membersCountBadge)
@@ -171,19 +162,19 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!confirmModal || !confirmModalText)
             return;
         confirmModalText.textContent = `¿Estás seguro de que deseas eliminar a ${playerName} del grupo? Esta acción no se puede deshacer.`;
-        currentDeleteCallback = () => __awaiter(void 0, void 0, void 0, function* () {
+        currentDeleteCallback = async () => {
             const deleteBtn = rowElement.querySelector(".btn-action-delete");
             if (deleteBtn)
                 deleteBtn.disabled = true;
             try {
-                const response = yield fetch(`/Group/RemoveMember?groupId=${groupId}&playerId=${playerId}`, {
+                const response = await fetch(`/Group/RemoveMember?groupId=${groupId}&playerId=${playerId}`, {
                     method: "POST",
                     headers: {
                         "RequestVerificationToken": getAntiForgeryToken()
                     }
                 });
                 if (!response.ok) {
-                    const errorText = yield response.text();
+                    const errorText = await response.text();
                     throw new Error(errorText || "Error al eliminar al jugador.");
                 }
                 // Animación de salida fluida
@@ -207,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (deleteBtn)
                     deleteBtn.disabled = false;
             }
-        });
+        };
         // Mostrar el modal con transiciones
         confirmModal.style.display = "flex";
         confirmModal.offsetHeight; // Forzar reflow

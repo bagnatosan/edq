@@ -1,23 +1,14 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 document.addEventListener("DOMContentLoaded", () => {
     const container = document.getElementById("chatGroupsListContainer");
     if (!container)
         return;
-    const loadChatGroups = () => __awaiter(void 0, void 0, void 0, function* () {
+    const loadChatGroups = async () => {
         try {
-            const response = yield fetch("/Group/GetGroups?skip=0&take=1000");
+            const response = await fetch("/Group/GetGroups?skip=0&take=1000");
             if (!response.ok)
                 throw new Error("Error al obtener los grupos.");
-            const data = yield response.json();
+            const data = await response.json();
             const myGroups = data.myGroups || [];
             container.innerHTML = "";
             if (myGroups.length === 0) {
@@ -93,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `;
         }
-    });
+    };
     const escapeHtml = (unsafe) => {
         if (!unsafe)
             return "";

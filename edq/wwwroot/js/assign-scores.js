@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 document.addEventListener("DOMContentLoaded", () => {
     const groupIdInput = document.getElementById("groupIdInput");
     const groupNameTitle = document.getElementById("groupNameTitle");
@@ -35,9 +26,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 3000);
     };
     // Cargar datos por AJAX
-    const loadGroupData = () => __awaiter(void 0, void 0, void 0, function* () {
+    const loadGroupData = async () => {
         try {
-            const response = yield fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
+            const response = await fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
             if (!response.ok) {
                 if (response.status === 403) {
                     alert("No tienes permisos de administrador.");
@@ -46,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 throw new Error("Error al obtener los miembros del grupo.");
             }
-            const data = yield response.json();
+            const data = await response.json();
             // 1. Título
             groupNameTitle.textContent = `Calificar Miembros - ${data.groupName}`;
             // 2. Renderizar listado de puntajes
@@ -56,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error cargando jugadores:", error);
             showToast("Ocurrió un error al cargar la lista de jugadores.", true);
         }
-    });
+    };
     // Renderizar miembros en forma de lista editable
     const renderMembersList = (members) => {
         if (!membersScoresList || !membersCountBadge)
@@ -120,7 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     // Guardar puntajes
     if (btnSaveScores) {
-        btnSaveScores.addEventListener("click", () => __awaiter(void 0, void 0, void 0, function* () {
+        btnSaveScores.addEventListener("click", async () => {
             const sliders = document.querySelectorAll(".member-score-slider");
             const updates = [];
             sliders.forEach(slider => {
@@ -135,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
             btnSaveScores.disabled = true;
             btnSaveScores.textContent = "Guardando...";
             try {
-                const response = yield fetch(`/Group/UpdateScores?groupId=${groupId}`, {
+                const response = await fetch(`/Group/UpdateScores?groupId=${groupId}`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -144,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify(updates)
                 });
                 if (!response.ok) {
-                    const errMsg = yield response.text();
+                    const errMsg = await response.text();
                     throw new Error(errMsg || "Error al actualizar los puntajes.");
                 }
                 showToast("¡Puntajes guardados con éxito!", false);
@@ -158,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 btnSaveScores.disabled = false;
                 btnSaveScores.innerHTML = `💾 Guardar Puntajes`;
             }
-        }));
+        });
     }
     // Anti forgery token helper
     const getAntiForgeryToken = () => {

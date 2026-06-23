@@ -451,17 +451,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Escapar HTML para evitar XSS
+    const escapeHtml = (unsafe: string): string => {
+        if (!unsafe) return "";
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    };
+
     // Cargar detalles al inicio
     loadDetails();
 });
-
-// Escapar HTML para evitar XSS
-const escapeHtml = (unsafe: string): string => {
-    if (!unsafe) return "";
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-};

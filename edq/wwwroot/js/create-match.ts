@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (error) {
             console.error("Error al cargar los miembros:", error);
-            alert("No se pudieron cargar los miembros del grupo.");
+            showToast("No se pudieron cargar los miembros del grupo.", true);
         }
     };
 
@@ -155,13 +155,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!isNaN(id)) selectedIds.push(id);
             });
 
-            if (selectedIds.length === 0) {
-                alert("Debes seleccionar al menos un jugador para convocar al partido.");
+            if (selectedIds.length < 2) {
+                showToast("Debes seleccionar al menos dos jugadores para poder balancear y crear el partido.", true);
                 return;
             }
 
             if (!matchDateTime.value) {
-                alert("Por favor selecciona una fecha y hora para el encuentro.");
+                showToast("Por favor selecciona una fecha y hora para el encuentro.", true);
                 return;
             }
 

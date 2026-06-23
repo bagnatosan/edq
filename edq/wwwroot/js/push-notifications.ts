@@ -1,3 +1,4 @@
+(() => {
 // Helper to convert base64 to Uint8Array for VAPID key
 function urlB64ToUint8Array(base64String: string): Uint8Array {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -244,3 +245,4 @@ document.addEventListener('DOMContentLoaded', () => {
         initNotificationsDropdown();
     }
 });
+})();

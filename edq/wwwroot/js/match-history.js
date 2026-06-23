@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 document.addEventListener("DOMContentLoaded", () => {
     const groupIdInput = document.getElementById("groupIdInput");
     const groupNameTitle = document.getElementById("groupNameTitle");
@@ -19,12 +10,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isNaN(groupId))
         return;
     // Cargar historial de partidos por AJAX
-    const loadMatchHistory = () => __awaiter(void 0, void 0, void 0, function* () {
+    const loadMatchHistory = async () => {
         try {
-            const response = yield fetch(`/Group/GetMatchHistoryData?groupId=${groupId}`);
+            const response = await fetch(`/Group/GetMatchHistoryData?groupId=${groupId}`);
             if (!response.ok)
                 throw new Error("Error al obtener el historial de partidos.");
-            const data = yield response.json();
+            const data = await response.json();
             // Renderizar listado de partidos
             renderHistoryList(data.matches, data.isCreator);
         }
@@ -34,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 matchesHistoryList.innerHTML = `<div style="text-align: center; color: var(--red-alert); padding: 40px 20px;">No se pudo cargar el historial de partidos.</div>`;
             }
         }
-    });
+    };
     // Renderizar la lista de partidos jugados
     const renderHistoryList = (matches, isCreator) => {
         if (!matchesHistoryList || !matchesCountBadge)

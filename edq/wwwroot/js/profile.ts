@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const setupPushSwitch = async () => {
             if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
                 switchNotifications.disabled = true;
-                const switchParent = switchNotifications.closest(".profile-option-item");
+                const switchParent = switchNotifications.closest(".profile-option-item") as HTMLElement | null;
                 if (switchParent) {
                     switchParent.style.opacity = "0.5";
                 }
@@ -217,7 +217,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         try {
                             const sub = await reg.pushManager.subscribe({
                                 userVisibleOnly: true,
-                                applicationServerKey: b64ToUint8(vapidKey)
+                                applicationServerKey: b64ToUint8(vapidKey) as any
                             });
 
                             const subJson = sub.toJSON();

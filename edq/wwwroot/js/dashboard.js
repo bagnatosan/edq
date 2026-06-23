@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 document.addEventListener("DOMContentLoaded", () => {
     const groupIdInput = document.getElementById("groupIdInput");
     const groupNameTitle = document.getElementById("groupNameTitle");
@@ -33,9 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isNaN(groupId))
         return;
     // Cargar datos del dashboard por AJAX
-    const loadDashboardData = () => __awaiter(void 0, void 0, void 0, function* () {
+    const loadDashboardData = async () => {
         try {
-            const response = yield fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
+            const response = await fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
             if (!response.ok) {
                 if (response.status === 403) {
                     alert("No tienes permiso para ver este grupo.");
@@ -44,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 throw new Error("Error al obtener datos del grupo.");
             }
-            const data = yield response.json();
+            const data = await response.json();
             // 1. Mostrar nombre del grupo
             groupNameTitle.textContent = data.groupName;
             // 2. Mostrar miembros en el carrusel (solo mostrar puntaje si el usuario actual es el creador)
@@ -98,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
         catch (error) {
             console.error("Error al cargar datos del dashboard:", error);
         }
-    });
+    };
     // Renderizar miembros en el carrusel horizontal
     const renderMembers = (members, isCreator) => {
         if (!membersCarousel || !membersCountBadge)
@@ -191,19 +182,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
     // Procesar la solicitud (Aceptar o Rechazar) por AJAX
-    const handleProcessRequest = (requestId, accept, itemElement) => __awaiter(void 0, void 0, void 0, function* () {
+    const handleProcessRequest = async (requestId, accept, itemElement) => {
         const actionUrl = accept ? "/Group/AcceptRequest" : "/Group/DeclineRequest";
         const buttons = itemElement.querySelectorAll(".btn-action");
         buttons.forEach(btn => btn.disabled = true);
         try {
-            const response = yield fetch(`${actionUrl}?requestId=${requestId}`, {
+            const response = await fetch(`${actionUrl}?requestId=${requestId}`, {
                 method: "POST",
                 headers: {
                     "RequestVerificationToken": getAntiForgeryToken()
                 }
             });
             if (!response.ok) {
-                const errorText = yield response.text();
+                const errorText = await response.text();
                 throw new Error(errorText || "Error al procesar la solicitud.");
             }
             itemElement.style.transition = "all 0.3s ease";
@@ -219,7 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
             alert(error.message || "No se pudo procesar la solicitud.");
             buttons.forEach(btn => btn.disabled = false);
         }
-    });
+    };
     // Renderizar ranking completo en orden descendente de winrate
     const renderRanking = (members) => {
         if (!rankingList)

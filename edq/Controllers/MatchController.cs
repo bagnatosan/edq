@@ -150,6 +150,11 @@ public class MatchController : Controller
     [HttpPost]
     public async Task<IActionResult> BalancePlayers([FromBody] BalanceMatchRequestDto request)
     {
+        if (request.PlayerIds == null || request.PlayerIds.Count < 2)
+        {
+            return BadRequest("Debes seleccionar al menos dos jugadores.");
+        }
+
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdString, out var userId))
         {

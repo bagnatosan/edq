@@ -503,6 +503,11 @@ public class GroupController : Controller
     [HttpPost]
     public async Task<IActionResult> GenerateMatch([FromBody] BalanceMatchRequestDto request)
     {
+        if (request.PlayerIds == null || request.PlayerIds.Count < 2)
+        {
+            return BadRequest("Debes seleccionar al menos dos jugadores.");
+        }
+
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         int.TryParse(userIdString, out var userId);
 

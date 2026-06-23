@@ -116,8 +116,9 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     // Renderizar una burbuja de mensaje en el DOM
     const appendMessage = (msg) => {
+        var _a, _b;
         const emptyMsg = chatMessages.querySelector("div");
-        if (emptyMsg && (emptyMsg.textContent?.includes("No hay mensajes") || emptyMsg.textContent?.includes("historial"))) {
+        if (emptyMsg && (((_a = emptyMsg.textContent) === null || _a === void 0 ? void 0 : _a.includes("No hay mensajes")) || ((_b = emptyMsg.textContent) === null || _b === void 0 ? void 0 : _b.includes("historial")))) {
             emptyMsg.remove();
         }
         const isMe = msg.senderId === currentUserId;
@@ -152,8 +153,9 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     // Renderizar una tarjeta de encuesta en el DOM (Estilo WhatsApp)
     const appendPoll = (poll) => {
+        var _a, _b;
         const emptyMsg = chatMessages.querySelector("div");
-        if (emptyMsg && (emptyMsg.textContent?.includes("No hay mensajes") || emptyMsg.textContent?.includes("historial"))) {
+        if (emptyMsg && (((_a = emptyMsg.textContent) === null || _a === void 0 ? void 0 : _a.includes("No hay mensajes")) || ((_b = emptyMsg.textContent) === null || _b === void 0 ? void 0 : _b.includes("historial")))) {
             emptyMsg.remove();
         }
         const isMe = poll.creatorId === currentUserId;

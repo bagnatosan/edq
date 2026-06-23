@@ -1,25 +1,16 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 document.addEventListener("DOMContentLoaded", () => {
     const upcomingMatchesList = document.getElementById("upcomingMatchesList");
     const matchesCountBadge = document.getElementById("matchesCountBadge");
     if (!upcomingMatchesList || !matchesCountBadge)
         return;
     // Cargar partidos futuros por AJAX
-    const loadUpcomingMatches = () => __awaiter(void 0, void 0, void 0, function* () {
+    const loadUpcomingMatches = async () => {
         try {
-            const response = yield fetch("/Match/GetUpcomingMatches");
+            const response = await fetch("/Match/GetUpcomingMatches");
             if (!response.ok)
                 throw new Error("Error al obtener los partidos programados.");
-            const data = yield response.json();
+            const data = await response.json();
             renderUpcomingList(data);
         }
         catch (error) {
@@ -28,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 upcomingMatchesList.innerHTML = `<div style="text-align: center; color: var(--red-alert); padding: 40px 20px;">No se pudieron cargar los próximos partidos.</div>`;
             }
         }
-    });
+    };
     // Renderizar la lista de partidos programados
     const renderUpcomingList = (matches) => {
         if (!upcomingMatchesList || !matchesCountBadge)

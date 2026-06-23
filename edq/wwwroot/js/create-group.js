@@ -1,3 +1,4 @@
+"use strict";
 document.addEventListener("DOMContentLoaded", () => {
     const createGroupForm = document.getElementById("createGroupForm");
     const groupNameInput = document.getElementById("groupName");

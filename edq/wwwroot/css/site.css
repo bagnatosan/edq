@@ -2123,7 +2123,7 @@ body {
   /* Centrado y límite de ancho para vistas secundarias y formularios */
   .app-content > .card,
   .app-content > form > .card,
-  .app-content > div:not(.dashboard-grid-layout):not(.groups-section):not(.chat-container-layout):not(.chat-header-nav):not(.dashboard-header-nav),
+  .app-content > div:not(.dashboard-grid-layout):not(.groups-section):not(.chat-container-layout):not(.chat-header-nav):not(.dashboard-header-nav):not(.modal-backdrop):not(#matchmakingLoadingModal):not(#confirmModal),
   .card:has(form),
   .card:has(#membersRemoveList),
   .card:has(#membersScoresList),
@@ -2132,6 +2132,21 @@ body {
     margin-left: auto;
     margin-right: auto;
     width: 100%;
+  }
+
+  /* Asegurar que los modals y backdrops a pantalla completa ignoren la restricción de ancho */
+  .app-content > #matchmakingLoadingModal,
+  .app-content > #confirmModal,
+  .app-content > .modal-backdrop,
+  .modal-backdrop {
+    max-width: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    margin: 0 !important;
   }
 
   /* Centrar y limitar el botón Comenzar Ahora de Index */
@@ -2287,9 +2302,16 @@ body {
   .desktop-nav {
     display: flex;
   }
+  .app-content {
+    display: flex;
+    flex-direction: column;
+  }
   .app-footer-desktop {
     display: flex;
-    margin-top: 40px;
+    margin-top: auto !important;
+    padding: 20px 0;
+    height: auto;
+    min-height: auto;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
   }
   .app-content.with-nav {
