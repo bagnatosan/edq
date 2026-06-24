@@ -33,9 +33,12 @@ public class MatchController : Controller
     public async Task<IActionResult> GetUpcomingMatches()
     {
         var userId = GetUserId();
-        if (userId == null) return Unauthorized();
-        
-        var matches = await _matchService.GetUpcomingMatchesForUserAsync(userId);
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var matches = await _matchService.GetUpcomingMatchesForUserAsync(userId.Value);
         return Json(matches);
     }
 
@@ -44,18 +47,17 @@ public class MatchController : Controller
     public async Task<IActionResult> Edit(int matchId)
     {
         var userId = GetUserId();
-        if (userId == null) return Unauthorized();
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
 
-        var details = await _matchService.GetMatchDetailsAsync(matchId, userId);
+        var details = await _matchService.GetMatchDetailsAsync(matchId, userId.Value);
         if (details == null)
         {
             return Forbid();
         }
 
-        ViewBag.MatchId = matchId;
-        ViewBag.GroupId = details.GroupId;
-        ViewBag.GroupName = details.GroupName;
-        ViewBag.IsCreator = details.IsCreator;
         return View(details);
     }
 
@@ -64,9 +66,12 @@ public class MatchController : Controller
     public async Task<IActionResult> GetMatchDetails(int matchId)
     {
         var userId = GetUserId();
-        if (userId == null) return Unauthorized();
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
 
-        var details = await _matchService.GetMatchDetailsAsync(matchId, userId);
+        var details = await _matchService.GetMatchDetailsAsync(matchId, userId.Value);
         if (details == null)
         {
             return Forbid();
@@ -80,15 +85,18 @@ public class MatchController : Controller
     public async Task<IActionResult> UpdateMatch([FromBody] UpdateMatchRequestDto request)
     {
         var userId = GetUserId();
-        if (userId == null) return Unauthorized();
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
 
-        var success = await _matchService.UpdateMatchPlayersAsync(request.MatchId, userId, request.Players, request.Date);
+        var success = await _matchService.UpdateMatchPlayersAsync(request.MatchId, userId.Value, request.Players, request.Date);
         if (!success)
         {
             return BadRequest("No se pudo actualizar el partido.");
         }
 
-        await _pushService.SendMatchModificationNotificationAsync(userId, request.MatchId);
+        await _pushService.SendMatchModificationNotificationAsync(userId.Value, request.MatchId);
 
         return Ok(new { success = true });
     }
@@ -98,9 +106,12 @@ public class MatchController : Controller
     public async Task<IActionResult> FinishMatch([FromBody] FinishMatchRequestDto request)
     {
         var userId = GetUserId();
-        if (userId == null) return Unauthorized();
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
 
-        var success = await _matchService.FinishMatchAsync(request.MatchId, userId, request.Winner , request.TotalGoals , request.GoalsAhead);
+        var success = await _matchService.FinishMatchAsync(request.MatchId, userId.Value, request);
         
         if (!success)
         {
@@ -121,7 +132,10 @@ public class MatchController : Controller
         }
 
         var userId = GetUserId();
-        if (userId == null) return Unauthorized();
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
 
         var teamsBalanced = await _matchmakingService.BalanceTeamsAsync(request.PlayerIds, request.GroupId);
         return Ok(teamsBalanced);
@@ -130,14 +144,6 @@ public class MatchController : Controller
     private int? GetUserId()
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        if (int.TryParse(userIdString, out var userId))
-        {
-            return  userId;
-        }
-        else
-        {
-            return null;
-        }
+        return int.TryParse(userIdString, out var userId) ? userId : null;
     }
 }

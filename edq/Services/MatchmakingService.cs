@@ -135,9 +135,5 @@ namespace edq.Services
                 return false;
             }
         }
-        
-        
-        
-        
     }
 }
