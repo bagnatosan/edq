@@ -17,7 +17,7 @@ namespace edq.Services
         public async Task<Dictionary<int, byte>> BalanceTeamsAsync(List<int> playerId, int grupoId)
         {
             const byte limitWithoutImprovement = 100;
-            ushort count = 0;
+            ushort count;
             const byte numberOfRestarts = 20;
             
             var lessDifference = int.MaxValue;
@@ -38,7 +38,7 @@ namespace edq.Services
             {
                 count = 0;
                 var random = new Random();
-                var shuffledPlayers = players.OrderBy(p => random.Next()).ToList();
+                var shuffledPlayers = players.OrderBy( _ => random.Next()).ToList();
 
                 var teamA = shuffledPlayers.Take(half).ToList();
                 var teamB = shuffledPlayers.Skip(half).ToList();
@@ -89,9 +89,9 @@ namespace edq.Services
                     }
                 }
             }
+            var capacity = bestTeamA.Count + bestTeamB.Count;
+            Dictionary<int, byte> results = new(capacity);
             
-            Dictionary<int, byte> results = new();
-
             foreach (var i in bestTeamA)
             {
                 results.Add(i , 1);

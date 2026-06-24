@@ -33,39 +33,40 @@ public class MatchService : IMatchService
             .Include(m => m.MatchPlayers)
                 .ThenInclude(mp => mp.Player)
             .Where(m => userGroupIds.Contains(m.GroupId) && m.State == "Pending")
+            
             .OrderBy(m => m.Date)
             .ToListAsync();
 
-        // 3. Mapear a DTO
-        var result = upcomingMatches.Select(m =>
-        {
-            var teams = m.MatchPlayers
-                .GroupBy(mp => mp.Team)
-                .OrderBy(g => g.Key)
-                .ToList();
 
-            var team1 = teams.Count > 0
-                ? teams[0].Select(mp => mp.Player != null ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : $"{mp.Player.Name} {mp.Player.LastName}") : "Desconocido").ToList()
-                : new List<string>();
-
-            var team2 = teams.Count > 1
-                ? teams[1].Select(mp => mp.Player != null ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : $"{mp.Player.Name} {mp.Player.LastName}") : "Desconocido").ToList()
-                : new List<string>();
-
-            return new UserUpcomingMatchDto
+        return await _context.Matches
+            .Where(m => userGroupIds.Contains(m.GroupId) && m.State == "Pending")
+            .OrderBy(m => m.Date)
+            .Select(m => new UserUpcomingMatchDto()
             {
                 MatchId = m.Id,
                 GroupId = m.GroupId,
-                GroupName = m.Group?.Name ?? "Grupo Desconocido",
+                GroupName = m.Group != null ? m.Group.Name : "Grupo Desconocido",
                 Date = m.Date,
-                Team1 = team1,
-                Team2 = team2
-            };
-        }).ToList();
 
-        return result;
+                Team1 = m.MatchPlayers.Where(mp => mp.Player != null)
+                    .Select(mp => mp.Player != null
+                        ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname)
+                            ? mp.Player.Nickname
+                            : $"{mp.Player.Name} {mp.Player.LastName}")
+                        : "Desconocido")
+                    .ToList(),
+                Team2 = m.MatchPlayers.Where(mp => mp.Player != null)
+                    .Select(mp => mp.Player != null
+                        ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname)
+                            ? mp.Player.Nickname
+                            : $"{mp.Player.Name} {mp.Player.LastName}")
+                        : "Desconocido")
+                    .ToList()
+            })
+            .ToListAsync();
     }
-
+    
+    
     public async Task<MatchDetailsDto?> GetMatchDetailsAsync(int matchId, int userId)
     {
         var match = await _context.Matches.AsNoTracking()

@@ -44,7 +44,7 @@ public class AccountController : Controller
 
     // POST: /Account/Login
     [HttpPost]
-    public async Task<IActionResult> Login(LoginDto model)
+    public async Task<IActionResult>Login(LoginDto model)
     {
         if (ModelState.IsValid)
         {
