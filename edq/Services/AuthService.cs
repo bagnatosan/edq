@@ -2,11 +2,7 @@ using edq.Data;
 using edq.DTO;
 using edq.Models;
 using Isopoh.Cryptography.Argon2;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace edq.Services;
 
@@ -24,74 +20,74 @@ public class AuthService : IAuthService
     public async Task<Player?> RegisterAsync(RegisterDto model)
     {
         // 1. Verificar si el correo ya existe
-        var usuarioExistente = await _context.Players.AnyAsync(p => p.Email == model.Email);
-        if (usuarioExistente)
+        var userExists = await _context.Players.AnyAsync(p => p.Email == model.Email);
+        if (userExists)
         {
             return null;
         }
 
         // 2. Procesar el guardado de la foto si subió una
-        string? rutaFoto = null;
+        string? photoRoute = null;
         if (model.ProfilePhoto != null && model.ProfilePhoto.Length > 0)
         {
-            string carpetaDestino = Path.Combine(_environment.WebRootPath, "images", "profiles");
+            string folderDestination = Path.Combine(_environment.WebRootPath, "images", "profiles");
             
             // Asegurar que exista la carpeta
-            if (!Directory.Exists(carpetaDestino))
+            if (!Directory.Exists(folderDestination))
             {
-                Directory.CreateDirectory(carpetaDestino);
+                Directory.CreateDirectory(folderDestination);
             }
 
             // Generar nombre de archivo único
-            string nombreUnico = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.ProfilePhoto.FileName);
-            string rutaFisicaCompleta = Path.Combine(carpetaDestino, nombreUnico);
+            string uniqueName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.ProfilePhoto.FileName);
+            string completePhysicalRoute = Path.Combine(folderDestination, uniqueName);
 
             // Guardar físicamente
-            using (var stream = new FileStream(rutaFisicaCompleta, FileMode.Create))
+            await using (var stream = new FileStream(completePhysicalRoute, FileMode.Create))
             {
                 await model.ProfilePhoto.CopyToAsync(stream);
             }
 
-            rutaFoto = "/images/profiles/" + nombreUnico;
+            photoRoute = "/images/profiles/" + uniqueName;
         }
 
         // 3. Hashear la contraseña usando Argon2id
         string passwordHash = Argon2.Hash(model.Password);
 
         // 4. Crear el nuevo Player
-        var nuevoJugador = new Player
+        var newPlayer = new Player
         {
             Name = model.Name,
             LastName = model.LastName,
             Email = model.Email,
             Nickname = model.Nickname,
             Password = passwordHash, // Se guarda el hash
-            PhotoUrl = rutaFoto
+            PhotoUrl = photoRoute
         };
 
-        _context.Players.Add(nuevoJugador);
+        _context.Players.Add(newPlayer);
         await _context.SaveChangesAsync();
 
-        return nuevoJugador;
+        return newPlayer;
     }
 
     public async Task<Player?> LoginAsync(string email, string password)
     {
         // 1. Buscar jugador por correo
-        var jugador = await _context.Players.AsNoTracking().FirstOrDefaultAsync(p => p.Email == email);
-        if (jugador == null)
+        var player = await _context.Players.AsNoTracking().FirstOrDefaultAsync(p => p.Email == email);
+        if (player == null)
         {
             return null;
         }
 
         // 2. Verificar el hash de contraseña usando Argon2id
-        bool contraseniaValida = Argon2.Verify(jugador.Password, password);
-        if (!contraseniaValida)
+        bool invalidPassword = Argon2.Verify(player.Password, password);
+        if (!invalidPassword)
         {
             return null;
         }
 
-        return jugador;
+        return player;
     }
 
     public async Task<Player?> GetPlayerByIdAsync(int id)

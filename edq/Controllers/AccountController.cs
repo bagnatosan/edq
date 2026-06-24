@@ -1,16 +1,9 @@
 using edq.DTO;
-using edq.Models;
 using edq.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using System.IO;
 using Microsoft.AspNetCore.Authorization;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
@@ -48,14 +41,14 @@ public class AccountController : Controller
     {
         if (ModelState.IsValid)
         {
-            var jugador = await _authService.LoginAsync(model.Email, model.Password);
-            if (jugador != null)
+            var player = await _authService.LoginAsync(model.Email, model.Password);
+            if (player != null)
             {
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.NameIdentifier, jugador.Id.ToString()),
-                    new Claim(ClaimTypes.Name, jugador.Name),
-                    new Claim(ClaimTypes.Email, jugador.Email)
+                    new Claim(ClaimTypes.NameIdentifier, player.Id.ToString()),
+                    new Claim(ClaimTypes.Name, player.Name),
+                    new Claim(ClaimTypes.Email, player.Email)
                 };
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -89,14 +82,14 @@ public class AccountController : Controller
     {
         if (ModelState.IsValid)
         {
-            var jugador = await _authService.RegisterAsync(model);
-            if (jugador != null)
+            var player = await _authService.RegisterAsync(model);
+            if (player != null)
             {
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.NameIdentifier, jugador.Id.ToString()),
-                    new Claim(ClaimTypes.Name, jugador.Name),
-                    new Claim(ClaimTypes.Email, jugador.Email)
+                    new Claim(ClaimTypes.NameIdentifier, player.Id.ToString()),
+                    new Claim(ClaimTypes.Name, player.Name),
+                    new Claim(ClaimTypes.Email, player.Email)
                 };
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -129,13 +122,13 @@ public class AccountController : Controller
     [Authorize]
     public async Task<IActionResult> Profile()
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return RedirectToAction("Login", "Account");
         }
 
-        var player = await _authService.GetPlayerByIdAsync(userId);
+        var player = await _authService.GetPlayerByIdAsync(userId.Value);
         if (player == null)
         {
             return RedirectToAction("Login", "Account");
@@ -147,20 +140,20 @@ public class AccountController : Controller
     // POST: /Account/UpdateNickname
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> UpdateNickname([FromBody] UpdateNicknameDto model)
+    public async Task<IActionResult> UpdateNickname([FromBody] UpdateNicknameDto? model)
     {
         if (model == null || string.IsNullOrWhiteSpace(model.Nickname))
         {
             return BadRequest(new { message = "El apodo no puede estar vacío." });
         }
 
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var success = await _authService.UpdatePlayerNicknameAsync(userId, model.Nickname.Trim());
+        var success = await _authService.UpdatePlayerNicknameAsync(userId.Value, model.Nickname.Trim());
         if (!success)
         {
             return NotFound(new { message = "Usuario no encontrado." });
@@ -172,32 +165,32 @@ public class AccountController : Controller
     // POST: /Account/UpdatePhoto
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> UpdatePhoto(IFormFile photo)
+    public async Task<IActionResult> UpdatePhoto(IFormFile? photo)
     {
         if (photo == null || photo.Length == 0)
         {
             return BadRequest(new { message = "No se ha proporcionado ninguna imagen válida." });
         }
 
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
         try
         {
-            string carpetaDestino = Path.Combine(_environment.WebRootPath, "images", "profiles");
+            string folderDestination = Path.Combine(_environment.WebRootPath, "images", "profiles");
             
             // Asegurar que exista la carpeta
-            if (!Directory.Exists(carpetaDestino))
+            if (!Directory.Exists(folderDestination))
             {
-                Directory.CreateDirectory(carpetaDestino);
+                Directory.CreateDirectory(folderDestination);
             }
 
             // Generar nombre de archivo único con extensión .webp para máxima compresión
-            string nombreUnico = Guid.NewGuid().ToString() + ".webp";
-            string rutaFisicaCompleta = Path.Combine(carpetaDestino, nombreUnico);
+            string uniqueName = Guid.NewGuid().ToString() + ".webp";
+            string completePhysicalRoute = Path.Combine(folderDestination, uniqueName);
 
             // Procesar y guardar la imagen de forma optimizada
             using (var image = await Image.LoadAsync(photo.OpenReadStream()))
@@ -214,11 +207,11 @@ public class AccountController : Controller
                 {
                     Quality = 75
                 };
-                await image.SaveAsync(rutaFisicaCompleta, encoder);
+                await image.SaveAsync(completePhysicalRoute, encoder);
             }
 
-            string photoUrl = "/images/profiles/" + nombreUnico;
-            var success = await _authService.UpdatePlayerPhotoAsync(userId, photoUrl);
+            string photoUrl = "/images/profiles/" + uniqueName;
+            var success = await _authService.UpdatePlayerPhotoAsync(userId.Value, photoUrl);
             if (!success)
             {
                 return NotFound(new { message = "Usuario no encontrado." });
@@ -235,20 +228,20 @@ public class AccountController : Controller
     // POST: /Account/UpdateNotificationSettings
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> UpdateNotificationSettings([FromBody] NotificationSettingsDto model)
+    public async Task<IActionResult> UpdateNotificationSettings([FromBody] NotificationSettingsDto? model)
     {
         if (model == null)
         {
             return BadRequest(new { message = "Datos inválidos." });
         }
 
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var success = await _authService.UpdatePlayerNotificationSettingsAsync(userId, model.NotifyMatchCreation, model.NotifyMatchModification, model.NotifyChat);
+        var success = await _authService.UpdatePlayerNotificationSettingsAsync(userId.Value, model.NotifyMatchCreation, model.NotifyMatchModification, model.NotifyChat);
         if (!success)
         {
             return BadRequest(new { message = "No se pudieron actualizar los ajustes." });
@@ -427,5 +420,11 @@ public class AccountController : Controller
         TempData["SuccessMessage"] = "Contraseña restablecida correctamente. Ya puedes iniciar sesión.";
 
         return RedirectToAction("Login");
+    }
+    
+    private int? GetUserId()
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return int.TryParse(userIdString, out var userId) ? userId : null;
     }
 }
