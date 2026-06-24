@@ -125,8 +125,7 @@ public class MatchService : IMatchService
         if (match == null) return false;
 
         // Cualquier miembro del grupo puede editar el partido
-        var isMember = await _context.GroupPlayers.AnyAsync(gp => gp.GroupId == match.GroupId && gp.PlayerId == userId)
-                       || match.Group?.CreatorId == userId;
+        var isMember = await IsUserInGroupAsync(match, userId);
         if (!isMember) return false;
 
         // Actualizar fecha
@@ -135,15 +134,15 @@ public class MatchService : IMatchService
         // Actualizar jugadores
         _context.MatchPlayers.RemoveRange(match.MatchPlayers);
 
-        foreach (var p in players)
+        var newPlayers = players.Select(p => new MatchPlayer()
         {
-            _context.MatchPlayers.Add(new MatchPlayer
-            {
-                MatchId = matchId,
-                PlayerId = p.PlayerId,
-                Team = p.Team
-            });
-        }
+            MatchId = matchId,
+            PlayerId = p.PlayerId,
+            Team = p.Team
+        }).ToList();
+        
+        _context.MatchPlayers.AddRange(newPlayers);
+        
 
         await _context.SaveChangesAsync();
         return true;
@@ -180,12 +179,20 @@ public class MatchService : IMatchService
         if (match == null) return false;
 
         // Cualquier miembro del grupo puede finalizar el partido
-        var isMember = await _context.GroupPlayers.AnyAsync(gp => gp.GroupId == match.GroupId && gp.PlayerId == userId)
-                       || match.Group?.CreatorId == userId;
+        var isMember = await IsUserInGroupAsync(match, userId);
         if (!isMember) return false;
+        
 
         match.State = scoreState;
         await _context.SaveChangesAsync();
         return true;
+    }
+
+    private async Task<bool> IsUserInGroupAsync(Match match, int? userId)
+    {
+        var isMember = await _context.GroupPlayers.AnyAsync(gp => gp.GroupId == match.GroupId && gp.PlayerId == userId)
+                       || match.Group?.CreatorId == userId;
+        
+        return isMember;
     }
 }

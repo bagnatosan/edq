@@ -27,19 +27,6 @@ public class MatchController : Controller
         return View();
     }
     
-    private int? GetUserId()
-    {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        if (int.TryParse(userIdString, out var userId))
-        {
-            return  userId;
-        }
-        else
-        {
-            return null;
-        }
-    }
     
     // GET: /Match/GetUpcomingMatches (AJAX)
     [HttpGet]
@@ -140,5 +127,17 @@ public class MatchController : Controller
         return Ok(teamsBalanced);
     }
 
-    
+    private int? GetUserId()
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (int.TryParse(userIdString, out var userId))
+        {
+            return  userId;
+        }
+        else
+        {
+            return null;
+        }
+    }
 }
