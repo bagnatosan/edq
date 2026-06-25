@@ -3,8 +3,6 @@ using edq.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using edq.Models;
 
 namespace edq.Controllers;
 
@@ -40,32 +38,30 @@ public class GroupController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateGroup(string name)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
         if (string.IsNullOrWhiteSpace(name))
-        {
             return BadRequest("El nombre del grupo no puede estar vacío.");
-        }
 
-        var groupId = await _groupService.CreateGroupAsync(userId, name.Trim());
-        return Ok(new { success = true, groupId = groupId });
+        var auxGroupId = await _groupService.CreateGroupAsync(userId.Value, name.Trim());
+        return Ok(new { success = true, groupId = auxGroupId });
     }
 
     // GET: /Group/GetGroups (AJAX endpoint)
     [HttpGet]
     public async Task<IActionResult> GetGroups(string? search, int skip = 0, int take = 15)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var (myGroups, otherGroups) = await _groupService.GetGroupsAsync(userId, search, skip, take);
+        var (myGroups, otherGroups) = await _groupService.GetGroupsAsync(userId.Value, search, skip, take);
 
         // Mapear los DTOs a la misma estructura JSON que espera el cliente javascript
         var myGroupsResult = myGroups.Select(g => new
@@ -101,13 +97,13 @@ public class GroupController : Controller
     [HttpPost]
     public async Task<IActionResult> JoinRequest(int groupId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var result = await _groupService.RequestJoinGroupAsync(userId, groupId);
+        var result = await _groupService.RequestJoinGroupAsync(userId.Value, groupId);
 
         return result switch
         {
@@ -125,17 +121,15 @@ public class GroupController : Controller
     [HttpGet]
     public async Task<IActionResult> Dashboard(int groupId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var canAccess = await _groupService.CanAccessDashboardAsync(userId, groupId);
-        if (!canAccess)
-        {
-            return Forbid();
-        }
+        var canAccess = await _groupService.CanAccessDashboardAsync(userId.Value, groupId);
+        
+        if (!canAccess)  return Forbid();
 
         ViewBag.GroupId = groupId;
         return View();
@@ -145,18 +139,17 @@ public class GroupController : Controller
     [HttpGet]
     public async Task<IActionResult> CreateMatch(int groupId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
         // Validar acceso: Cualquier miembro del grupo puede crear partidos
-        var canAccess = await _groupService.CanAccessDashboardAsync(userId, groupId);
-        if (!canAccess)
-        {
-            return Forbid();
-        }
+        var canAccess = await _groupService.CanAccessDashboardAsync(userId.Value, groupId);
+        
+        if (!canAccess) return Forbid();
+        
 
         ViewBag.GroupId = groupId;
         return View();
@@ -166,21 +159,27 @@ public class GroupController : Controller
     [HttpPost]
     public async Task<IActionResult> BalanceAndCreateMatch([FromBody] BalanceMatchRequestDto request)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
         // Validar acceso: Cualquier miembro del grupo puede crear partidos
-        var canAccess = await _groupService.CanAccessDashboardAsync(userId, request.GroupId);
+        var canAccess = await _groupService.CanAccessDashboardAsync(userId.Value, request.GroupId);
         if (!canAccess)
-        {
             return Forbid();
-        }
 
-        // TODO: Invocar el algoritmo de emparejamiento (IMatchmakingService) y guardar el partido.
-        // El usuario implementará la lógica aquí.
+        if (request.PlayerIds == null || request.PlayerIds.Count < 2)
+            return BadRequest("Debes seleccionar al menos dos jugadores.");
+
+        var teamsBalanced = await _matchmakingService.BalanceTeamsAsync(request.PlayerIds, request.GroupId);
+        var success = await _matchmakingService.CreateMatchAsync(request.GroupId, request.Date, request.PlayerIds, teamsBalanced);
+
+        if (!success)
+            return BadRequest("No se pudo crear el partido balanceado.");
+
+        _ = _pushService.SendMatchCreationNotificationAsync(userId.Value, request.GroupId, request.PlayerIds, request.Date);
 
         return Ok(new { success = true });
     }
@@ -189,17 +188,16 @@ public class GroupController : Controller
     [HttpGet]
     public async Task<IActionResult> GetGroupDashboardData(int groupId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
+        
 
-        var data = await _groupService.GetGroupDashboardDataAsync(userId, groupId);
-        if (data == null)
-        {
-            return Forbid();
-        }
+        var data = await _groupService.GetGroupDashboardDataAsync(userId.Value, groupId);
+        if (data == null) return Forbid();
+        
 
         // Mapear al formato JSON que espera el cliente javascript
         return Json(new
@@ -207,7 +205,7 @@ public class GroupController : Controller
             groupId = data.GroupId,
             groupName = data.GroupName,
             isCreator = data.IsCreator,
-            creatorId = userId,
+            creatorId = userId.Value,
             members = data.Members.Select(m => new
             {
                 id = m.Id,
@@ -234,17 +232,15 @@ public class GroupController : Controller
     [HttpPost]
     public async Task<IActionResult> AcceptRequest(int requestId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var success = await _groupService.AcceptRequestAsync(userId, requestId);
+        var success = await _groupService.AcceptRequestAsync(userId.Value, requestId);
         if (!success)
-        {
             return BadRequest("La solicitud no pudo ser procesada, ya fue procesada o no tienes permisos.");
-        }
 
         return Json(new { success = true });
     }
@@ -253,17 +249,16 @@ public class GroupController : Controller
     [HttpPost]
     public async Task<IActionResult> DeclineRequest(int requestId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var success = await _groupService.DeclineRequestAsync(userId, requestId);
+        var success = await _groupService.DeclineRequestAsync(userId.Value, requestId);
         if (!success)
-        {
             return BadRequest("La solicitud no pudo ser procesada, ya fue procesada o no tienes permisos.");
-        }
+        
 
         return Json(new { success = true });
     }
@@ -272,17 +267,16 @@ public class GroupController : Controller
     [HttpGet]
     public async Task<IActionResult> AssignScores(int groupId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var groupData = await _groupService.GetGroupDashboardDataAsync(userId, groupId);
+        var groupData = await _groupService.GetGroupDashboardDataAsync(userId.Value, groupId);
         if (groupData == null || !groupData.IsCreator)
-        {
             return Forbid();
-        }
+        
 
         ViewBag.GroupId = groupId;
         return View();
@@ -290,24 +284,21 @@ public class GroupController : Controller
 
     // POST: /Group/UpdateScores (AJAX endpoint)
     [HttpPost]
-    public async Task<IActionResult> UpdateScores(int groupId, [FromBody] System.Collections.Generic.List<MemberScoreUpdateDto> updates)
+    public async Task<IActionResult> UpdateScores(int groupId, [FromBody] List<MemberScoreUpdateDto>? updates)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        if (updates == null || updates.Count == 0)
-        {
+        if (updates == null || updates.Count == 0) 
             return BadRequest("No se recibieron puntajes para actualizar.");
-        }
+        
 
-        var success = await _groupService.UpdateMemberScoresAsync(userId, groupId, updates);
+        var success = await _groupService.UpdateMemberScoresAsync(userId.Value, groupId, updates);
         if (!success)
-        {
             return BadRequest("No se pudieron actualizar los puntajes.");
-        }
 
         return Json(new { success = true });
     }
@@ -316,22 +307,19 @@ public class GroupController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateTemporaryPlayer(int groupId, string name, string lastName, byte initialScore)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
         if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(lastName))
-        {
             return BadRequest("El nombre y el apellido son obligatorios.");
-        }
+        
 
-        var success = await _groupService.CreateTemporaryPlayerAsync(userId, groupId, name, lastName, initialScore);
+        var success = await _groupService.CreateTemporaryPlayerAsync(userId.Value, groupId, name, lastName, initialScore);
         if (!success)
-        {
             return BadRequest("No se pudo crear el jugador temporal.");
-        }
 
         return Json(new { success = true });
     }
@@ -340,17 +328,15 @@ public class GroupController : Controller
     [HttpGet]
     public async Task<IActionResult> MatchHistory(int groupId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var canAccess = await _groupService.CanAccessDashboardAsync(userId, groupId);
+        var canAccess = await _groupService.CanAccessDashboardAsync(userId.Value, groupId);
         if (!canAccess)
-        {
             return Forbid();
-        }
 
         ViewBag.GroupId = groupId;
         return View();
@@ -360,37 +346,33 @@ public class GroupController : Controller
     [HttpGet]
     public async Task<IActionResult> GetMatchHistoryData(int groupId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var data = await _groupService.GetMatchHistoryAsync(userId, groupId);
+        var data = await _groupService.GetMatchHistoryAsync(userId.Value, groupId);
         if (data == null)
-        {
             return Forbid();
-        }
 
-        var isCreator = await _groupService.IsGroupCreatorAsync(userId, groupId);
-        return Json(new { isCreator = isCreator, matches = data });
+        var auxIsCreator = await _groupService.IsGroupCreatorAsync(userId.Value, groupId);
+        return Json(new { isCreator = auxIsCreator, matches = data });
     }
 
     // GET: /Group/AdminPanel
     [HttpGet]
     public async Task<IActionResult> AdminPanel(int groupId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var groupData = await _groupService.GetGroupDashboardDataAsync(userId, groupId);
+        var groupData = await _groupService.GetGroupDashboardDataAsync(userId.Value, groupId);
         if (groupData == null || !groupData.IsCreator)
-        {
             return Forbid();
-        }
 
         ViewBag.GroupId = groupId;
         return View();
@@ -400,17 +382,15 @@ public class GroupController : Controller
     [HttpGet]
     public async Task<IActionResult> CreateTempPlayer(int groupId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var groupData = await _groupService.GetGroupDashboardDataAsync(userId, groupId);
+        var groupData = await _groupService.GetGroupDashboardDataAsync(userId.Value, groupId);
         if (groupData == null || !groupData.IsCreator)
-        {
             return Forbid();
-        }
 
         ViewBag.GroupId = groupId;
         return View();
@@ -420,17 +400,15 @@ public class GroupController : Controller
     [HttpGet]
     public async Task<IActionResult> GroupSettings(int groupId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var groupData = await _groupService.GetGroupDashboardDataAsync(userId, groupId);
+        var groupData = await _groupService.GetGroupDashboardDataAsync(userId.Value, groupId);
         if (groupData == null || !groupData.IsCreator)
-        {
             return Forbid();
-        }
 
         ViewBag.GroupId = groupId;
         return View();
@@ -440,22 +418,18 @@ public class GroupController : Controller
     [HttpPost]
     public async Task<IActionResult> UpdateGroupName(int groupId, string name)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
         if (string.IsNullOrWhiteSpace(name))
-        {
             return BadRequest("El nombre del grupo no puede estar vacío.");
-        }
 
-        var success = await _groupService.UpdateGroupNameAsync(userId, groupId, name);
+        var success = await _groupService.UpdateGroupNameAsync(userId.Value, groupId, name);
         if (!success)
-        {
             return BadRequest("No se pudo actualizar el nombre del grupo.");
-        }
 
         return Json(new { success = true });
     }
@@ -464,17 +438,15 @@ public class GroupController : Controller
     [HttpGet]
     public async Task<IActionResult> RemoveMembers(int groupId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var groupData = await _groupService.GetGroupDashboardDataAsync(userId, groupId);
+        var groupData = await _groupService.GetGroupDashboardDataAsync(userId.Value, groupId);
         if (groupData == null || !groupData.IsCreator)
-        {
             return Forbid();
-        }
 
         ViewBag.GroupId = groupId;
         return View();
@@ -484,48 +456,22 @@ public class GroupController : Controller
     [HttpPost]
     public async Task<IActionResult> RemoveMember(int groupId, int playerId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var success = await _groupService.RemoveMemberAsync(userId, groupId, playerId);
+        var success = await _groupService.RemoveMemberAsync(userId.Value, groupId, playerId);
         if (!success)
-        {
             return BadRequest("No se pudo eliminar al jugador del grupo o no tienes permisos.");
-        }
 
         return Json(new { success = true });
     }
-
-
-    [HttpPost]
-    public async Task<IActionResult> GenerateMatch([FromBody] BalanceMatchRequestDto request)
+    
+    private int? GetUserId()
     {
-        if (request.PlayerIds == null || request.PlayerIds.Count < 2)
-        {
-            return BadRequest("Debes seleccionar al menos dos jugadores.");
-        }
-
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        int.TryParse(userIdString, out var userId);
-
-        var teamsBalanced = await _matchmakingService.BalanceTeamsAsync
-            (request.PlayerIds, request.GroupId);
-
-        var success = await _matchmakingService.CreateMatchAsync(request.GroupId, request.Date, request.PlayerIds, teamsBalanced);
-
-        if (success)
-        {
-            _ = _pushService.SendMatchCreationNotificationAsync(userId, request.GroupId, request.PlayerIds, request.Date);
-            return Ok("Partido creado correctamente");
-        }
-        else
-        {
-            return BadRequest("No se pudo crear el partido");
-        }
+        return int.TryParse(userIdString, out var userId) ? userId : null;
     }
 }
-
-

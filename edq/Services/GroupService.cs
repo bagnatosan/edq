@@ -2,10 +2,6 @@ using edq.Data;
 using edq.DTO;
 using edq.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace edq.Services;
 
@@ -20,31 +16,24 @@ public class GroupService : IGroupService
 
     public async Task<(List<GroupDto> MyGroups, List<GroupDto> OtherGroups)> GetGroupsAsync(int userId, string? search, int skip, int take)
     {
-        // 1. Mis Grupos (Creador o miembro regular)
-        var myGroupsQuery = _context.Groups.AsNoTracking()
-            .Include(g => g.Creator)
-            .Include(g => g.GroupPlayers)
-            .Where(g => g.CreatorId == userId || g.GroupPlayers.Any(gp => gp.PlayerId == userId));
-
-        var myGroups = await myGroupsQuery
+        // 1. Mis Grupos (Creador o miembro regular) - Proyección directa optimizada
+        var myGroupsResult = await _context.Groups
+            .Where(g => g.CreatorId == userId || g.GroupPlayers.Any(gp => gp.PlayerId == userId))
             .OrderBy(g => g.Name)
+            .Select(g => new GroupDto
+            {
+                Id = g.Id,
+                Name = g.Name,
+                CreatorName = g.Creator != null ? g.Creator.Name + " " + g.Creator.LastName : "Desconocido",
+                MemberCount = g.GroupPlayers.Count,
+                IsCreator = g.CreatorId == userId,
+                IsMember = true,
+                RequestStatus = null
+            })
             .ToListAsync();
 
-        var myGroupsResult = myGroups.Select(g => new GroupDto
-        {
-            Id = g.Id,
-            Name = g.Name,
-            CreatorName = g.Creator != null ? $"{g.Creator.Name} {g.Creator.LastName}" : "Desconocido",
-            MemberCount = g.GroupPlayers.Count,
-            IsCreator = g.CreatorId == userId,
-            IsMember = true,
-            RequestStatus = null
-        }).ToList();
-
-        // 2. Otros Grupos (Descubrir) - Paginado y Filtrable
-        var otherGroupsQuery = _context.Groups.AsNoTracking()
-            .Include(g => g.Creator)
-            .Include(g => g.GroupPlayers)
+        // 2. Otros Grupos (Descubrir) - Paginado y Filtrable - Proyección directa optimizada
+        var otherGroupsQuery = _context.Groups
             .Where(g => g.CreatorId != userId && !g.GroupPlayers.Any(gp => gp.PlayerId == userId));
 
         if (!string.IsNullOrWhiteSpace(search))
@@ -53,29 +42,37 @@ public class GroupService : IGroupService
             otherGroupsQuery = otherGroupsQuery.Where(g => g.Name.ToLower().Contains(searchLower));
         }
 
-        var otherGroups = await otherGroupsQuery
+        var otherGroupsResult = await otherGroupsQuery
             .OrderBy(g => g.Name)
             .Skip(skip)
             .Take(take)
+            .Select(g => new GroupDto
+            {
+                Id = g.Id,
+                Name = g.Name,
+                CreatorName = g.Creator != null ? g.Creator.Name + " " + g.Creator.LastName : "Desconocido",
+                MemberCount = g.GroupPlayers.Count,
+                IsCreator = false,
+                IsMember = false,
+                RequestStatus = null
+            })
             .ToListAsync();
 
-        var otherGroupIds = otherGroups.Select(g => g.Id).ToList();
+        var otherGroupIds = otherGroupsResult.Select(g => g.Id).ToList();
 
         // Obtener el estado de solicitudes del usuario actual para estos grupos
         var userRequests = await _context.Requests.AsNoTracking()
             .Where(r => r.PlayerId == userId && otherGroupIds.Contains(r.GroupId))
             .ToDictionaryAsync(r => r.GroupId, r => r.State);
 
-        var otherGroupsResult = otherGroups.Select(g => new GroupDto
+        // Asignar el estado de las solicitudes en memoria local
+        foreach (var groupDto in otherGroupsResult)
         {
-            Id = g.Id,
-            Name = g.Name,
-            CreatorName = g.Creator != null ? $"{g.Creator.Name} {g.Creator.LastName}" : "Desconocido",
-            MemberCount = g.GroupPlayers.Count,
-            IsCreator = false,
-            IsMember = false,
-            RequestStatus = userRequests.TryGetValue(g.Id, out var status) ? status : null
-        }).ToList();
+            if (userRequests.TryGetValue(groupDto.Id, out var status))
+            {
+                groupDto.RequestStatus = status;
+            }
+        }
 
         return (myGroupsResult, otherGroupsResult);
     }
@@ -193,37 +190,48 @@ public class GroupService : IGroupService
 
     public async Task<GroupDashboardDto?> GetGroupDashboardDataAsync(int userId, int groupId)
     {
+        // 1. Obtener datos básicos del grupo (Sin incluir Creator completo)
         var group = await _context.Groups.AsNoTracking()
-            .Include(g => g.Creator)
+            .Select(g => new { g.Id, g.Name, g.CreatorId })
             .FirstOrDefaultAsync(g => g.Id == groupId);
 
         if (group == null)
-        {
             return null;
-        }
 
         var isCreator = group.CreatorId == userId;
         var isMember = await _context.GroupPlayers.AnyAsync(gp => gp.GroupId == groupId && gp.PlayerId == userId);
 
         if (!isCreator && !isMember)
-        {
             return null;
-        }
+        
 
-        // Obtener miembros del grupo
-        var groupPlayers = await _context.GroupPlayers.AsNoTracking()
-            .Include(gp => gp.Player)
+        // 2. Obtener miembros del grupo con proyección limpia de campos
+        var groupPlayersData = await _context.GroupPlayers.AsNoTracking()
             .Where(gp => gp.GroupId == groupId)
+            .Select(gp => new
+            {
+                gp.PlayerId,
+                gp.Score,
+                PlayerName = gp.Player != null ? gp.Player.Name : "",
+                PlayerLastName = gp.Player != null ? gp.Player.LastName : "",
+                PlayerNickname = gp.Player != null ? gp.Player.Nickname : "",
+                PlayerPhotoUrl = gp.Player != null ? gp.Player.PhotoUrl : null,
+                PlayerInitials = gp.Player != null ? gp.Player.Initials : ""
+            })
             .ToListAsync();
 
-        // Obtener partidos finalizados para calcular winrates
-        var completedMatches = await _context.Matches.AsNoTracking()
-            .Include(m => m.MatchPlayers)
+        // 3. Obtener datos ligeros de partidos finalizados para winrate
+        var completedMatchesData = await _context.Matches.AsNoTracking()
             .Where(m => m.GroupId == groupId && m.State != "Pending")
+            .Select(m => new
+            {
+                m.State,
+                MatchPlayers = m.MatchPlayers.Select(mp => new { mp.Team, mp.PlayerId }).ToList()
+            })
             .ToListAsync();
 
         var playerWinStats = new Dictionary<int, (int Played, int Won)>();
-        foreach (var match in completedMatches)
+        foreach (var match in completedMatchesData)
         {
             var parts = match.State.Split('-');
             if (parts.Length != 2 || !int.TryParse(parts[0].Trim(), out var score1) || !int.TryParse(parts[1].Trim(), out var score2))
@@ -260,17 +268,18 @@ public class GroupService : IGroupService
             }
         }
 
-        var members = groupPlayers.Select(gp =>
+        var members = groupPlayersData.Select(gp =>
         {
             playerWinStats.TryGetValue(gp.PlayerId, out var stats);
             double winrate = stats.Played > 0 ? ((double)stats.Won / stats.Played) * 100.0 : 0.0;
+            var fullName = $"{gp.PlayerName} {gp.PlayerLastName}";
             return new GroupMemberDto
             {
                 Id = gp.PlayerId,
-                Name = $"{gp.Player!.Name} {gp.Player.LastName}",
-                Nickname = !string.IsNullOrWhiteSpace(gp.Player.Nickname) ? gp.Player.Nickname : $"{gp.Player.Name} {gp.Player.LastName}",
-                PhotoUrl = gp.Player.PhotoUrl,
-                Initials = gp.Player.Initials,
+                Name = fullName,
+                Nickname = !string.IsNullOrWhiteSpace(gp.PlayerNickname) ? gp.PlayerNickname : fullName,
+                PhotoUrl = gp.PlayerPhotoUrl,
+                Initials = gp.PlayerInitials,
                 Score = gp.Score,
                 Winrate = Math.Round(winrate, 1)
             };
@@ -279,58 +288,47 @@ public class GroupService : IGroupService
         .ThenBy(m => m.Name)
         .ToList();
 
-        // Obtener solicitudes pendientes si es administrador
+        // 4. Obtener solicitudes pendientes si es administrador
         List<PendingRequestDto>? pendingRequests = null;
         if (isCreator)
         {
             pendingRequests = await _context.Requests.AsNoTracking()
-                .Include(r => r.Player)
                 .Where(r => r.GroupId == groupId && r.State == "Pending")
                 .OrderBy(r => r.DateRequest)
                 .Select(r => new PendingRequestDto
                 {
                     RequestId = r.Id,
                     PlayerId = r.PlayerId,
-                    Name = $"{r.Player!.Name} {r.Player.LastName}",
-                    Nickname = !string.IsNullOrWhiteSpace(r.Player.Nickname) ? r.Player.Nickname : $"{r.Player.Name} {r.Player.LastName}",
-                    PhotoUrl = r.Player.PhotoUrl,
-                    Initials = r.Player.Initials
+                    Name = r.Player != null ? r.Player.Name + " " + r.Player.LastName : "Desconocido",
+                    Nickname = r.Player != null ? (!string.IsNullOrWhiteSpace(r.Player.Nickname) ? r.Player.Nickname : r.Player.Name + " " + r.Player.LastName) : "Desconocido",
+                    PhotoUrl = r.Player != null ? r.Player.PhotoUrl : null,
+                    Initials = r.Player != null ? r.Player.Initials : ""
                 })
                 .ToListAsync();
         }
 
-        // Obtener próximo partido
-        var upcomingMatch = await _context.Matches.AsNoTracking()
-            .Include(m => m.MatchPlayers)
-                .ThenInclude(mp => mp.Player)
+        // 5. Obtener próximo partido con proyección directa
+        var upcomingMatchDto = await _context.Matches.AsNoTracking()
             .Where(m => m.GroupId == groupId && m.State == "Pending")
             .OrderBy(m => m.Date)
-            .FirstOrDefaultAsync();
-
-        UpcomingMatchDto? upcomingMatchDto = null;
-        if (upcomingMatch != null)
-        {
-            var teams = upcomingMatch.MatchPlayers
-                .GroupBy(mp => mp.Team)
-                .OrderBy(g => g.Key)
-                .ToList();
-
-            var team1 = teams.Count > 0 
-                ? teams[0].Select(mp => mp.Player != null ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : $"{mp.Player.Name} {mp.Player.LastName}") : "Desconocido").ToList() 
-                : new List<string>();
-
-            var team2 = teams.Count > 1 
-                ? teams[1].Select(mp => mp.Player != null ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : $"{mp.Player.Name} {mp.Player.LastName}") : "Desconocido").ToList() 
-                : new List<string>();
-
-            upcomingMatchDto = new UpcomingMatchDto
+            .Select(m => new UpcomingMatchDto
             {
-                Id = upcomingMatch.Id,
-                Date = upcomingMatch.Date,
-                Team1 = team1,
-                Team2 = team2
-            };
-        }
+                Id = m.Id,
+                Date = m.Date,
+                Team1 = m.MatchPlayers
+                    .Where(mp => mp.Team == 1)
+                    .Select(mp => mp.Player != null 
+                        ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : mp.Player.Name + " " + mp.Player.LastName) 
+                        : "Desconocido")
+                    .ToList(),
+                Team2 = m.MatchPlayers
+                    .Where(mp => mp.Team == 2)
+                    .Select(mp => mp.Player != null 
+                        ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : mp.Player.Name + " " + mp.Player.LastName) 
+                        : "Desconocido")
+                    .ToList()
+            })
+            .FirstOrDefaultAsync();
 
         return new GroupDashboardDto
         {
@@ -350,19 +348,15 @@ public class GroupService : IGroupService
             .FirstOrDefaultAsync(r => r.Id == requestId);
 
         if (request == null)
-        {
             return false;
-        }
+        
 
         if (request.Group == null || request.Group.CreatorId != userId)
-        {
             return false;
-        }
 
         if (request.State != "Pending")
-        {
             return false;
-        }
+        
 
         // Agregar a la tabla de relación si no existe
         var exists = await _context.GroupPlayers.AnyAsync(gp => gp.GroupId == request.GroupId && gp.PlayerId == request.PlayerId);
@@ -391,19 +385,16 @@ public class GroupService : IGroupService
             .FirstOrDefaultAsync(r => r.Id == requestId);
 
         if (request == null)
-        {
             return false;
-        }
+        
 
         if (request.Group == null || request.Group.CreatorId != userId)
-        {
             return false;
-        }
+        
 
         if (request.State != "Pending")
-        {
             return false;
-        }
+        
 
         // Marcar solicitud como rechazada
         request.State = "Rejected";
@@ -416,9 +407,8 @@ public class GroupService : IGroupService
     {
         var group = await _context.Groups.AsNoTracking().FirstOrDefaultAsync(g => g.Id == groupId);
         if (group == null || group.CreatorId != userId)
-        {
             return false;
-        }
+        
 
         foreach (var update in updates)
         {
@@ -475,36 +465,29 @@ public class GroupService : IGroupService
             return null;
         }
 
-        var matches = await _context.Matches.AsNoTracking()
-            .Include(m => m.MatchPlayers)
-                .ThenInclude(mp => mp.Player)
+        // Proyección directa optimizada
+        return await _context.Matches.AsNoTracking()
             .Where(m => m.GroupId == groupId && m.State != "Pending")
             .OrderByDescending(m => m.Date)
-            .ToListAsync();
-
-        return matches.Select(m => {
-            var teams = m.MatchPlayers
-                .GroupBy(mp => mp.Team)
-                .OrderBy(g => g.Key)
-                .ToList();
-
-            var team1 = teams.Count > 0 
-                ? teams[0].Select(mp => mp.Player != null ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : $"{mp.Player.Name} {mp.Player.LastName}") : "Desconocido").ToList() 
-                : new List<string>();
-
-            var team2 = teams.Count > 1 
-                ? teams[1].Select(mp => mp.Player != null ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : $"{mp.Player.Name} {mp.Player.LastName}") : "Desconocido").ToList() 
-                : new List<string>();
-
-            return new MatchHistoryDto
+            .Select(m => new MatchHistoryDto
             {
                 MatchId = m.Id,
                 Date = m.Date,
                 Result = m.State,
-                Team1 = team1,
-                Team2 = team2
-            };
-        }).ToList();
+                Team1 = m.MatchPlayers
+                    .Where(mp => mp.Team == 1)
+                    .Select(mp => mp.Player != null 
+                        ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : mp.Player.Name + " " + mp.Player.LastName) 
+                        : "Desconocido")
+                    .ToList(),
+                Team2 = m.MatchPlayers
+                    .Where(mp => mp.Team == 2)
+                    .Select(mp => mp.Player != null 
+                        ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : mp.Player.Name + " " + mp.Player.LastName) 
+                        : "Desconocido")
+                    .ToList()
+            })
+            .ToListAsync();
     }
 
     public async Task<bool> UpdateGroupNameAsync(int userId, int groupId, string newName)
