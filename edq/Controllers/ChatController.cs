@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace edq.Controllers;
 
@@ -14,18 +13,15 @@ namespace edq.Controllers;
 public class ChatController : Controller
 {
     private readonly IChatService _chatService;
-    private readonly IGroupService _groupService;
     private readonly IHubContext<ChatHub> _hubContext;
     private readonly IPushNotificationService _pushService;
 
     public ChatController(
         IChatService chatService,
-        IGroupService groupService,
         IHubContext<ChatHub> hubContext,
         IPushNotificationService pushService)
     {
         _chatService = chatService;
-        _groupService = groupService;
         _hubContext = hubContext;
         _pushService = pushService;
     }
@@ -35,8 +31,8 @@ public class ChatController : Controller
     [Route("Group/Chat")]
     public async Task<IActionResult> Chat(int groupId = 0)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
@@ -46,7 +42,7 @@ public class ChatController : Controller
             return View("~/Views/Group/ChatList.cshtml");
         }
 
-        var belongs = await _chatService.CanAccessChatAsync(userId, groupId);
+        var belongs = await _chatService.CanAccessChatAsync(userId.Value, groupId);
         if (!belongs)
         {
             return Forbid();
@@ -67,13 +63,13 @@ public class ChatController : Controller
     [HttpGet]
     public async Task<IActionResult> GetMessages(int groupId, int skip = 0, int take = 30)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var belongs = await _chatService.CanAccessChatAsync(userId, groupId);
+        var belongs = await _chatService.CanAccessChatAsync(userId.Value, groupId);
         if (!belongs)
         {
             return Forbid();
@@ -87,19 +83,19 @@ public class ChatController : Controller
     [HttpPost]
     public async Task<IActionResult> CreatePoll([FromBody] CreatePollRequestDto request)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var belongs = await _chatService.CanAccessChatAsync(userId, request.GroupId);
+        var belongs = await _chatService.CanAccessChatAsync(userId.Value, request.GroupId);
         if (!belongs)
         {
             return Forbid();
         }
 
-        var pollDto = await _chatService.CreatePollAsync(userId, request.GroupId, request.Question, request.Options, request.DurationMinutes, request.TargetDate);
+        var pollDto = await _chatService.CreatePollAsync(userId.Value, request.GroupId, request.Question, request.Options, request.DurationMinutes, request.TargetDate);
         if (pollDto == null)
         {
             return BadRequest("No se pudo crear la encuesta.");
@@ -114,7 +110,7 @@ public class ChatController : Controller
             "📊 Nueva Encuesta",
             $"Se creó la encuesta: \"{request.Question}\"",
             $"/Group/Chat?groupId={request.GroupId}",
-            userId,
+            userId.Value,
             NotificationType.Chat
         );
 
@@ -125,19 +121,19 @@ public class ChatController : Controller
     [HttpGet]
     public async Task<IActionResult> GetActivePolls(int groupId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var belongs = await _chatService.CanAccessChatAsync(userId, groupId);
+        var belongs = await _chatService.CanAccessChatAsync(userId.Value, groupId);
         if (!belongs)
         {
             return Forbid();
         }
 
-        var polls = await _chatService.GetActivePollsAsync(userId, groupId);
+        var polls = await _chatService.GetActivePollsAsync(userId.Value, groupId);
         return Json(polls);
     }
 
@@ -145,13 +141,14 @@ public class ChatController : Controller
     [HttpPost]
     public async Task<IActionResult> Vote([FromBody] VoteRequestDto request)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
-
-        var (success, groupId, updatedPollData) = await _chatService.VoteAsync(userId, request.PollId, request.OptionId);
+        
+        
+        var (success, groupId, updatedPollData) = await _chatService.VoteAsync(userId.Value, request.PollId, request.OptionId);
         if (!success)
         {
             return BadRequest("No se pudo registrar el voto en este momento.");
@@ -167,13 +164,13 @@ public class ChatController : Controller
     [HttpGet]
     public async Task<IActionResult> GetLatestPollVoters(int groupId)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdString, out var userId))
+        var userId = GetUserId();
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var belongs = await _chatService.CanAccessChatAsync(userId, groupId);
+        var belongs = await _chatService.CanAccessChatAsync(userId.Value, groupId);
         if (!belongs)
         {
             return Forbid();
@@ -181,5 +178,11 @@ public class ChatController : Controller
 
         var voterIds = await _chatService.GetLatestPollVotersAsync(groupId);
         return Json(voterIds);
+    }
+    
+    private int? GetUserId()
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return int.TryParse(userIdString, out var userId) ? userId : null;
     }
 }

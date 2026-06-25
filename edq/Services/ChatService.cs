@@ -2,10 +2,6 @@ using edq.Data;
 using edq.DTO;
 using edq.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace edq.Services;
 
@@ -26,30 +22,33 @@ public class ChatService : IChatService
 
     public async Task<string?> GetGroupNameAsync(int groupId)
     {
-        var group = await _context.Groups.AsNoTracking().FirstOrDefaultAsync(g => g.Id == groupId);
-        return group?.Name;
+        return await _context.Groups.AsNoTracking()
+            .Where(g => g.Id == groupId)
+            .Select(g => g.Name)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<List<ChatMessageDto>> GetMessagesAsync(int groupId, int skip, int take)
     {
         var messages = await _context.ChatMessages.AsNoTracking()
-            .Include(m => m.Sender)
             .Where(m => m.GroupId == groupId)
             .OrderByDescending(m => m.SentAt)
             .Skip(skip)
             .Take(take)
+            .Select(m => new ChatMessageDto
+            {
+                Id = m.Id,
+                SenderId = m.SenderId,
+                SenderName = m.Sender != null ? (m.Sender.Nickname != null && m.Sender.Nickname != "" ? m.Sender.Nickname : m.Sender.Name + " " + m.Sender.LastName) : "Desconocido",
+                SenderInitials = m.Sender != null ? m.Sender.Initials : "",
+                PhotoUrl = m.Sender != null ? m.Sender.PhotoUrl : null,
+                MessageText = m.MessageText,
+                SentAt = m.SentAt
+            })
             .ToListAsync();
 
-        return messages.Select(m => new ChatMessageDto
-        {
-            Id = m.Id,
-            SenderId = m.SenderId,
-            SenderName = !string.IsNullOrWhiteSpace(m.Sender?.Nickname) ? m.Sender.Nickname : $"{m.Sender?.Name} {m.Sender?.LastName}",
-            SenderInitials = m.Sender?.Initials ?? "",
-            PhotoUrl = m.Sender?.PhotoUrl,
-            MessageText = m.MessageText,
-            SentAt = m.SentAt
-        }).Reverse().ToList();
+        messages.Reverse();
+        return messages;
     }
 
     public async Task<PollDto?> CreatePollAsync(int userId, int groupId, string question, List<string> options, int durationMinutes, DateTime? targetDate)
@@ -108,24 +107,16 @@ public class ChatService : IChatService
     public async Task<List<PollDto>> GetActivePollsAsync(int userId, int groupId)
     {
         var now = DateTime.UtcNow;
-        var polls = await _context.Polls.AsNoTracking()
-            .Include(p => p.Creator)
-            .Include(p => p.Options)
-                .ThenInclude(o => o.Votes)
-                    .ThenInclude(v => v.Player)
+        return await _context.Polls.AsNoTracking()
             .Where(p => p.GroupId == groupId && p.IsActive && p.ExpiresAt > now)
             .OrderByDescending(p => p.CreatedAt)
-            .ToListAsync();
-
-        return polls.Select(p => {
-            var creatorName = p.Creator != null ? (!string.IsNullOrWhiteSpace(p.Creator.Nickname) ? p.Creator.Nickname : $"{p.Creator.Name} {p.Creator.LastName}") : "Desconocido";
-            return new PollDto
+            .Select(p => new PollDto
             {
                 Id = p.Id,
                 CreatorId = p.CreatorId,
-                CreatorName = creatorName,
-                CreatorInitials = p.Creator?.Initials ?? "",
-                CreatorPhotoUrl = p.Creator?.PhotoUrl,
+                CreatorName = p.Creator != null ? (p.Creator.Nickname != null && p.Creator.Nickname != "" ? p.Creator.Nickname : p.Creator.Name + " " + p.Creator.LastName) : "Desconocido",
+                CreatorInitials = p.Creator != null ? p.Creator.Initials : "",
+                CreatorPhotoUrl = p.Creator != null ? p.Creator.PhotoUrl : null,
                 Question = p.Question,
                 CreatedAt = p.CreatedAt,
                 ExpiresAt = p.ExpiresAt,
@@ -139,20 +130,20 @@ public class ChatService : IChatService
                     Voters = o.Votes.Select(v => new PollVoterDto
                     {
                         PlayerId = v.PlayerId,
-                        Name = v.Player != null ? $"{v.Player.Name} {v.Player.LastName}" : "Desconocido",
+                        Name = v.Player != null ? v.Player.Name + " " + v.Player.LastName : "Desconocido",
                         Nickname = v.Player != null ? v.Player.Nickname : null,
                         Initials = v.Player != null ? v.Player.Initials : "",
                         PhotoUrl = v.Player != null ? v.Player.PhotoUrl : null
                     }).ToList()
                 }).ToList()
-            };
-        }).ToList();
+            })
+            .ToListAsync();
     }
 
     public async Task<(bool Success, int GroupId, object? UpdatedPollData)> VoteAsync(int userId, int pollId, int optionId)
     {
         var poll = await _context.Polls.AsNoTracking()
-            .Include(p => p.Options)
+            .Select(p => new { p.Id, p.IsActive, p.ExpiresAt, p.GroupId })
             .FirstOrDefaultAsync(p => p.Id == pollId);
 
         if (poll == null || !poll.IsActive || poll.ExpiresAt <= DateTime.UtcNow)
@@ -160,8 +151,8 @@ public class ChatService : IChatService
             return (false, 0, null);
         }
 
-        var option = poll.Options.FirstOrDefault(o => o.Id == optionId);
-        if (option == null)
+        var optionExists = await _context.PollOptions.AnyAsync(o => o.Id == optionId && o.PollId == pollId);
+        if (!optionExists)
         {
             return (false, 0, null);
         }
@@ -200,8 +191,6 @@ public class ChatService : IChatService
         await _context.SaveChangesAsync();
 
         var updatedOptions = await _context.PollOptions.AsNoTracking()
-            .Include(o => o.Votes)
-                .ThenInclude(v => v.Player)
             .Where(o => o.PollId == pollId)
             .Select(o => new
             {
@@ -211,7 +200,7 @@ public class ChatService : IChatService
                 voters = o.Votes.Select(v => new
                 {
                     playerId = v.PlayerId,
-                    name = v.Player != null ? $"{v.Player.Name} {v.Player.LastName}" : "Desconocido",
+                    name = v.Player != null ? v.Player.Name + " " + v.Player.LastName : "Desconocido",
                     nickname = v.Player != null ? v.Player.Nickname : null,
                     initials = v.Player != null ? v.Player.Initials : "",
                     photoUrl = v.Player != null ? v.Player.PhotoUrl : null
@@ -230,34 +219,44 @@ public class ChatService : IChatService
 
     public async Task<List<int>> GetLatestPollVotersAsync(int groupId)
     {
-        // Obtener la última encuesta del grupo, incluyendo opciones y votos
-        var latestPoll = await _context.Polls.AsNoTracking()
-            .Include(p => p.Options)
-                .ThenInclude(o => o.Votes)
+        // Obtener el ID de la última encuesta y sus opciones con sus conteos de votos
+        var latestPollInfo = await _context.Polls.AsNoTracking()
             .Where(p => p.GroupId == groupId)
             .OrderByDescending(p => p.CreatedAt)
+            .Select(p => new
+            {
+                p.Id,
+                Options = p.Options.Select(o => new
+                {
+                    o.Id,
+                    VoteCount = o.Votes.Count
+                }).ToList()
+            })
             .FirstOrDefaultAsync();
 
-        if (latestPoll == null || !latestPoll.Options.Any())
+        if (latestPollInfo == null || !latestPollInfo.Options.Any())
         {
             return new List<int>();
         }
 
         // Encontrar el máximo número de votos entre las opciones
-        var maxVotes = latestPoll.Options.Max(o => o.Votes.Count);
+        var maxVotes = latestPollInfo.Options.Max(o => o.VoteCount);
         if (maxVotes == 0)
         {
             return new List<int>();
         }
 
-        // Seleccionar todos los PlayerId que votaron por las opciones que obtuvieron el máximo de votos
-        var voterIds = latestPoll.Options
-            .Where(o => o.Votes.Count == maxVotes)
-            .SelectMany(o => o.Votes)
-            .Select(v => v.PlayerId)
-            .Distinct()
+        // Obtener los IDs de las opciones ganadoras
+        var winningOptionIds = latestPollInfo.Options
+            .Where(o => o.VoteCount == maxVotes)
+            .Select(o => o.Id)
             .ToList();
 
-        return voterIds;
+        // Buscar en la BD los PlayerId que votaron por esas opciones
+        return await _context.PollVotes.AsNoTracking()
+            .Where(v => v.PollId == latestPollInfo.Id && winningOptionIds.Contains(v.PollOptionId))
+            .Select(v => v.PlayerId)
+            .Distinct()
+            .ToListAsync();
     }
 }
