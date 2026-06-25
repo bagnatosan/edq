@@ -1,4 +1,5 @@
-using System;
+
+using System.ComponentModel.DataAnnotations;
 
 namespace edq.Models;
 
@@ -12,6 +13,8 @@ public class ChatMessage
     public int SenderId { get; set; }
     public Player? Sender { get; set; }
     
+    [Required]
+    [MaxLength(4096)]
     public string MessageText { get; set; } = string.Empty;
     
     public DateTime SentAt { get; set; } = DateTime.UtcNow;

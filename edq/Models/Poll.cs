@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace edq.Models;
 
@@ -13,6 +14,7 @@ public class Poll
     public int CreatorId { get; set; }
     public Player? Creator { get; set; }
     
+    [MaxLength(30)]
     public string Question { get; set; } = string.Empty;
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

@@ -1,7 +1,10 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace edq.DTO;
 
 public class UpdateNicknameDto
 {
+    [MaxLength(20, ErrorMessage = "El apodo no puede superar los 20 caracteres.")]
     public string? Nickname { get; set; } = string.Empty;
 }
 

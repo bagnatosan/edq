@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace edq.Models;
 
 public class Match
@@ -7,6 +9,8 @@ public class Match
     public Group? Group { get; set; }
     
     public DateTime Date { get; set; }
+    
+    [MaxLength(20)]
     public string State { get; set; } = "Pending";
 
     public List<MatchPlayer> MatchPlayers { get; set; } = new();

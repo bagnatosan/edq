@@ -40,12 +40,12 @@
 
                 <div class="form-group">
                     <label class="form-label">Email</label>
-                    <input type="email" name="Email" value="@(ViewBag.ShowRegisterOnLoad != true ? ViewData.ModelState["Email"]?.AttemptedValue : "")" class="form-control-neon"  required />
+                    <input type="email" name="Email" value="@(ViewBag.ShowRegisterOnLoad != true ? ViewData.ModelState["Email"]?.AttemptedValue : "")" class="form-control-neon" maxlength="50"  required />
                 </div>
                 
                 <div class="form-group form-group-spaced">
                     <label class="form-label">Contraseña</label>
-                    <input type="password" name="Password" class="form-control-neon" placeholder="••••••••" required />
+                    <input type="password" name="Password" class="form-control-neon" placeholder="••••••••" maxlength="20" required />
                 </div>
 
                 <!-- Recordarme & Olvidé contraseña -->
@@ -89,32 +89,32 @@
                 <div class="form-row-double">
                     <div class="form-col-half">
                         <label class="form-label">Nombre</label>
-                        <input type="text" name="Name" value="@(ViewBag.ShowRegisterOnLoad == true ? ViewData.ModelState["Name"]?.AttemptedValue : "")" class="form-control-neon" required />
+                        <input type="text" name="Name" value="@(ViewBag.ShowRegisterOnLoad == true ? ViewData.ModelState["Name"]?.AttemptedValue : "")" class="form-control-neon" maxlength="30" required />
                     </div>
                     <div class="form-col-half">
                         <label class="form-label">Apellido</label>
-                        <input type="text" name="LastName" value="@(ViewBag.ShowRegisterOnLoad == true ? ViewData.ModelState["LastName"]?.AttemptedValue : "")" class="form-control-neon" required />
+                        <input type="text" name="LastName" value="@(ViewBag.ShowRegisterOnLoad == true ? ViewData.ModelState["LastName"]?.AttemptedValue : "")" class="form-control-neon" maxlength="30" required />
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Email</label>
-                    <input type="email" name="Email" value="@(ViewBag.ShowRegisterOnLoad == true ? ViewData.ModelState["Email"]?.AttemptedValue : "")" class="form-control-neon" required />
+                    <input type="email" name="Email" value="@(ViewBag.ShowRegisterOnLoad == true ? ViewData.ModelState["Email"]?.AttemptedValue : "")" class="form-control-neon" maxlength="50" required />
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Apodo (Opcional)</label>
-                    <input type="text" name="Nickname" value="@(ViewBag.ShowRegisterOnLoad == true ? ViewData.ModelState["Nickname"]?.AttemptedValue : "")" class="form-control-neon" />
+                    <input type="text" name="Nickname" value="@(ViewBag.ShowRegisterOnLoad == true ? ViewData.ModelState["Nickname"]?.AttemptedValue : "")" class="form-control-neon" maxlength="20" />
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Contraseña</label>
-                    <input type="password" name="Password" class="form-control-neon" placeholder="••••••••" required />
+                    <input type="password" name="Password" class="form-control-neon" placeholder="••••••••" maxlength="20" required />
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Confirmar Contraseña</label>
-                    <input type="password" name="ConfirmPassword" class="form-control-neon" placeholder="••••••••" required />
+                    <input type="password" name="ConfirmPassword" class="form-control-neon" placeholder="••••••••" maxlength="20" required />
                 </div>
 
                 <!-- Carga de Foto de Perfil personalizada -->

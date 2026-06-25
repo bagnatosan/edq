@@ -51,9 +51,10 @@ public class ChatHub : Hub
         }
 
         if (string.IsNullOrWhiteSpace(messageText))
-        {
             return;
-        }
+
+        if (messageText.Length > 4096)
+            throw new HubException("El mensaje no puede superar los 4096 caracteres.");
 
         var player = await _context.Players.FindAsync(userId);
         if (player == null)

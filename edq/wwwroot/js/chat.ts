@@ -356,6 +356,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const text = chatMessageInput.value.trim();
         if (!text) return;
 
+        if (text.length > 4096) {
+            showToast("El mensaje no puede superar los 4096 caracteres.", true);
+            return;
+        }
+
         chatMessageInput.value = "";
         btnSendMessage.disabled = true;
 
@@ -374,6 +379,12 @@ document.addEventListener("DOMContentLoaded", () => {
     chatMessageInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
             handleSendMessage();
+        }
+    });
+
+    chatMessageInput.addEventListener("input", () => {
+        if (chatMessageInput.value.length >= 4096) {
+            showToast("Se alcanzó el límite máximo de 4096 caracteres.", true);
         }
     });
 
@@ -562,7 +573,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 optionDiv.style.alignItems = "center";
                 
                 optionDiv.innerHTML = `
-                    <input type="text" class="form-control-neon poll-option-input" placeholder="Opción ${optionIndex}" required style="flex: 1; margin-bottom: 0;" />
+                    <input type="text" class="form-control-neon poll-option-input" placeholder="Opción ${optionIndex}" maxlength="20" required style="flex: 1; margin-bottom: 0;" />
                     <button type="button" class="btn-remove-option" style="background: none; border: none; color: var(--red-alert); font-size: 18px; cursor: pointer; padding: 0 4px; display: flex; align-items: center; justify-content: center; height: 38px; line-height: 1;">×</button>
                 `;
                 

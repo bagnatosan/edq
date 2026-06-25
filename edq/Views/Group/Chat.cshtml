@@ -72,7 +72,7 @@
             </div>
         </div>
 
-        <input type="text" id="chatMessageInput" placeholder="Escribe aquí..." class="form-control-neon" style="flex: 1; margin-bottom: 0; padding: 12px 16px; font-size: 14px;" />
+        <input type="text" id="chatMessageInput" placeholder="Escribe aquí..." class="form-control-neon" maxlength="4096" style="flex: 1; margin-bottom: 0; padding: 12px 16px; font-size: 14px;" />
         
         <button id="btnSendMessage" class="btn-neon" style="width: 46px; height: 46px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;" aria-label="Enviar mensaje">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(45deg); margin-left: -2px;">
@@ -91,7 +91,7 @@
         <form id="createPollForm">
             <div style="margin-bottom: 12px;">
                 <label class="form-label" style="font-size: 11px;">Pregunta / Texto</label>
-                <input type="text" id="pollQuestion" placeholder="¿Qué día jugamos?" class="form-control-neon" required />
+                <input type="text" id="pollQuestion" placeholder="¿Qué día jugamos?" class="form-control-neon" maxlength="30" required />
             </div>
 
             <!-- Contenedor para Opciones Dinámicas -->
@@ -99,10 +99,10 @@
                 <label class="form-label" style="font-size: 11px;">Opciones de Respuesta</label>
                 <div id="pollOptionsContainer" style="display: flex; flex-direction: column; gap: 8px;">
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        <input type="text" class="form-control-neon poll-option-input" placeholder="Opción 1" required style="flex: 1; margin-bottom: 0;" />
+                        <input type="text" class="form-control-neon poll-option-input" placeholder="Opción 1" maxlength="20" required style="flex: 1; margin-bottom: 0;" />
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        <input type="text" class="form-control-neon poll-option-input" placeholder="Opción 2" required style="flex: 1; margin-bottom: 0;" />
+                        <input type="text" class="form-control-neon poll-option-input" placeholder="Opción 2" maxlength="20" required style="flex: 1; margin-bottom: 0;" />
                     </div>
                 </div>
                 <button type="button" id="btnAddPollOption" class="btn-outline-neon" style="margin-top: 8px; font-size: 11px; padding: 6px 12px; width: auto; align-self: flex-start; height: auto;">＋ Agregar Opción</button>

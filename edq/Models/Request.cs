@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace edq.Models;
 
 public class Request
@@ -11,5 +13,6 @@ public class Request
     public Player? Player { get; set; }
 
     public DateTime DateRequest { get; set; } = DateTime.UtcNow;
+    [MaxLength(20)]
     public string State { get; set; } = "Pending";
 }

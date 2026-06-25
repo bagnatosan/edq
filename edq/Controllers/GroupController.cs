@@ -47,6 +47,9 @@ public class GroupController : Controller
         if (string.IsNullOrWhiteSpace(name))
             return BadRequest("El nombre del grupo no puede estar vacío.");
 
+        if (name.Length > 50)
+            return BadRequest("El nombre del grupo no puede superar los 50 caracteres.");
+
         var groupId = await _groupService.CreateGroupAsync(userId.Value, name.Trim());
         return Ok(new { success = true, groupId });
     }
@@ -316,6 +319,8 @@ public class GroupController : Controller
         if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(lastName))
             return BadRequest("El nombre y el apellido son obligatorios.");
         
+        if (name.Length > 30 || lastName.Length > 30)
+            return BadRequest("El nombre y el apellido no pueden superar los 30 caracteres.");
 
         var success = await _groupService.CreateTemporaryPlayerAsync(userId.Value, groupId, name, lastName, initialScore);
         if (!success)

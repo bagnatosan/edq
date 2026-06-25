@@ -143,9 +143,10 @@ public class AccountController : Controller
     public async Task<IActionResult> UpdateNickname([FromBody] UpdateNicknameDto? model)
     {
         if (model == null || string.IsNullOrWhiteSpace(model.Nickname))
-        {
             return BadRequest(new { message = "El apodo no puede estar vacío." });
-        }
+
+        if (model.Nickname.Length > 20)
+            return BadRequest(new { message = "El apodo no puede superar los 20 caracteres." });
 
         var userId = GetUserId();
         if (userId == null)
