@@ -1,11 +1,7 @@
 using edq.Data;
 using edq.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 using WebPush;
 
 namespace edq.Services;
@@ -20,9 +16,15 @@ public class PushNotificationService : IPushNotificationService
     public PushNotificationService(ApplicationDbContext context)
     {
         _context = context;
+    
+        // Inicializar con valores por defecto para evitar advertencias de nulidad del compilador
+        _publicKey = "";
+        _privateKey = "";
 
-        // Cargar o generar llaves VAPID
         string path = Path.Combine(AppContext.BaseDirectory, "vapid.json");
+        bool keysLoaded = false;
+
+        // 1. Intentar leer el archivo si existe
         if (File.Exists(path))
         {
             try
@@ -30,21 +32,31 @@ public class PushNotificationService : IPushNotificationService
                 var keys = JsonSerializer.Deserialize<VapidKeysJson>(File.ReadAllText(path));
                 _publicKey = keys?.PublicKey ?? "";
                 _privateKey = keys?.PrivateKey ?? "";
+            
+                // Marcar como cargado si las llaves no están vacías
+                if (!string.IsNullOrEmpty(_publicKey) && !string.IsNullOrEmpty(_privateKey))
+                {
+                    keysLoaded = true;
+                }
             }
             catch
             {
-                var generated = VapidHelper.GenerateVapidKeys();
-                _publicKey = generated.PublicKey;
-                _privateKey = generated.PrivateKey;
-                File.WriteAllText(path, JsonSerializer.Serialize(new VapidKeysJson { PublicKey = _publicKey, PrivateKey = _privateKey }));
+                // Si la lectura falla, keysLoaded sigue en false y se regenerarán abajo
             }
         }
-        else
+
+        // 2. Si las llaves no se cargaron correctamente, generar unas nuevas
+        if (!keysLoaded)
         {
             var generated = VapidHelper.GenerateVapidKeys();
             _publicKey = generated.PublicKey;
             _privateKey = generated.PrivateKey;
-            File.WriteAllText(path, JsonSerializer.Serialize(new VapidKeysJson { PublicKey = _publicKey, PrivateKey = _privateKey }));
+        
+            File.WriteAllText(path, JsonSerializer.Serialize(new VapidKeysJson 
+            { 
+                PublicKey = _publicKey, 
+                PrivateKey = _privateKey 
+            }));
         }
     }
 
@@ -61,9 +73,9 @@ public class PushNotificationService : IPushNotificationService
 
         var payload = JsonSerializer.Serialize(new
         {
-            title = title,
-            body = body,
-            url = url
+            title,
+            body,
+            url
         });
 
         try
@@ -157,7 +169,7 @@ public class PushNotificationService : IPushNotificationService
         }
     }
 
-    public async Task SendMatchCreationNotificationAsync(int creatorId, int groupId, System.Collections.Generic.List<int> convocadoPlayerIds, System.DateTime date)
+    public async Task SendMatchCreationNotificationAsync(int creatorId, int groupId, List<int> chosenPlayerIds, DateTime date)
     {
         var creator = await _context.Players.AsNoTracking().FirstOrDefaultAsync(p => p.Id == creatorId);
         var creatorName = creator != null ? (!string.IsNullOrWhiteSpace(creator.Nickname) ? creator.Nickname : $"{creator.Name} {creator.LastName}") : "Un administrador";
@@ -166,7 +178,7 @@ public class PushNotificationService : IPushNotificationService
         var groupName = group?.Name ?? "Grupo";
 
         var targets = await _context.Players.AsNoTracking()
-            .Where(p => convocadoPlayerIds.Contains(p.Id) && p.Id != creatorId && p.NotifyMatchCreation)
+            .Where(p => chosenPlayerIds.Contains(p.Id) && p.Id != creatorId && p.NotifyMatchCreation)
             .Select(p => p.Id)
             .ToListAsync();
 
@@ -200,10 +212,10 @@ public class PushNotificationService : IPushNotificationService
         var modifier = await _context.Players.AsNoTracking().FirstOrDefaultAsync(p => p.Id == modifierId);
         var modifierName = modifier != null ? (!string.IsNullOrWhiteSpace(modifier.Nickname) ? modifier.Nickname : $"{modifier.Name} {modifier.LastName}") : "Un administrador";
 
-        var convocadoPlayerIds = match.MatchPlayers.Select(mp => mp.PlayerId).ToList();
+        var chosenPlayerIds = match.MatchPlayers.Select(mp => mp.PlayerId).ToList();
 
         var targets = await _context.Players.AsNoTracking()
-            .Where(p => convocadoPlayerIds.Contains(p.Id) && p.Id != modifierId && p.NotifyMatchModification)
+            .Where(p => chosenPlayerIds.Contains(p.Id) && p.Id != modifierId && p.NotifyMatchModification)
             .Select(p => p.Id)
             .ToListAsync();
 
@@ -223,9 +235,9 @@ public class PushNotificationService : IPushNotificationService
         }
     }
 
-    public async Task<bool> SubscribePlayerAsync(int playerId, string endpoint, string p256dh, string auth)
+    public async Task<bool> SubscribePlayerAsync(int playerId, string endpoint, string p256Dh, string auth)
     {
-        if (string.IsNullOrWhiteSpace(endpoint) || string.IsNullOrWhiteSpace(p256dh) || string.IsNullOrWhiteSpace(auth))
+        if (string.IsNullOrWhiteSpace(endpoint) || string.IsNullOrWhiteSpace(p256Dh) || string.IsNullOrWhiteSpace(auth))
         {
             return false;
         }
@@ -239,7 +251,7 @@ public class PushNotificationService : IPushNotificationService
             {
                 PlayerId = playerId,
                 Endpoint = endpoint,
-                P256dh = p256dh,
+                P256dh = p256Dh,
                 Auth = auth,
                 CreatedAt = DateTime.UtcNow
             };

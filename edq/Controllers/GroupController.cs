@@ -47,8 +47,8 @@ public class GroupController : Controller
         if (string.IsNullOrWhiteSpace(name))
             return BadRequest("El nombre del grupo no puede estar vacío.");
 
-        var auxGroupId = await _groupService.CreateGroupAsync(userId.Value, name.Trim());
-        return Ok(new { success = true, groupId = auxGroupId });
+        var groupId = await _groupService.CreateGroupAsync(userId.Value, name.Trim());
+        return Ok(new { success = true, groupId });
     }
 
     // GET: /Group/GetGroups (AJAX endpoint)
@@ -356,8 +356,8 @@ public class GroupController : Controller
         if (data == null)
             return Forbid();
 
-        var auxIsCreator = await _groupService.IsGroupCreatorAsync(userId.Value, groupId);
-        return Json(new { isCreator = auxIsCreator, matches = data });
+        var isCreator = await _groupService.IsGroupCreatorAsync(userId.Value, groupId);
+        return Json(new { isCreator, matches = data });
     }
 
     // GET: /Group/AdminPanel

@@ -2,7 +2,6 @@ using edq.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace edq.Controllers;
 
@@ -32,15 +31,13 @@ public class PushSubscriptionController : Controller
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdString, out var userId))
-        {
             return Unauthorized();
-        }
+        
 
-        var success = await _pushService.SubscribePlayerAsync(userId, request.Endpoint, request.P256dh, request.Auth);
+        var success = await _pushService.SubscribePlayerAsync(userId, request.Endpoint, request.P256Dh, request.Auth);
         if (!success)
-        {
             return BadRequest("Suscripción inválida.");
-        }
+        
 
         return Ok(new { success = true });
     }
@@ -51,9 +48,8 @@ public class PushSubscriptionController : Controller
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdString, out var userId))
-        {
             return Unauthorized();
-        }
+        
 
         await _pushService.UnsubscribePlayerAsync(userId, request.Endpoint);
         return Ok(new { success = true });
@@ -63,7 +59,7 @@ public class PushSubscriptionController : Controller
 public class PushSubscriptionRequestDto
 {
     public string Endpoint { get; set; } = string.Empty;
-    public string P256dh { get; set; } = string.Empty;
+    public string P256Dh { get; set; } = string.Empty;
     public string Auth { get; set; } = string.Empty;
 }
 
