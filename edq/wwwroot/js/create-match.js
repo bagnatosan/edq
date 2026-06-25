@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }, progressSpeed);
             try {
                 // Realizar llamada al backend para balancear y crear el partido
-                const response = await fetch(`/Group/GenerateMatch`, {
+                const response = await fetch(`/Group/BalanceAndCreateMatch`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
