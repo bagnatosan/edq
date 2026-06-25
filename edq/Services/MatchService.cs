@@ -23,21 +23,9 @@ public class MatchService : IMatchService
             .ToListAsync();
 
         if (userGroupIds.Count == 0)
-        {
             return new List<UserUpcomingMatchDto>();
-        }
 
-        // 2. Obtener todos los partidos de esos grupos que estén pendientes
-        var upcomingMatches = await _context.Matches.AsNoTracking()
-            .Include(m => m.Group)
-            .Include(m => m.MatchPlayers)
-                .ThenInclude(mp => mp.Player)
-            .Where(m => userGroupIds.Contains(m.GroupId) && m.State == "Pending")
-            
-            .OrderBy(m => m.Date)
-            .ToListAsync();
-
-
+        // 2. Obtener todos los partidos de esos grupos que estén pendientes mediante proyección directa
         return await _context.Matches
             .Where(m => userGroupIds.Contains(m.GroupId) && m.State == "Pending")
             .OrderBy(m => m.Date)
@@ -48,14 +36,14 @@ public class MatchService : IMatchService
                 GroupName = m.Group != null ? m.Group.Name : "Grupo Desconocido",
                 Date = m.Date,
 
-                Team1 = m.MatchPlayers.Where(mp => mp.Player != null)
+                Team1 = m.MatchPlayers.Where(mp => mp.Player != null && mp.Team == 1)
                     .Select(mp => mp.Player != null
                         ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname)
                             ? mp.Player.Nickname
                             : $"{mp.Player.Name} {mp.Player.LastName}")
                         : "Desconocido")
                     .ToList(),
-                Team2 = m.MatchPlayers.Where(mp => mp.Player != null)
+                Team2 = m.MatchPlayers.Where(mp => mp.Player != null && mp.Team == 2)
                     .Select(mp => mp.Player != null
                         ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname)
                             ? mp.Player.Nickname
@@ -69,64 +57,103 @@ public class MatchService : IMatchService
     
     public async Task<MatchDetailsDto?> GetMatchDetailsAsync(int matchId, int userId)
     {
-        var match = await _context.Matches.AsNoTracking()
-            .Include(m => m.Group)
-            .Include(m => m.MatchPlayers)
-                .ThenInclude(mp => mp.Player)
-            .FirstOrDefaultAsync(m => m.Id == matchId);
+        // 1. Validar acceso de manera eficiente en una sola consulta ligera
+        var matchAccess = await _context.Matches.AsNoTracking()
+            .Where(m => m.Id == matchId)
+            .Select(m => new
+            {
+                m.GroupId,
+                GroupCreatorId = m.Group != null ? m.Group.CreatorId : 0,
+                IsMember = _context.GroupPlayers.Any(gp => gp.GroupId == m.GroupId && gp.PlayerId == userId)
+            })
+            .FirstOrDefaultAsync();
 
-        if (match == null) return null;
+        if (matchAccess == null)
+            return null;
 
-        // Validar acceso: el usuario debe ser creador o miembro del grupo
-        var isMember = await IsUserInGroupAsync(match, userId);
+        var isUserAuthorized = matchAccess.IsMember || matchAccess.GroupCreatorId == userId;
+        if (!isUserAuthorized)
+            return null;
 
-        if (!isMember) return null;
+        // 2. Traer el partido proyectado directamente desde SQL
+        var matchDetails = await _context.Matches.AsNoTracking()
+            .Where(m => m.Id == matchId)
+            .Select(m => new
+            {
+                MatchId = m.Id,
+                GroupId = m.GroupId,
+                GroupName = m.Group != null ? m.Group.Name : "Grupo Desconocido",
+                Date = m.Date,
+                State = m.State,
+                MatchPlayers = m.MatchPlayers.Select(mp => new MatchPlayerDetailsDto
+                {
+                    PlayerId = mp.PlayerId,
+                    Name = mp.Player != null ? mp.Player.Name + " " + mp.Player.LastName : "Desconocido",
+                    Nickname = mp.Player != null 
+                        ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : mp.Player.Name + " " + mp.Player.LastName) 
+                        : "Desconocido",
+                    Team = mp.Team
+                }).ToList()
+            })
+            .FirstOrDefaultAsync();
 
-        var isCreator = true; // Cualquier miembro del grupo tiene permisos de edición (equivalente a creador para la vista)
+        if (matchDetails == null)
+            return null;
 
-        // Obtener todos los miembros del grupo para permitir agregar/sacar
+        // 3. Traer miembros del grupo proyectados
         var groupMembers = await _context.GroupPlayers.AsNoTracking()
-            .Include(gp => gp.Player)
-            .Where(gp => gp.GroupId == match.GroupId)
+            .Where(gp => gp.GroupId == matchDetails.GroupId)
+            .Select(gm => new GroupMemberDetailsDto
+            {
+                PlayerId = gm.PlayerId,
+                Name = gm.Player != null ? gm.Player.Name + " " + gm.Player.LastName : "Desconocido",
+                Nickname = gm.Player != null 
+                    ? (!string.IsNullOrWhiteSpace(gm.Player.Nickname) ? gm.Player.Nickname : gm.Player.Name + " " + gm.Player.LastName) 
+                    : "Desconocido",
+                Score = gm.Score
+            })
             .ToListAsync();
 
         return new MatchDetailsDto
         {
-            MatchId = match.Id,
-            GroupId = match.GroupId,
-            GroupName = match.Group?.Name ?? "Grupo Desconocido",
-            Date = match.Date,
-            State = match.State,
-            IsCreator = isCreator,
-            MatchPlayers = match.MatchPlayers.Select(mp => new MatchPlayerDetailsDto
-            {
-                PlayerId = mp.PlayerId,
-                Name = mp.Player != null ? $"{mp.Player.Name} {mp.Player.LastName}" : "Desconocido",
-                Nickname = mp.Player != null ? (!string.IsNullOrWhiteSpace(mp.Player.Nickname) ? mp.Player.Nickname : $"{mp.Player.Name} {mp.Player.LastName}") : "Desconocido",
-                Team = mp.Team
-            }).ToList(),
-            GroupMembers = groupMembers.Select(gm => new GroupMemberDetailsDto
-            {
-                PlayerId = gm.PlayerId,
-                Name = gm.Player != null ? $"{gm.Player.Name} {gm.Player.LastName}" : "Desconocido",
-                Nickname = gm.Player != null ? (!string.IsNullOrWhiteSpace(gm.Player.Nickname) ? gm.Player.Nickname : $"{gm.Player.Name} {gm.Player.LastName}") : "Desconocido",
-                Score = gm.Score
-            }).ToList()
+            MatchId = matchDetails.MatchId,
+            GroupId = matchDetails.GroupId,
+            GroupName = matchDetails.GroupName,
+            Date = matchDetails.Date,
+            State = matchDetails.State,
+            IsCreator = true,
+            MatchPlayers = matchDetails.MatchPlayers,
+            GroupMembers = groupMembers
         };
     }
 
     public async Task<bool> UpdateMatchPlayersAsync(int matchId, int userId, List<MatchPlayerUpdateDto> players, DateTime date)
     {
+        // 1. Obtener la info mínima del partido y verificar acceso en una sola consulta ligera
+        var matchInfo = await _context.Matches.AsNoTracking()
+            .Where(m => m.Id == matchId)
+            .Select(m => new
+            {
+                m.GroupId,
+                GroupCreatorId = m.Group != null ? m.Group.CreatorId : 0,
+                IsMember = _context.GroupPlayers.Any(gp => gp.GroupId == m.GroupId && gp.PlayerId == userId)
+            })
+            .FirstOrDefaultAsync();
+
+        if (matchInfo == null)
+            return false;
+
+        var isUserAuthorized = matchInfo.IsMember || matchInfo.GroupCreatorId == userId;
+        if (!isUserAuthorized)
+            return false;
+
+        // 2. Cargar el partido y sus MatchPlayers para modificar (sin incluir Group)
         var match = await _context.Matches
-            .Include(m => m.Group)
             .Include(m => m.MatchPlayers)
             .FirstOrDefaultAsync(m => m.Id == matchId);
 
-        if (match == null) return false;
-
-        // Cualquier miembro del grupo puede editar el partido
-        var isMember = await IsUserInGroupAsync(match, userId);
-        if (!isMember) return false;
+        if (match == null)
+            return false;
 
         // Actualizar fecha
         match.Date = date;
@@ -143,7 +170,6 @@ public class MatchService : IMatchService
         
         _context.MatchPlayers.AddRange(newPlayers);
         
-
         await _context.SaveChangesAsync();
         return true;
     }
@@ -170,17 +196,29 @@ public class MatchService : IMatchService
         }
 
         var scoreState = $"{score1}-{score2}";
-        
-        var match = await _context.Matches
-            .Include(m => m.Group)
-            .FirstOrDefaultAsync(m => m.Id == matchId);
 
-        if (match == null) return false;
+        // 1. Obtener la info mínima del partido y verificar acceso en una sola consulta ligera
+        var matchInfo = await _context.Matches.AsNoTracking()
+            .Where(m => m.Id == matchId)
+            .Select(m => new
+            {
+                m.GroupId,
+                GroupCreatorId = m.Group != null ? m.Group.CreatorId : 0,
+                IsMember = _context.GroupPlayers.Any(gp => gp.GroupId == m.GroupId && gp.PlayerId == userId)
+            })
+            .FirstOrDefaultAsync();
 
-        // Cualquier miembro del grupo puede finalizar el partido
-        var isMember = await IsUserInGroupAsync(match, userId);
-        if (!isMember) return false;
+        if (matchInfo == null)
+            return false;
+
+        var isUserAuthorized = matchInfo.IsMember || matchInfo.GroupCreatorId == userId;
+        if (!isUserAuthorized)
+            return false;
         
+        // 2. Cargar el partido sin ningún Include para actualizar el estado
+        var match = await _context.Matches.FirstOrDefaultAsync(m => m.Id == matchId);
+        if (match == null)
+            return false;
 
         match.State = scoreState;
         await _context.SaveChangesAsync();
