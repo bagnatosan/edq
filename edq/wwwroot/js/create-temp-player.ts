@@ -42,7 +42,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const loadGroupName = async (): Promise<void> => {
         try {
             const response = await fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
-            if (!response.ok) throw new Error("Error al cargar los datos del grupo.");
+            if (!response.ok) {
+                console.error("Error al obtener nombre de grupo: respuesta no ok");
+                return;
+            }
 
             const data = await response.json();
             groupNameTitle.textContent = `Nuevo Jugador - ${data.groupName}`;
@@ -52,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    loadGroupName();
+    loadGroupName().catch(err => console.error('Error:', err));
 
     // Crear jugador temporal
     createTempPlayerForm.addEventListener("submit", async (e) => {
@@ -85,7 +88,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!response.ok) {
                 const errMsg = await response.text();
-                throw new Error(errMsg || "Error al crear el jugador temporal.");
+                const finalError = errMsg || "Error al crear el jugador temporal.";
+
+                console.error("Error creando jugador temporal (API):", finalError);
+                showToast(finalError, true);
+
+                // Reestablecemos el botón aquí mismo
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove("btn-loading");
+                    const existingSpinner = submitBtn.querySelector(".btn-spinner");
+                    if (existingSpinner) existingSpinner.remove();
+                }
+
+                return; // <--- Cortamos la ejecución para que no siga con el éxito
             }
 
             showToast("¡Jugador temporal creado e integrado con éxito!", false);

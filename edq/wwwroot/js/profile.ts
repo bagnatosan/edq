@@ -225,7 +225,9 @@ document.addEventListener("DOMContentLoaded", () => {
                             const auth = subJson.keys?.auth;
 
                             if (!sub.endpoint || !p256dh || !auth) {
-                                throw new Error("Suscripción inválida obtenida del navegador.");
+                                console.error("Suscripción inválida obtenida del navegador.");
+                                showToast("Suscripción inválida obtenida del navegador.", true);
+                                return; // Cortamos ejecución localmente
                             }
 
                             // Enviar al servidor
@@ -243,7 +245,9 @@ document.addEventListener("DOMContentLoaded", () => {
                             });
 
                             if (!regResponse.ok) {
-                                throw new Error("El servidor rechazó el registro de la suscripción.");
+                                console.error("Error en Push/Subscribe: El servidor rechazó el registro.");
+                                showToast("El servidor rechazó el registro de la suscripción.", true);
+                                return; // Cortamos ejecución localmente
                             }
 
                             updateSettingsButtonVisibility(true);

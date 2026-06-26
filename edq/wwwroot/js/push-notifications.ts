@@ -241,7 +241,7 @@ function initNotificationsDropdown(): void {
 document.addEventListener('DOMContentLoaded', () => {
     const isAuth = document.getElementById('btnNotificationsToggle') !== null;
     if (isAuth) {
-        initPushNotifications();
+        initPushNotifications().catch(err => console.error('Error:', err));
         initNotificationsDropdown();
     }
 });

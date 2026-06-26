@@ -72,7 +72,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const loadGroupMembers = async (): Promise<void> => {
         try {
             const response = await fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
-            if (!response.ok) throw new Error("Error al obtener miembros del grupo.");
+            if (!response.ok) {
+                showToast("No se pudieron cargar los miembros del grupo.", true);
+                return;
+            }
 
             const data: GroupDashboardData = await response.json();
 
@@ -101,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const label = document.createElement("label");
             label.className = "player-checkbox-item";
 
-            let avatarContent = "";
+            let avatarContent : string;
             if (member.photoUrl) {
                 avatarContent = `<img src="${escapeHtml(member.photoUrl)}" class="avatar-image" alt="${escapeHtml(member.nickname)}" />`;
             } else {
@@ -139,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Elementos del modal de carga de emparejamiento
     const matchmakingLoadingModal = document.getElementById("matchmakingLoadingModal") as HTMLDivElement | null;
     const matchmakingLoadingCard = document.getElementById("matchmakingLoadingCard") as HTMLDivElement | null;
-    const loadingProgressPath = document.getElementById("loadingProgressPath") as SVGPathElement | null;
+    const loadingProgressPath = document.getElementById("loadingProgressPath") as HTMLElement | null;
     const loadingIconContainer = document.getElementById("loadingIconContainer") as HTMLDivElement | null;
     const loadingTitle = document.getElementById("loadingTitle") as HTMLHeadingElement | null;
     const loadingSubtitle = document.getElementById("loadingSubtitle") as HTMLParagraphElement | null;
@@ -218,7 +221,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    throw new Error(errorText || "Error al balancear y crear el partido.");
+                    // Ocultar modal de carga
+                    matchmakingLoadingModal.style.opacity = "0";
+                    matchmakingLoadingCard.style.transform = "scale(0.9)";
+                    setTimeout(() => {
+                        matchmakingLoadingModal.style.display = "none";
+                    }, 250);
+                    showToast(errorText || "Error al balancear y crear el partido.", true);
+                    return;
                 }
 
                 // Completar al 100% de inmediato
@@ -294,5 +304,5 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Cargar miembros al cargar la página
-    loadGroupMembers();
+    loadGroupMembers().catch(err => console.error('Error:', err));
 });

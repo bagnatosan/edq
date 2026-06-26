@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (myGroups.length === 0) {
             container.innerHTML = `
                 <div class="no-results-message" style="padding: 40px 20px; text-align: center; color: var(--text-muted); width: 100%;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 48px; height: 48px; margin-bottom: 12px; opacity: 0.5; margin: 0 auto 12px auto; display: block;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 48px; height: 48px; opacity: 0.5; margin: 0 auto 12px auto; display: block;">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                     </svg>
                     <p style="font-size: 15px; margin: 0;">Aún no perteneces a ningún grupo.</p>
@@ -92,7 +92,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // 2. FETCH EN SEGUNDO PLANO: pedir al servidor la lista actualizada.
             const response = await fetch("/Group/GetGroups?skip=0&take=1000");
-            if (!response.ok) throw new Error("Error al obtener los grupos.");
+            if (!response.ok) {
+                // Solo mostrar el error si el contenedor sigue vacío (no hay caché)
+                if (!container.hasChildNodes())
+                    container.innerHTML = `
+                        <div style="text-align: center; color: var(--red-alert); padding: 40px 20px; font-size: 14px;">
+                            No se pudieron cargar los chats grupales.
+                        </div>
+                    `;
+                return;
+            }
 
             const data = await response.json();
             const myGroups = data.myGroups || [];
@@ -127,5 +136,5 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/'/g, "&#039;");
     };
 
-    loadChatGroups();
+    loadChatGroups().catch(err => console.error('Error:', err));
 });

@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const createPollModal = document.getElementById("createPollModal") as HTMLDivElement | null;
     const createPollCard = document.getElementById("createPollCard") as HTMLDivElement | null;
     const btnCancelPoll = document.getElementById("btnCancelPoll") as HTMLButtonElement | null;
-    const pollTargetDate = document.getElementById("pollTargetDate") as HTMLInputElement | null;
+    // pollTargetDate no es leído en este script (se usa solo como campo del formulario)
     const createPollForm = document.getElementById("createPollForm") as HTMLFormElement | null;
     const pollQuestion = document.getElementById("pollQuestion") as HTMLInputElement | null;
     const pollDuration = document.getElementById("pollDuration") as HTMLSelectElement | null;
@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updatePollCardResults(updatedPoll.pollId, updatedPoll.options);
     });
 
-    startSignalR();
+    startSignalR().catch(err => console.error('SignalR error:', err));
 
     // ----------------------------------------------------
     // CARGAR MENSAGES Y ENCUESTAS CHRONOLÓGICAMENTE
@@ -133,8 +133,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 fetch(`/Chat/GetActivePolls?groupId=${groupId}`)
             ]);
 
-            if (!messagesRes.ok) throw new Error("Error cargando mensajes.");
-            if (!pollsRes.ok) throw new Error("Error cargando encuestas.");
+            if (!messagesRes.ok) {
+                showToast("Error cargando mensajes.", true);
+                return;
+            }
+            if (!pollsRes.ok) {
+                showToast("Error cargando encuestas.", true);
+                return;
+            }
 
             const messages: ChatMessageDto[] = await messagesRes.json();
             const polls: PollDto[] = await pollsRes.json();
@@ -179,12 +185,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    // Helper: eliminar el placeholder vacío del chat si existe
+    const removeEmptyPlaceholder = (): void => {
+        const emptyMsg = chatMessages.querySelector("div");
+        if (emptyMsg && (emptyMsg.textContent?.includes("No hay mensajes") || emptyMsg.textContent?.includes("historial")))
+            emptyMsg.remove();
+    };
+
     // Renderizar una burbuja de mensaje en el DOM
     const appendMessage = (msg: ChatMessageDto): void => {
-        const emptyMsg = chatMessages.querySelector("div");
-        if (emptyMsg && (emptyMsg.textContent?.includes("No hay mensajes") || emptyMsg.textContent?.includes("historial"))) {
-            emptyMsg.remove();
-        }
+        removeEmptyPlaceholder();
 
         const isMe = msg.senderId === currentUserId;
         const msgWrapper = document.createElement("div");
@@ -193,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
         msgWrapper.style.marginBottom = "12px";
         msgWrapper.style.width = "100%";
 
-        let avatarHtml = "";
+        let avatarHtml: string;
         if (msg.photoUrl) {
             avatarHtml = `<img src="${escapeHtml(msg.photoUrl)}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; margin-top: 4px;" alt="${escapeHtml(msg.senderName)}" />`;
         } else {
@@ -222,10 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Renderizar una tarjeta de encuesta en el DOM (Estilo WhatsApp)
     const appendPoll = (poll: PollDto): void => {
-        const emptyMsg = chatMessages.querySelector("div");
-        if (emptyMsg && (emptyMsg.textContent?.includes("No hay mensajes") || emptyMsg.textContent?.includes("historial"))) {
-            emptyMsg.remove();
-        }
+        removeEmptyPlaceholder();
 
         const isMe = poll.creatorId === currentUserId;
         const pollWrapper = document.createElement("div");
@@ -234,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
         pollWrapper.style.marginBottom = "12px";
         pollWrapper.style.width = "100%";
 
-        let avatarHtml = "";
+        let avatarHtml: string;
         if (poll.creatorPhotoUrl) {
             avatarHtml = `<img src="${escapeHtml(poll.creatorPhotoUrl)}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; margin-top: 4px;" alt="${escapeHtml(poll.creatorName)}" />`;
         } else {
@@ -378,7 +385,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btnSendMessage.addEventListener("click", handleSendMessage);
     chatMessageInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
-            handleSendMessage();
+            handleSendMessage().catch(err => console.error('Send error:', err));
         }
     });
 
@@ -402,7 +409,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!response.ok) {
                 const text = await response.text();
-                throw new Error(text || "Error al registrar el voto.");
+                showToast(text || "Error al registrar el voto.", true);
+                return;
             }
 
             // Cambiar resaltado de borde localmente de forma instantánea
@@ -484,7 +492,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const votersHtml = optVoters.map((v: any) => {
                     const displayName = v.nickname ? v.nickname : v.name;
                     const avatar = v.photoUrl 
-                        ? `<img src="${escapeHtml(v.photoUrl)}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;" />`
+                        ? `<img alt="pictureofuser" src="${escapeHtml(v.photoUrl)}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;" />`
                         : `<div style="width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; color: var(--text-primary);">${escapeHtml(v.initials)}</div>`;
                     return `
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
@@ -634,7 +642,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         })
                     });
 
-                    if (!response.ok) throw new Error("No se pudo crear la encuesta.");
+                    if (!response.ok) {
+                        showToast("No se pudo crear la encuesta.", true);
+                        return;
+                    }
 
                     showToast("¡Encuesta creada correctamente!", false);
                     hideModal();
@@ -668,5 +679,5 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Cargar historial inicializado
-    loadMessagesAndPolls();
+    loadMessagesAndPolls().catch(err => console.error('Load error:', err));
 });

@@ -106,7 +106,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     }, 1500);
                     return;
                 }
-                throw new Error("Error al obtener los miembros del grupo.");
+                showToast("Ocurrió un error al cargar la lista de jugadores.", true);
+                return;
             }
 
             const data: DashboardData = await response.json();
@@ -142,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
             row.dataset.playerId = member.id.toString();
 
             // Avatar y Nombre
-            let avatarContent = "";
+            let avatarContent : string;
             if (member.photoUrl) {
                 avatarContent = `<img src="${escapeHtml(member.photoUrl)}" class="avatar-image" alt="${escapeHtml(member.nickname)}" />`;
             } else {
@@ -150,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const isCreatorSelf = member.id === creatorId;
-            let actionHtml = "";
+            let actionHtml : string;
 
             if (isCreatorSelf) {
                 actionHtml = `<span class="card-subtitle-badge" style="color: var(--neon-green); border-color: var(--neon-green-glow); background: rgba(158, 255, 0, 0.05); font-size: 10px; font-weight: 700;">PROPIETARIO</span>`;
@@ -214,7 +215,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    throw new Error(errorText || "Error al eliminar al jugador.");
+                    const finalError = errorText || "Error al eliminar al jugador.";
+
+                    console.error("Error al eliminar miembro (API):", finalError);
+                    showToast(finalError, true);
+
+                    // Si acá necesitas reactivar algún botón de la lista (ej: btn.disabled = false), ponelo acá.
+
+                    return; // Cortamos ejecución localmente
                 }
 
                 // Animación de salida fluida
@@ -268,5 +276,5 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Carga inicial
-    loadGroupData();
+    loadGroupData().catch(err => console.error('Error:', err));
 });

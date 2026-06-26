@@ -31,7 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const loadGroupData = async (): Promise<void> => {
         try {
             const response = await fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
-            if (!response.ok) throw new Error("Error al obtener datos del grupo.");
+            if (!response.ok) {
+                console.error("Error cargando configuración: respuesta no ok");
+                return;
+            }
 
             const data = await response.json();
 
@@ -70,7 +73,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!response.ok) {
                 const errMsg = await response.text();
-                throw new Error(errMsg || "Error al actualizar el nombre del grupo.");
+                // 1. Corregido el texto por defecto aquí:
+                const finalError = errMsg || "Error al actualizar la configuración.";
+
+                // 2. Corregido el console.error aquí:
+                console.error("Error actualizando configuración (API):", finalError);
+                showToast(finalError, true);
+
+                // Reestablecemos el botón aquí mismo
+                if (btnSaveSettings) {
+                    btnSaveSettings.disabled = false;
+                    btnSaveSettings.classList.remove("btn-loading");
+                    const existingSpinner = btnSaveSettings.querySelector(".btn-spinner");
+                    if (existingSpinner) existingSpinner.remove();
+                }
+
+                return;
             }
 
             showToast("¡Nombre del grupo actualizado con éxito!", false);
@@ -96,5 +114,5 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Carga inicial
-    loadGroupData();
+    loadGroupData().catch(err => console.error('Error:', err));
 });

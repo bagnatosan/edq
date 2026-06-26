@@ -97,7 +97,10 @@ document.addEventListener("DOMContentLoaded", () => {
             // -----------------------------------------------
 
             const response = await fetch(`/Group/GetGroups?search=${encodeURIComponent(currentSearch)}&skip=${skip}&take=${take}`);
-            if (!response.ok) throw new Error("Error en la carga de grupos.");
+            if (!response.ok) {
+                showToast("Error en la carga de grupos.", true);
+                return;
+            }
 
             const data: GroupsResponse = await response.json();
 
@@ -297,7 +300,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!response.ok) {
                 const errorMsg = await response.text();
-                throw new Error(errorMsg || "Error al procesar la solicitud.");
+                showToast(errorMsg || "Error al procesar la solicitud.", true);
+                buttonElement.disabled = false;
+                buttonElement.textContent = "Solicitar Unión";
+                buttonElement.style.opacity = "1";
+                return;
             }
 
             const result = await response.json();
@@ -314,7 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 setTimeout(() => {
                     skip = 0;
                     hasMore = true;
-                    loadGroups(false);
+                    loadGroups(false).catch(err => console.error('Error:', err));
                 }, 1000);
             } else {
                 setButtonStateRequested(buttonElement);
@@ -351,7 +358,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 currentSearch = searchInput.value;
                 skip = 0;
                 hasMore = true;
-                loadGroups(false);
+                loadGroups(false).catch(err => console.error('Error:', err));
             }, 300);
         });
     }
@@ -405,7 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }, 600);
             } else {
                 if (hasMore && !isLoading)
-                    loadGroups(true);
+                    loadGroups(true).catch(err => console.error('Error:', err));
             }
         });
     }
@@ -421,7 +428,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const position = mainContent.scrollHeight - mainContent.scrollTop - mainContent.clientHeight;
             
             if (position <= threshold)
-                loadGroups(true);
+                loadGroups(true).catch(err => console.error('Error:', err));
         }
     };
     
@@ -441,5 +448,5 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Carga inicial de grupos
-    loadGroups(false);
+    loadGroups(false).catch(err => console.error('Error:', err));
 });

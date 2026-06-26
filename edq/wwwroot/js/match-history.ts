@@ -26,12 +26,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const loadMatchHistory = async (): Promise<void> => {
         try {
             const response = await fetch(`/Group/GetMatchHistoryData?groupId=${groupId}`);
-            if (!response.ok) throw new Error("Error al obtener el historial de partidos.");
+            if (!response.ok) {
+                if (matchesHistoryList) {
+                    matchesHistoryList.innerHTML = `<div style="text-align: center; color: var(--red-alert); padding: 40px 20px;">No se pudo cargar el historial de partidos.</div>`;
+                }
+                return;
+            }
 
             const data: MatchHistoryResponse = await response.json();
 
             // Renderizar listado de partidos
-            renderHistoryList(data.matches, data.isCreator);
+            renderHistoryList(data.matches);
 
         } catch (error) {
             console.error("Error cargando historial de partidos:", error);
@@ -42,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Renderizar la lista de partidos jugados
-    const renderHistoryList = (matches: MatchHistoryItem[], isCreator: boolean): void => {
+    const renderHistoryList = (matches: MatchHistoryItem[]): void => {
         if (!matchesHistoryList || !matchesCountBadge) return;
         matchesHistoryList.innerHTML = "";
 
@@ -137,5 +142,5 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Cargar historial
-    loadMatchHistory();
+    loadMatchHistory().catch(err => console.error('Error:', err));
 });

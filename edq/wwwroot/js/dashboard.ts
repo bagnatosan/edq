@@ -90,7 +90,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     }, 1500);
                     return;
                 }
-                throw new Error("Error al obtener datos del grupo.");
+                showToast("Error al obtener datos del grupo.", true);
+                return;
             }
 
             const data: DashboardData = await response.json();
@@ -154,6 +155,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    // Helper: construir HTML del avatar (foto o iniciales)
+    const buildAvatarHtml = (photoUrl: string | null, nickname: string, initials: string, fontSize: string = "11px"): string => {
+        if (photoUrl) {
+            return `<img src="${escapeHtml(photoUrl)}" class="avatar-image" alt="${escapeHtml(nickname)}" />`;
+        }
+        return `<span class="avatar-initials" style="font-size: ${fontSize}">${escapeHtml(initials)}</span>`;
+    };
+
     // Renderizar miembros en el carrusel horizontal
     const renderMembers = (members: GroupMember[], isCreator: boolean): void => {
         if (!membersCarousel || !membersCountBadge) return;
@@ -166,13 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
             memberCard.className = "member-card";
             memberCard.dataset.playerId = member.id.toString();
 
-            // Contenido del avatar (foto o iniciales)
-            let avatarContent = "";
-            if (member.photoUrl) {
-                avatarContent = `<img src="${escapeHtml(member.photoUrl)}" class="avatar-image" alt="${escapeHtml(member.nickname)}" />`;
-            } else {
-                avatarContent = `<span class="avatar-initials">${escapeHtml(member.initials)}</span>`;
-            }
+            const avatarContent = buildAvatarHtml(member.photoUrl, member.nickname, member.initials);
 
             // Mostrar el puntaje abajo del nombre únicamente si es el creador
             let ratingHtml = "";
@@ -209,13 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
             requestItem.className = "request-card";
             requestItem.dataset.requestId = req.requestId.toString();
 
-            // Avatar (foto o iniciales)
-            let avatarContent = "";
-            if (req.photoUrl) {
-                avatarContent = `<img src="${escapeHtml(req.photoUrl)}" class="avatar-image" alt="${escapeHtml(req.nickname)}" />`;
-            } else {
-                avatarContent = `<span class="avatar-initials">${escapeHtml(req.initials)}</span>`;
-            }
+            const avatarContent = buildAvatarHtml(req.photoUrl, req.nickname, req.initials);
 
             const hasNickname = req.nickname && req.nickname !== req.name;
             const nicknameHtml = hasNickname ? `
@@ -274,7 +271,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!response.ok) {
                 const errorText = await response.text();
-                throw new Error(errorText || "Error al procesar la solicitud.");
+                showToast(errorText || "Error al procesar la solicitud.", true);
+                buttons.forEach(btn => btn.disabled = false);
+                return;
             }
 
             itemElement.style.transition = "all 0.3s ease";
@@ -283,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             setTimeout(() => {
                 itemElement.remove();
-                loadDashboardData();
+                loadDashboardData().catch(err => console.error('Dashboard error:', err));
             }, 300);
 
         } catch (error: any) {
@@ -309,13 +308,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const rankingItem = document.createElement("div");
             rankingItem.className = `ranking-row rank-${position}`;
 
-            // Avatar
-            let avatarContent = "";
-            if (member.photoUrl) {
-                avatarContent = `<img src="${escapeHtml(member.photoUrl)}" class="avatar-image" alt="${escapeHtml(member.nickname)}" />`;
-            } else {
-                avatarContent = `<span class="avatar-initials" style="font-size: 11px;">${escapeHtml(member.initials)}</span>`;
-            }
+            const avatarContent = buildAvatarHtml(member.photoUrl, member.nickname, member.initials, "11px");
 
             // Símbolo de posición
             let positionSymbol = `#${position}`;
@@ -408,5 +401,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Cargar datos iniciales
-    loadDashboardData();
+    loadDashboardData().catch(err => console.error('Dashboard error:', err));
 });

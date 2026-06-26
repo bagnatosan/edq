@@ -48,7 +48,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!response.ok) {
                 const errMsg = await response.text();
-                throw new Error(errMsg || "Error al crear el grupo.");
+
+                console.error("Error al crear grupo:", errMsg);
+                showToast(errMsg || "Error al crear el grupo.", true);
+
+                // Limpiás el botón acá mismo
+                btnCreateGroup.disabled = false;
+                btnCreateGroup.classList.remove("btn-loading");
+                const existingSpinner = btnCreateGroup.querySelector(".btn-spinner");
+                if (existingSpinner) existingSpinner.remove();
+
+                return; // <--- Súper importante para que no siga ejecutando el código de abajo
             }
 
             const data = await response.json();

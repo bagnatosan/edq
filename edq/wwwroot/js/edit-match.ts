@@ -63,7 +63,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const matchId = parseInt(matchIdInput.value);
     const groupId = parseInt(groupIdInput.value);
-    const isCreator = isCreatorInput.value === "true";
 
     if (isNaN(matchId) || isNaN(groupId)) return;
 
@@ -96,7 +95,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const loadDetails = async (): Promise<void> => {
         try {
             const response = await fetch(`/Match/GetMatchDetails?matchId=${matchId}`);
-            if (!response.ok) throw new Error("Error al obtener los detalles del partido.");
+            if (!response.ok) {
+                showToast("No se pudieron cargar los datos del partido.", true);
+                return;
+            }
 
             const data: MatchEditDetails = await response.json();
             allMembers = data.groupMembers;
@@ -210,7 +212,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     })
                 });
 
-                if (!response.ok) throw new Error("Error en el balanceador.");
+                if (!response.ok) {
+                    showToast("No se pudo re-balancear el partido.", true);
+                    return;
+                }
 
                 const teamsBalanced: { [key: string]: number } = await response.json();
 
@@ -268,7 +273,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) throw new Error("Error al guardar cambios.");
+                if (!response.ok) {
+                    showToast("No se pudieron guardar los cambios.", true);
+                    return;
+                }
 
                 showToast("¡Partido actualizado correctamente!", false);
 
@@ -412,8 +420,8 @@ document.addEventListener("DOMContentLoaded", () => {
             spinner.className = "btn-spinner";
             btnFinishMatch.appendChild(spinner);
 
-            let goalsAheadValNum = 0;
-            let totalGoalsValNum = 0;
+            let goalsAheadValNum: number;
+            let totalGoalsValNum: number;
 
             if (mode === "ahead") {
                 goalsAheadValNum = winner === "Empate" ? 0 : parseInt(goalsAhead.value);
@@ -442,7 +450,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) throw new Error("Error al registrar el resultado.");
+                if (!response.ok) {
+                    showToast("No se pudo registrar el resultado del partido.", true);
+                    return;
+                }
 
                 showToast("¡Partido finalizado y resultado registrado!", false);
 
@@ -453,6 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch (error) {
                 console.error("Error al finalizar partido:", error);
                 showToast("No se pudo registrar el resultado del partido.", true);
+            } finally {
                 btnFinishMatch.disabled = false;
                 btnFinishMatch.classList.remove("btn-loading");
                 const existingSpinner = btnFinishMatch.querySelector(".btn-spinner");
@@ -473,5 +485,5 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Cargar detalles al inicio
-    loadDetails();
+    loadDetails().catch(err => console.error('Error:', err));
 });
