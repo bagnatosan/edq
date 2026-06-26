@@ -1,4 +1,4 @@
-const CACHE_NAME = 'edq-cache-v2';
+const CACHE_NAME = 'edq-cache-v4';
 
 // Recursos estáticos que se cachean al instalar el Service Worker
 const STATIC_ASSETS = [
@@ -6,6 +6,9 @@ const STATIC_ASSETS = [
   '/images/logo_navbar.svg',
   '/images/logo_appicon.svg'
 ];
+
+// URL de la página "sin conexión" (se cachea por separado del resto)
+const OFFLINE_URL = '/Home/Offline';
 
 // Páginas HTML completas que se cachean dinámicamente con estrategia Network-First
 const CACHEABLE_PAGES = [
@@ -31,12 +34,27 @@ const API_PREFIXES = [
   '/Account/Logout'
 ];
 
-// Install Event: cachear recursos estáticos esenciales
+// Install Event: cachear recursos estáticos + página offline por separado
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache =>
-      cache.addAll(STATIC_ASSETS).catch(err => console.warn('Cache assets error:', err))
-    )
+    caches.open(CACHE_NAME).then(async cache => {
+      // 1. Cachear assets estáticos (CSS, imágenes)
+      await cache.addAll(STATIC_ASSETS).catch(err => console.warn('Static assets cache error:', err));
+
+      // 2. Cachear la página offline por separado con su propio try/catch
+      //    Se hace así porque addAll() falla silenciosamente si un item da error,
+      //    y queremos saber específicamente si /Home/Offline no se pudo cachear.
+      try {
+        const offlineReq = new Request(OFFLINE_URL, { credentials: 'same-origin' });
+        const offlineRes = await fetch(offlineReq);
+        if (offlineRes.ok)
+          await cache.put(OFFLINE_URL, offlineRes);
+        else
+          console.warn('Offline page returned status:', offlineRes.status);
+      } catch (err) {
+        console.warn('Could not pre-cache offline page:', err);
+      }
+    })
   );
   self.skipWaiting();
 });
@@ -73,7 +91,7 @@ self.addEventListener('fetch', event => {
     return;
 
   // Para páginas HTML cacheables: Network-First con fallback al caché
-  // Si el servidor responde, actualiza el caché. Si no hay red, sirve el caché.
+  // Si no hay red ni caché, muestra la página de "sin conexión".
   const isCacheablePage = CACHEABLE_PAGES.some(page => pathname.startsWith(page));
   if (isCacheablePage) {
     event.respondWith(
@@ -87,8 +105,10 @@ self.addEventListener('fetch', event => {
           return response;
         })
         .catch(() =>
-          // Sin red: servir la versión cacheada de la página
-          caches.match(event.request)
+          // Sin red: intentar caché propio, sino mostrar página offline
+          caches.match(event.request).then(cached =>
+            cached || caches.match('/Home/Offline')
+          )
         )
     );
     return;
@@ -96,20 +116,28 @@ self.addEventListener('fetch', event => {
 
   // Para recursos estáticos (CSS, JS, imágenes): Cache-First con fallback a red
   // Si el recurso ya está cacheado, lo sirve instantáneamente sin ir a la red.
+  // Si no hay red ni caché (ej: una página de navegación desconocida), muestra offline.
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached)
         return cached;
-      return fetch(event.request).then(response => {
-        if (response && response.status === 200 && response.type === 'basic') {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        }
-        return response;
-      });
+      return fetch(event.request)
+        .then(response => {
+          if (response && response.status === 200 && response.type === 'basic') {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => {
+          // Sin red y sin caché: si es navegación HTML, mostrar página offline
+          if (event.request.headers.get('Accept')?.includes('text/html'))
+            return caches.match('/Home/Offline');
+        });
     })
   );
 });
+
 
 // Push Event listener to show background notifications
 self.addEventListener('push', event => {

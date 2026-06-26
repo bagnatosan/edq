@@ -19,6 +19,38 @@
     <link rel="stylesheet" href="~/edq.styles.css" asp-append-version="true"/>
 </head>
 <body>
+    <!-- Banner de "sin conexión": se muestra automáticamente cuando el navegador pierde la red -->
+    <!-- Aparece justo debajo del header fijo (top: 68px = altura del .app-header) -->
+    <div id="offline-banner" style="
+        display: none;
+        position: fixed;
+        top: 68px; left: 0; right: 0;
+        z-index: 9;
+        background: rgba(200, 40, 40, 0.95);
+        backdrop-filter: blur(8px);
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 9px 16px;
+        text-align: center;
+        letter-spacing: 0.2px;
+        border-bottom: 1px solid rgba(255, 120, 120, 0.4);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+        animation: offline-slide-down 0.3s ease;
+    ">
+        📵 Sin conexión — los cambios no se guardarán hasta que vuelva la red
+    </div>
+    <style>
+        @@keyframes offline-slide-down {
+            from { transform: translateY(-100%); opacity: 0; }
+            to   { transform: translateY(0);     opacity: 1; }
+        }
+        @@keyframes offline-slide-up {
+            from { transform: translateY(0);     opacity: 1; }
+            to   { transform: translateY(-100%); opacity: 0; }
+        }
+    </style>
 
     <!-- Contenedor móvil centralizado (App Shell) -->
     <div class="app-shell">
@@ -163,6 +195,30 @@
                 setTimeout(function() { window.location.assign(dest); }, 200);
             });
         }
+    </script>
+    <script>
+        // Banner de "sin conexión": escucha los eventos offline/online del navegador
+        (function() {
+            var banner = document.getElementById('offline-banner');
+            if (!banner) return;
+
+            function showBanner() {
+                banner.style.animation = 'offline-slide-down 0.3s ease';
+                banner.style.display = 'block';
+            }
+
+            function hideBanner() {
+                banner.style.animation = 'offline-slide-up 0.3s ease';
+                // Esperar a que termine la animación antes de ocultar
+                setTimeout(function() { banner.style.display = 'none'; }, 280);
+            }
+
+            // Si ya arrancó sin conexión, mostrar inmediatamente
+            if (!navigator.onLine) showBanner();
+
+            window.addEventListener('offline', showBanner);
+            window.addEventListener('online',  hideBanner);
+        })();
     </script>
 </body>
 </html>

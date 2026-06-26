@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using edq.DTO;
 
@@ -31,6 +32,18 @@ public class HomeController : Controller
         { 
             RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
             ErrorMessage = errorMsg
+        });
+    }
+
+    // Página sin conexión: servida por el Service Worker cuando no hay red ni caché
+    [AllowAnonymous]
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Offline()
+    {
+        return View("Error", new ErrorViewModel
+        {
+            RequestId = string.Empty,
+            ErrorMessage = "No hay conexión a internet. Revisá tu red y volvé a intentarlo."
         });
     }
 }
