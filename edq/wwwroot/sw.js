@@ -1,10 +1,18 @@
-const CACHE_NAME = 'edq-cache-v4';
+const CACHE_NAME = 'edq-cache-v5';
 
 // Recursos estáticos que se cachean al instalar el Service Worker
 const STATIC_ASSETS = [
   '/css/site.css',
   '/images/logo_navbar.svg',
-  '/images/logo_appicon.svg'
+  '/images/logo_appicon.svg',
+  // Fuentes auto-hospedadas — cacheadas para funcionar offline
+  '/fonts/outfit-latin.woff2',
+  '/fonts/outfit-latin-ext.woff2',
+  '/fonts/inter-300.woff2',
+  '/fonts/inter-400.woff2',
+  '/fonts/inter-500.woff2',
+  '/fonts/inter-600.woff2',
+  '/fonts/inter-700.woff2'
 ];
 
 // URL de la página "sin conexión" (se cachea por separado del resto)
