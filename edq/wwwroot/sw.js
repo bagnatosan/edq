@@ -1,18 +1,42 @@
-const CACHE_NAME = 'edq-cache-v1';
-const ASSETS = [
-  '/',
+const CACHE_NAME = 'edq-cache-v2';
+
+// Recursos estáticos que se cachean al instalar el Service Worker
+const STATIC_ASSETS = [
   '/css/site.css',
   '/images/logo_navbar.svg',
   '/images/logo_appicon.svg'
 ];
 
-// Install Event
+// Páginas HTML completas que se cachean dinámicamente con estrategia Network-First
+const CACHEABLE_PAGES = [
+  '/Account/Profile',
+  '/Group/Explore',
+  '/Group/Chat'
+];
+
+// Prefijos de rutas de API/datos que NUNCA se cachean (cambian por usuario/momento)
+const API_PREFIXES = [
+  '/Group/GetGroups',
+  '/Group/JoinRequest',
+  '/Group/CreateGroup',
+  '/Chat/GetMessages',
+  '/Chat/CreatePoll',
+  '/Chat/Vote',
+  '/Push/',
+  '/Account/UpdateNickname',
+  '/Account/UpdatePhoto',
+  '/Account/UpdateNotificationSettings',
+  '/Account/Login',
+  '/Account/Register',
+  '/Account/Logout'
+];
+
+// Install Event: cachear recursos estáticos esenciales
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      // Cargar archivos esenciales de manera pasiva, permitiendo que falle si alguno no está disponible
-      return cache.addAll(ASSETS).catch(err => console.warn('Cache assets error:', err));
-    })
+    caches.open(CACHE_NAME).then(cache =>
+      cache.addAll(STATIC_ASSETS).catch(err => console.warn('Cache assets error:', err))
+    )
   );
   self.skipWaiting();
 });
@@ -33,34 +57,57 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch Event (Network first, then fallback to cache)
+// Fetch Event: estrategia diferenciada según tipo de recurso
 self.addEventListener('fetch', event => {
   // Solo interceptar peticiones GET del mismo origen
-  if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
+  if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin))
+    return;
+
+  const url = new URL(event.request.url);
+  const pathname = url.pathname;
+
+  // Nunca cachear rutas de API/datos (tienen parámetros dinámicos o mutan estado)
+  const isApiCall = API_PREFIXES.some(prefix => pathname.startsWith(prefix))
+    || url.search.length > 0 && !CACHEABLE_PAGES.includes(pathname);
+  if (isApiCall)
+    return;
+
+  // Para páginas HTML cacheables: Network-First con fallback al caché
+  // Si el servidor responde, actualiza el caché. Si no hay red, sirve el caché.
+  const isCacheablePage = CACHEABLE_PAGES.some(page => pathname.startsWith(page));
+  if (isCacheablePage) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          // Guardar la página fresca en caché si la respuesta es correcta
+          if (response && response.status === 200 && response.type === 'basic') {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() =>
+          // Sin red: servir la versión cacheada de la página
+          caches.match(event.request)
+        )
+    );
     return;
   }
 
-  // Evitar cachear llamadas AJAX, controladores o APIs
-  const url = event.request.url;
-  if (url.includes('/Get') || url.includes('/Group/') || url.includes('/Match/') || url.includes('/Account/')) {
-    return;
-  }
-
+  // Para recursos estáticos (CSS, JS, imágenes): Cache-First con fallback a red
+  // Si el recurso ya está cacheado, lo sirve instantáneamente sin ir a la red.
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // Clonar la respuesta para guardarla en cache si es válida
+    caches.match(event.request).then(cached => {
+      if (cached)
+        return cached;
+      return fetch(event.request).then(response => {
         if (response && response.status === 200 && response.type === 'basic') {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-          });
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
         return response;
-      })
-      .catch(() => {
-        return caches.match(event.request);
-      })
+      });
+    })
   );
 });
 

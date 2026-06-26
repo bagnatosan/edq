@@ -142,5 +142,27 @@
         }
     </script>
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        // Animación de salida al navegar (fallback para Firefox y navegadores sin @@view-transition)
+        // Chrome y Edge usan la View Transitions API nativa del CSS, no necesitan esto.
+        if (!document.startViewTransition) {
+            document.addEventListener('click', function(e) {
+                var link = e.target.closest('a[href]');
+                // Ignorar links sin destino, externos, anclas o que abren nueva pestaña
+                if (!link || !link.href || link.target === '_blank' ||
+                    link.href.startsWith('javascript:') || link.href === '#' ||
+                    link.href.startsWith('mailto:') || link.href.startsWith('tel:') ||
+                    link.href === window.location.href)
+                    return;
+
+                e.preventDefault();
+                var dest = link.href;
+                // Aplica el fade-out (200ms) y luego navega
+                document.documentElement.style.transition = 'opacity 0.2s ease';
+                document.documentElement.style.opacity = '0';
+                setTimeout(function() { window.location.assign(dest); }, 200);
+            });
+        }
+    </script>
 </body>
 </html>

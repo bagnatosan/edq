@@ -40,6 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let searchTimeout = null;
     let cachedOtherGroups = [];
     let hasDiscoveredInitial = false;
+    // Clave de localStorage para cachear los grupos propios del usuario
+    const MY_GROUPS_CACHE_KEY = "edq_cached_my_groups";
     // Cargar grupos desde la API
     const loadGroups = (...args_1) => __awaiter(void 0, [...args_1], void 0, function* (append = true) {
         if (isLoading)
@@ -60,25 +62,57 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         noResultsMessage.style.display = "none";
         try {
+            // ----- CACÉ INSTANTÁNEO DE MIS GRUPOS -----
+            // Si es la carga inicial (skip=0) y no hay búsqueda activa:
+            // mostramos los grupos propios que guardamos la última vez (0 ms),
+            // para que la pantalla no esté en blanco mientras llega el fetch.
+            if (skip === 0 && !currentSearch) {
+                const cachedRaw = localStorage.getItem(MY_GROUPS_CACHE_KEY);
+                if (cachedRaw) {
+                    const cachedMyGroups = JSON.parse(cachedRaw);
+                    myGroupsList.innerHTML = "";
+                    if (cachedMyGroups.length === 0) {
+                        myGroupsEmptyMessage.style.display = "flex";
+                    }
+                    else {
+                        myGroupsEmptyMessage.style.display = "none";
+                        cachedMyGroups.forEach(group => {
+                            const card = createGroupCard(group, true);
+                            myGroupsList.appendChild(card);
+                        });
+                    }
+                }
+            }
+            // -----------------------------------------------
             const response = yield fetch(`/Group/GetGroups?search=${encodeURIComponent(currentSearch)}&skip=${skip}&take=${take}`);
             if (!response.ok)
                 throw new Error("Error en la carga de grupos.");
             const data = yield response.json();
             // 1. Renderizar Mis Grupos (solo si es la carga inicial skip === 0)
             if (skip === 0) {
-                myGroupsList.innerHTML = "";
                 const filteredMyGroups = currentSearch
                     ? data.myGroups.filter(g => g.name.toLowerCase().includes(currentSearch.toLowerCase()))
                     : data.myGroups;
-                if (filteredMyGroups.length === 0) {
-                    myGroupsEmptyMessage.style.display = "flex";
-                }
-                else {
-                    myGroupsEmptyMessage.style.display = "none";
-                    filteredMyGroups.forEach(group => {
-                        const card = createGroupCard(group, true);
-                        myGroupsList.appendChild(card);
-                    });
+                // Persistir los grupos propios frescos en localStorage (sin filtro de búsqueda)
+                if (!currentSearch)
+                    localStorage.setItem(MY_GROUPS_CACHE_KEY, JSON.stringify(data.myGroups));
+                // Re-renderizar Mis Grupos solo si los datos cambiaron respecto al caché
+                const cachedRawAfter = localStorage.getItem(MY_GROUPS_CACHE_KEY);
+                const freshJson = JSON.stringify(data.myGroups);
+                const needsRerender = currentSearch || cachedRawAfter !== freshJson
+                    || myGroupsList.childElementCount === 0;
+                if (needsRerender) {
+                    myGroupsList.innerHTML = "";
+                    if (filteredMyGroups.length === 0) {
+                        myGroupsEmptyMessage.style.display = "flex";
+                    }
+                    else {
+                        myGroupsEmptyMessage.style.display = "none";
+                        filteredMyGroups.forEach(group => {
+                            const card = createGroupCard(group, true);
+                            myGroupsList.appendChild(card);
+                        });
+                    }
                 }
                 if (data.myGroups.length === 0)
                     hasDiscoveredInitial = true;
