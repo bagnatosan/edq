@@ -1,0 +1,63 @@
+## ####################################
+## Compilación y Salida (Build Artifacts)
+## ####################################
+Bin/
+bin/
+Obj/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+bld/
+[Log]s/
+[Log]s/
+
+## ####################################
+## Configuraciones de IDEs y Editores
+## ####################################
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# JetBrains Rider (Rider crea esta carpeta para configuraciones del proyecto)
+.idea/
+*.sln.iml
+
+# Visual Studio Code
+.vscode/
+!.vscode/extensions.json
+*.code-workspace
+
+## ####################################
+## Paquetes y Dependencias (NuGet)
+## ####################################
+project.lock.json
+project.fragment.lock.json
+artifacts/
+**/packages/*
+!**/packages/repositories.config
+
+## ####################################
+## Secretos y Configuración Local
+## ####################################
+# Evita subir contraseñas o conexiones a bases de datos locales
+appsettings.Development.json
+*.secrets.json
+.env
+.env.*
+
+## ####################################
+## Sistema Operativo y Herramientas
+## ####################################
+.DS_Store
+Thumbs.db
+*.bak
+*.tmp
+*.swp
+*~
+edq.
