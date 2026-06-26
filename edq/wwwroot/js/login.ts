@@ -7,7 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const profilePhotoInput = document.getElementById("profilePhotoInput") as HTMLInputElement | null;
     const fileUploadBtn = document.getElementById("fileUploadBtn") as HTMLDivElement | null;
 
-    if (!authWrapper || !loginForm || !registerForm) return;
+    if (!authWrapper || !loginForm || !registerForm)
+        return;
 
     // Función para ajustar la altura del contenedor dinámicamente según el formulario visible
     const adjustContainerHeight = (): void => {
@@ -15,8 +16,11 @@ document.addEventListener("DOMContentLoaded", () => {
         authWrapper.style.height = `${activeForm.offsetHeight}px`;
     };
 
-    // Ajustar altura inicial al cargar la página
-    setTimeout(adjustContainerHeight, 100);
+    // Ajustar altura inicial al cargar la página una vez que todos los recursos estén cargados (incluyendo estilos)
+    if (document.readyState === "complete")
+        adjustContainerHeight();
+    else
+        window.addEventListener("load", adjustContainerHeight);
 
     // Alternar a Registro
     if (linkGoToRegister) {

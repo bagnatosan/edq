@@ -14,8 +14,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const activeForm = authWrapper.classList.contains("show-register") ? registerForm : loginForm;
         authWrapper.style.height = `${activeForm.offsetHeight}px`;
     };
-    // Ajustar altura inicial al cargar la página
-    setTimeout(adjustContainerHeight, 100);
+    // Ajustar altura inicial al cargar la página una vez que todos los recursos estén cargados (incluyendo estilos)
+    if (document.readyState === "complete")
+        adjustContainerHeight();
+    else
+        window.addEventListener("load", adjustContainerHeight);
     // Alternar a Registro
     if (linkGoToRegister) {
         linkGoToRegister.addEventListener("click", (e) => {
