@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 document.addEventListener("DOMContentLoaded", () => {
     const groupIdInput = document.getElementById("groupIdInput");
     const groupNameTitle = document.getElementById("groupNameTitle");
@@ -34,21 +43,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     // Cargar nombre del grupo para el encabezado
-    const loadGroupName = async () => {
+    const loadGroupName = () => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const response = await fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
+            const response = yield fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
             if (!response.ok)
                 throw new Error("Error al cargar los datos del grupo.");
-            const data = await response.json();
+            const data = yield response.json();
             groupNameTitle.textContent = `Nuevo Jugador - ${data.groupName}`;
         }
         catch (error) {
             console.error("Error al obtener nombre de grupo:", error);
         }
-    };
+    });
     loadGroupName();
     // Crear jugador temporal
-    createTempPlayerForm.addEventListener("submit", async (e) => {
+    createTempPlayerForm.addEventListener("submit", (e) => __awaiter(void 0, void 0, void 0, function* () {
         e.preventDefault();
         if (!tempPlayerName || !tempPlayerLastName || !tempPlayerScore)
             return;
@@ -60,17 +69,20 @@ document.addEventListener("DOMContentLoaded", () => {
         const submitBtn = document.getElementById("btnCreateTempPlayer");
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.textContent = "Creando...";
+            submitBtn.classList.add("btn-loading");
+            const spinner = document.createElement("span");
+            spinner.className = "btn-spinner";
+            submitBtn.appendChild(spinner);
         }
         try {
-            const response = await fetch(`/Group/CreateTemporaryPlayer?groupId=${groupId}&name=${encodeURIComponent(name)}&lastName=${encodeURIComponent(lastName)}&initialScore=${score}`, {
+            const response = yield fetch(`/Group/CreateTemporaryPlayer?groupId=${groupId}&name=${encodeURIComponent(name)}&lastName=${encodeURIComponent(lastName)}&initialScore=${score}`, {
                 method: "POST",
                 headers: {
                     "RequestVerificationToken": getAntiForgeryToken()
                 }
             });
             if (!response.ok) {
-                const errMsg = await response.text();
+                const errMsg = yield response.text();
                 throw new Error(errMsg || "Error al crear el jugador temporal.");
             }
             showToast("¡Jugador temporal creado e integrado con éxito!", false);
@@ -83,7 +95,10 @@ document.addEventListener("DOMContentLoaded", () => {
             // Habilitar botón para poder crear otro
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.textContent = "➕ Crear e Integrar al Grupo";
+                submitBtn.classList.remove("btn-loading");
+                const existingSpinner = submitBtn.querySelector(".btn-spinner");
+                if (existingSpinner)
+                    existingSpinner.remove();
             }
         }
         catch (error) {
@@ -91,10 +106,13 @@ document.addEventListener("DOMContentLoaded", () => {
             showToast(error.message || "No se pudo crear el jugador temporal.", true);
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.textContent = "➕ Crear e Integrar al Grupo";
+                submitBtn.classList.remove("btn-loading");
+                const existingSpinner = submitBtn.querySelector(".btn-spinner");
+                if (existingSpinner)
+                    existingSpinner.remove();
             }
         }
-    });
+    }));
     // Anti forgery token helper
     const getAntiForgeryToken = () => {
         const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');

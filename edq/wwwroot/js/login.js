@@ -51,4 +51,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     // Reajustar la altura si cambia el tamaño de la ventana (responsive layout)
     window.addEventListener("resize", adjustContainerHeight);
+    // Manejar el spinner de carga al enviar formularios
+    const forms = document.querySelectorAll("form");
+    forms.forEach(form => {
+        form.addEventListener("submit", () => {
+            const btn = form.querySelector('button[type="submit"]');
+            if (btn && !btn.classList.contains("btn-loading")) {
+                btn.classList.add("btn-loading");
+                const spinner = document.createElement("span");
+                spinner.className = "btn-spinner";
+                btn.appendChild(spinner);
+            }
+        });
+    });
 });

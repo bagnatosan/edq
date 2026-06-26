@@ -69,7 +69,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const submitBtn = document.getElementById("btnCreateTempPlayer") as HTMLButtonElement | null;
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.textContent = "Creando...";
+            submitBtn.classList.add("btn-loading");
+            const spinner = document.createElement("span");
+            spinner.className = "btn-spinner";
+            submitBtn.appendChild(spinner);
         }
 
         try {
@@ -96,7 +99,9 @@ document.addEventListener("DOMContentLoaded", () => {
             // Habilitar botón para poder crear otro
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.textContent = "➕ Crear e Integrar al Grupo";
+                submitBtn.classList.remove("btn-loading");
+                const existingSpinner = submitBtn.querySelector(".btn-spinner");
+                if (existingSpinner) existingSpinner.remove();
             }
 
         } catch (error: any) {
@@ -104,7 +109,9 @@ document.addEventListener("DOMContentLoaded", () => {
             showToast(error.message || "No se pudo crear el jugador temporal.", true);
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.textContent = "➕ Crear e Integrar al Grupo";
+                submitBtn.classList.remove("btn-loading");
+                const existingSpinner = submitBtn.querySelector(".btn-spinner");
+                if (existingSpinner) existingSpinner.remove();
             }
         }
     });

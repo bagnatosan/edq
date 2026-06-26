@@ -244,7 +244,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             btnSaveChanges.disabled = true;
-            btnSaveChanges.textContent = "Guardando...";
+            btnSaveChanges.classList.add("btn-loading");
+            const spinner = document.createElement("span");
+            spinner.className = "btn-spinner";
+            btnSaveChanges.appendChild(spinner);
 
             const payload = {
                 matchId: matchId,
@@ -274,7 +277,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 showToast("No se pudieron guardar los cambios.", true);
             } finally {
                 btnSaveChanges.disabled = false;
-                btnSaveChanges.textContent = "💾 Guardar Cambios del Partido";
+                btnSaveChanges.classList.remove("btn-loading");
+                const existingSpinner = btnSaveChanges.querySelector(".btn-spinner");
+                if (existingSpinner) existingSpinner.remove();
             }
         });
     }
@@ -402,7 +407,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const mode = matchResultMode.value;
 
             btnFinishMatch.disabled = true;
-            btnFinishMatch.textContent = "Guardando resultado...";
+            btnFinishMatch.classList.add("btn-loading");
+            const spinner = document.createElement("span");
+            spinner.className = "btn-spinner";
+            btnFinishMatch.appendChild(spinner);
 
             let goalsAheadValNum = 0;
             let totalGoalsValNum = 0;
@@ -446,7 +454,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.error("Error al finalizar partido:", error);
                 showToast("No se pudo registrar el resultado del partido.", true);
                 btnFinishMatch.disabled = false;
-                btnFinishMatch.textContent = "🏁 Finalizar y Registrar Partido";
+                btnFinishMatch.classList.remove("btn-loading");
+                const existingSpinner = btnFinishMatch.querySelector(".btn-spinner");
+                if (existingSpinner) existingSpinner.remove();
             }
         });
     }

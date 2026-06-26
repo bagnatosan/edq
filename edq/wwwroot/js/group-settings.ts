@@ -55,7 +55,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         btnSaveSettings.disabled = true;
-        btnSaveSettings.textContent = "Guardando...";
+        btnSaveSettings.classList.add("btn-loading");
+        const spinner = document.createElement("span");
+        spinner.className = "btn-spinner";
+        btnSaveSettings.appendChild(spinner);
 
         try {
             const response = await fetch(`/Group/UpdateGroupName?groupId=${groupId}&name=${encodeURIComponent(newName)}`, {
@@ -80,7 +83,9 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error al guardar cambios de grupo:", error);
             showToast(error.message || "No se pudo actualizar el nombre del grupo.", true);
             btnSaveSettings.disabled = false;
-            btnSaveSettings.innerHTML = `💾 Guardar Nombre`;
+            btnSaveSettings.classList.remove("btn-loading");
+            const existingSpinner = btnSaveSettings.querySelector(".btn-spinner");
+            if (existingSpinner) existingSpinner.remove();
         }
     });
 

@@ -33,7 +33,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!name) return;
 
         btnCreateGroup.disabled = true;
-        btnCreateGroup.textContent = "Creando...";
+        btnCreateGroup.classList.add("btn-loading");
+        const spinner = document.createElement("span");
+        spinner.className = "btn-spinner";
+        btnCreateGroup.appendChild(spinner);
 
         try {
             const response = await fetch(`/Group/CreateGroup?name=${encodeURIComponent(name)}`, {
@@ -59,7 +62,9 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error al crear grupo:", error);
             showToast(error.message || "No se pudo crear el grupo.", true);
             btnCreateGroup.disabled = false;
-            btnCreateGroup.textContent = "➕ Crear Grupo";
+            btnCreateGroup.classList.remove("btn-loading");
+            const existingSpinner = btnCreateGroup.querySelector(".btn-spinner");
+            if (existingSpinner) existingSpinner.remove();
         }
     });
 });
