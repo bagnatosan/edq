@@ -47,15 +47,27 @@ document.addEventListener("DOMContentLoaded", () => {
     let isLoading: boolean = false;
     let hasMore: boolean = true;
     let searchTimeout: ReturnType<typeof setTimeout> | null = null;
+    let cachedOtherGroups: Group[] = [];
+    let hasDiscoveredInitial: boolean = false;
 
     // Cargar grupos desde la API
     const loadGroups = async (append: boolean = true): Promise<void> => {
-        if (isLoading) return;
+        if (isLoading)
+            return;
         isLoading = true;
         
-        // Mostrar spinner y ocultar botón / sin resultados
-        loadingIndicator.style.display = "flex";
-        if (btnLoadMore) btnLoadMore.style.display = "none";
+        let spinner: HTMLElement | null = null;
+        if (append && btnLoadMore) {
+            btnLoadMore.disabled = true;
+            btnLoadMore.classList.add("btn-loading");
+            spinner = document.createElement("span");
+            spinner.className = "btn-spinner";
+            btnLoadMore.appendChild(spinner);
+        } else {
+            loadingIndicator.style.display = "flex";
+            if (btnLoadMore)
+                btnLoadMore.style.display = "none";
+        }
         noResultsMessage.style.display = "none";
 
         try {
@@ -80,31 +92,63 @@ document.addEventListener("DOMContentLoaded", () => {
                         myGroupsList.appendChild(card);
                     });
                 }
+
+                if (data.myGroups.length === 0)
+                    hasDiscoveredInitial = true;
             }
 
             // 2. Renderizar Otros Grupos (Descubrir)
-            if (!append) {
+            if (!append)
                 otherGroupsList.innerHTML = "";
-            }
 
             const otherGroups = data.otherGroups;
 
+            // CASO ESPECIAL: Si es la carga inicial, no hay búsqueda activa y el usuario tiene grupos propios
+            if (skip === 0 && !currentSearch && data.myGroups.length > 0 && !hasDiscoveredInitial) {
+                cachedOtherGroups = otherGroups;
+                otherGroupsList.innerHTML = "";
+                
+                if (btnLoadMore) {
+                    const btnTextSpan = btnLoadMore.querySelector(".btn-text") as HTMLElement | null;
+                    if (btnTextSpan)
+                        btnTextSpan.textContent = "🔍 Descubrir Grupos";
+                    else
+                        btnLoadMore.textContent = "🔍 Descubrir Grupos";
+                    btnLoadMore.style.display = "block";
+                }
+                
+                hasMore = false;
+                isLoading = false;
+                loadingIndicator.style.display = "none";
+                return;
+            }
+
+            // Flujo normal de renderizado
             if (otherGroups.length === 0 && skip === 0) {
                 noResultsMessage.style.display = "flex";
                 hasMore = false;
+                if (btnLoadMore)
+                    btnLoadMore.style.display = "none";
             } else {
                 otherGroups.forEach(group => {
                     const card = createGroupCard(group, false);
                     otherGroupsList.appendChild(card);
                 });
 
-                // Determinar si hay más elementos
                 if (otherGroups.length < take) {
                     hasMore = false;
-                    if (btnLoadMore) btnLoadMore.style.display = "none";
+                    if (btnLoadMore)
+                        btnLoadMore.style.display = "none";
                 } else {
                     hasMore = true;
-                    if (btnLoadMore) btnLoadMore.style.display = "block";
+                    if (btnLoadMore) {
+                        const btnTextSpan = btnLoadMore.querySelector(".btn-text") as HTMLElement | null;
+                        if (btnTextSpan)
+                            btnTextSpan.textContent = "Cargar más";
+                        else
+                            btnLoadMore.textContent = "Cargar más";
+                        btnLoadMore.style.display = "block";
+                    }
                 }
             }
 
@@ -114,6 +158,11 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error cargando grupos:", error);
         } finally {
             isLoading = false;
+            if (spinner && btnLoadMore) {
+                btnLoadMore.disabled = false;
+                btnLoadMore.classList.remove("btn-loading");
+                spinner.remove();
+            }
             loadingIndicator.style.display = "none";
         }
     };
@@ -259,7 +308,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Buscar en tiempo real con debounce (300ms)
     if (searchInput) {
         searchInput.addEventListener("input", () => {
-            if (searchTimeout) clearTimeout(searchTimeout);
+            if (searchTimeout)
+                clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 currentSearch = searchInput.value;
                 skip = 0;
@@ -269,34 +319,78 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Cargar más al hacer clic en el botón
+    // Cargar más al hacer clic en el botón o descubrir grupos
     if (btnLoadMore) {
         btnLoadMore.addEventListener("click", () => {
-            if (hasMore && !isLoading) {
-                loadGroups(true);
+            if (!hasDiscoveredInitial) {
+                hasDiscoveredInitial = true;
+                
+                // Activar spinner en el botón
+                btnLoadMore.disabled = true;
+                btnLoadMore.classList.add("btn-loading");
+                const spinner = document.createElement("span");
+                spinner.className = "btn-spinner";
+                btnLoadMore.appendChild(spinner);
+                
+                setTimeout(() => {
+                    btnLoadMore.disabled = false;
+                    btnLoadMore.classList.remove("btn-loading");
+                    const existingSpinner = btnLoadMore.querySelector(".btn-spinner");
+                    if (existingSpinner)
+                        existingSpinner.remove();
+                    
+                    if (cachedOtherGroups.length === 0) {
+                        noResultsMessage.style.display = "flex";
+                        btnLoadMore.style.display = "none";
+                        hasMore = false;
+                    } else {
+                        otherGroupsList.innerHTML = "";
+                        cachedOtherGroups.forEach(group => {
+                            const card = createGroupCard(group, false);
+                            otherGroupsList.appendChild(card);
+                        });
+                        
+                        if (cachedOtherGroups.length < take) {
+                            hasMore = false;
+                            btnLoadMore.style.display = "none";
+                        } else {
+                            hasMore = true;
+                            const btnTextSpan = btnLoadMore.querySelector(".btn-text") as HTMLElement | null;
+                            if (btnTextSpan)
+                                btnTextSpan.textContent = "Cargar más";
+                            else
+                                btnLoadMore.textContent = "Cargar más";
+                            btnLoadMore.style.display = "block";
+                        }
+                        
+                        skip = cachedOtherGroups.length;
+                    }
+                }, 600);
+            } else {
+                if (hasMore && !isLoading)
+                    loadGroups(true);
             }
         });
     }
 
     // Scroll infinito
     const handleScroll = (): void => {
-        if (!hasMore || isLoading) return;
+        if (!hasMore || isLoading || !hasDiscoveredInitial)
+            return;
         
         const mainContent = document.querySelector(".app-content") as HTMLDivElement | null;
         if (mainContent) {
             const threshold = 100; // píxeles antes del final
             const position = mainContent.scrollHeight - mainContent.scrollTop - mainContent.clientHeight;
             
-            if (position <= threshold) {
+            if (position <= threshold)
                 loadGroups(true);
-            }
         }
     };
     
     const mainContent = document.querySelector(".app-content") as HTMLDivElement | null;
-    if (mainContent) {
+    if (mainContent)
         mainContent.addEventListener("scroll", handleScroll);
-    }
 
     // Escapar HTML para evitar XSS
     const escapeHtml = (unsafe: string): string => {

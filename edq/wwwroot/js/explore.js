@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById("searchInput");
     const myGroupsList = document.getElementById("myGroupsList");
@@ -29,21 +38,32 @@ document.addEventListener("DOMContentLoaded", () => {
     let isLoading = false;
     let hasMore = true;
     let searchTimeout = null;
+    let cachedOtherGroups = [];
+    let hasDiscoveredInitial = false;
     // Cargar grupos desde la API
-    const loadGroups = async (append = true) => {
+    const loadGroups = (...args_1) => __awaiter(void 0, [...args_1], void 0, function* (append = true) {
         if (isLoading)
             return;
         isLoading = true;
-        // Mostrar spinner y ocultar botón / sin resultados
-        loadingIndicator.style.display = "flex";
-        if (btnLoadMore)
-            btnLoadMore.style.display = "none";
+        let spinner = null;
+        if (append && btnLoadMore) {
+            btnLoadMore.disabled = true;
+            btnLoadMore.classList.add("btn-loading");
+            spinner = document.createElement("span");
+            spinner.className = "btn-spinner";
+            btnLoadMore.appendChild(spinner);
+        }
+        else {
+            loadingIndicator.style.display = "flex";
+            if (btnLoadMore)
+                btnLoadMore.style.display = "none";
+        }
         noResultsMessage.style.display = "none";
         try {
-            const response = await fetch(`/Group/GetGroups?search=${encodeURIComponent(currentSearch)}&skip=${skip}&take=${take}`);
+            const response = yield fetch(`/Group/GetGroups?search=${encodeURIComponent(currentSearch)}&skip=${skip}&take=${take}`);
             if (!response.ok)
                 throw new Error("Error en la carga de grupos.");
-            const data = await response.json();
+            const data = yield response.json();
             // 1. Renderizar Mis Grupos (solo si es la carga inicial skip === 0)
             if (skip === 0) {
                 myGroupsList.innerHTML = "";
@@ -60,22 +80,42 @@ document.addEventListener("DOMContentLoaded", () => {
                         myGroupsList.appendChild(card);
                     });
                 }
+                if (data.myGroups.length === 0)
+                    hasDiscoveredInitial = true;
             }
             // 2. Renderizar Otros Grupos (Descubrir)
-            if (!append) {
+            if (!append)
                 otherGroupsList.innerHTML = "";
-            }
             const otherGroups = data.otherGroups;
+            // CASO ESPECIAL: Si es la carga inicial, no hay búsqueda activa y el usuario tiene grupos propios
+            if (skip === 0 && !currentSearch && data.myGroups.length > 0 && !hasDiscoveredInitial) {
+                cachedOtherGroups = otherGroups;
+                otherGroupsList.innerHTML = "";
+                if (btnLoadMore) {
+                    const btnTextSpan = btnLoadMore.querySelector(".btn-text");
+                    if (btnTextSpan)
+                        btnTextSpan.textContent = "🔍 Descubrir Grupos";
+                    else
+                        btnLoadMore.textContent = "🔍 Descubrir Grupos";
+                    btnLoadMore.style.display = "block";
+                }
+                hasMore = false;
+                isLoading = false;
+                loadingIndicator.style.display = "none";
+                return;
+            }
+            // Flujo normal de renderizado
             if (otherGroups.length === 0 && skip === 0) {
                 noResultsMessage.style.display = "flex";
                 hasMore = false;
+                if (btnLoadMore)
+                    btnLoadMore.style.display = "none";
             }
             else {
                 otherGroups.forEach(group => {
                     const card = createGroupCard(group, false);
                     otherGroupsList.appendChild(card);
                 });
-                // Determinar si hay más elementos
                 if (otherGroups.length < take) {
                     hasMore = false;
                     if (btnLoadMore)
@@ -83,8 +123,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 else {
                     hasMore = true;
-                    if (btnLoadMore)
+                    if (btnLoadMore) {
+                        const btnTextSpan = btnLoadMore.querySelector(".btn-text");
+                        if (btnTextSpan)
+                            btnTextSpan.textContent = "Cargar más";
+                        else
+                            btnLoadMore.textContent = "Cargar más";
                         btnLoadMore.style.display = "block";
+                    }
                 }
             }
             skip += otherGroups.length;
@@ -94,9 +140,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         finally {
             isLoading = false;
+            if (spinner && btnLoadMore) {
+                btnLoadMore.disabled = false;
+                btnLoadMore.classList.remove("btn-loading");
+                spinner.remove();
+            }
             loadingIndicator.style.display = "none";
         }
-    };
+    });
     // Crear la tarjeta de grupo individual
     const createGroupCard = (group, isMyGroup) => {
         const card = document.createElement("div");
@@ -161,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return `<button class="btn-neon btn-join-group" data-id="${group.id}">Solicitar Unión</button>`;
     };
     // Manejar solicitud de unión por AJAX
-    const handleJoinRequest = async (groupId, buttonElement) => {
+    const handleJoinRequest = (groupId, buttonElement) => __awaiter(void 0, void 0, void 0, function* () {
         if (buttonElement.disabled)
             return;
         // Deshabilitar y mostrar estado intermedio
@@ -169,7 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
         buttonElement.textContent = "Enviando...";
         buttonElement.style.opacity = "0.7";
         try {
-            const response = await fetch(`/Group/JoinRequest?groupId=${groupId}`, {
+            const response = yield fetch(`/Group/JoinRequest?groupId=${groupId}`, {
                 method: "POST",
                 headers: {
                     "RequestVerificationToken": getAntiForgeryToken()
@@ -181,10 +232,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
             if (!response.ok) {
-                const errorMsg = await response.text();
+                const errorMsg = yield response.text();
                 throw new Error(errorMsg || "Error al procesar la solicitud.");
             }
-            const result = await response.json();
+            const result = yield response.json();
             // Éxito: cambiar botón por badge correspondiente
             if (result.state === "Approved") {
                 const parent = buttonElement.parentElement;
@@ -210,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
             buttonElement.textContent = "Solicitar Unión";
             buttonElement.style.opacity = "1";
         }
-    };
+    });
     const setButtonStateRequested = (buttonElement) => {
         const parent = buttonElement.parentElement;
         if (parent) {
@@ -235,31 +286,72 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 300);
         });
     }
-    // Cargar más al hacer clic en el botón
+    // Cargar más al hacer clic en el botón o descubrir grupos
     if (btnLoadMore) {
         btnLoadMore.addEventListener("click", () => {
-            if (hasMore && !isLoading) {
-                loadGroups(true);
+            if (!hasDiscoveredInitial) {
+                hasDiscoveredInitial = true;
+                // Activar spinner en el botón
+                btnLoadMore.disabled = true;
+                btnLoadMore.classList.add("btn-loading");
+                const spinner = document.createElement("span");
+                spinner.className = "btn-spinner";
+                btnLoadMore.appendChild(spinner);
+                setTimeout(() => {
+                    btnLoadMore.disabled = false;
+                    btnLoadMore.classList.remove("btn-loading");
+                    const existingSpinner = btnLoadMore.querySelector(".btn-spinner");
+                    if (existingSpinner)
+                        existingSpinner.remove();
+                    if (cachedOtherGroups.length === 0) {
+                        noResultsMessage.style.display = "flex";
+                        btnLoadMore.style.display = "none";
+                        hasMore = false;
+                    }
+                    else {
+                        otherGroupsList.innerHTML = "";
+                        cachedOtherGroups.forEach(group => {
+                            const card = createGroupCard(group, false);
+                            otherGroupsList.appendChild(card);
+                        });
+                        if (cachedOtherGroups.length < take) {
+                            hasMore = false;
+                            btnLoadMore.style.display = "none";
+                        }
+                        else {
+                            hasMore = true;
+                            const btnTextSpan = btnLoadMore.querySelector(".btn-text");
+                            if (btnTextSpan)
+                                btnTextSpan.textContent = "Cargar más";
+                            else
+                                btnLoadMore.textContent = "Cargar más";
+                            btnLoadMore.style.display = "block";
+                        }
+                        skip = cachedOtherGroups.length;
+                    }
+                }, 600);
+            }
+            else {
+                if (hasMore && !isLoading)
+                    loadGroups(true);
             }
         });
     }
     // Scroll infinito
     const handleScroll = () => {
-        if (!hasMore || isLoading)
+        if (!hasMore || isLoading || !hasDiscoveredInitial)
             return;
         const mainContent = document.querySelector(".app-content");
         if (mainContent) {
             const threshold = 100; // píxeles antes del final
             const position = mainContent.scrollHeight - mainContent.scrollTop - mainContent.clientHeight;
-            if (position <= threshold) {
+            if (position <= threshold)
                 loadGroups(true);
-            }
         }
     };
     const mainContent = document.querySelector(".app-content");
-    if (mainContent) {
+    if (mainContent)
         mainContent.addEventListener("scroll", handleScroll);
-    }
     // Escapar HTML para evitar XSS
     const escapeHtml = (unsafe) => {
         if (!unsafe)

@@ -2090,14 +2090,16 @@ body {
     z-index: 5;
     box-sizing: border-box;
 }
-.btn-neon.btn-loading {
+.btn-neon.btn-loading,
+.btn-outline-neon.btn-loading {
     position: relative !important;
     overflow: hidden !important;
     cursor: not-allowed;
     pointer-events: none;
     opacity: 0.85;
 }
-.btn-neon.btn-loading .btn-text {
+.btn-neon.btn-loading .btn-text,
+.btn-outline-neon.btn-loading .btn-text {
     opacity: 0 !important;
     transition: opacity 0.2s ease;
 }

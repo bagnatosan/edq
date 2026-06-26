@@ -229,10 +229,8 @@
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/8fy9rbicfq-{0}-0gwum6astr-0gwum6astr.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/hyiiw9gq10-{0}-r3h4caz8gc-r3h4caz8gc.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/gka09gfb9a-{0}-43auapvnve-43auapvnve.gz
-/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/39938q6i2y-{0}-xrtpm8zdf4-xrtpm8zdf4.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/8o1p1ndg8z-{0}-dt4qshk2dx-dt4qshk2dx.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/z4x438jh9m-{0}-0z04ffdeqk-0z04ffdeqk.gz
-/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/b61zlydoc8-{0}-r7sr9l543c-r7sr9l543c.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/zh0xhe7jst-{0}-kfl00jco7y-kfl00jco7y.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/35t5j8b4ca-{0}-hc1y4bbtol-hc1y4bbtol.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/9flnuhc6xo-{0}-p243smaog9-p243smaog9.gz
@@ -241,3 +239,5 @@
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/sdwh7dt9yp-{0}-am8uawayrh-am8uawayrh.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/hfoedq47d5-{0}-yoz1wxpr8o-yoz1wxpr8o.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/tpmc4f0ug7-{0}-6phvau445a-6phvau445a.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/39938q6i2y-{0}-kjmtd7xbqq-kjmtd7xbqq.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/b61zlydoc8-{0}-vrv6smnp2r-vrv6smnp2r.gz
