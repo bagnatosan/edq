@@ -30,6 +30,7 @@ services:
       - ConnectionStrings__DefaultConnection=Server=db;Port=3306;Database=mi_base_datos;User Id=root;Password=TuPasswordSeguro123!;
     volumes:
       - uploads_data:/app/wwwroot/images/profiles
+      - keys_data:/app/keys
     depends_on:
       db:
         condition: service_healthy
@@ -37,3 +38,4 @@ services:
 volumes:
   mariadb_data:
   uploads_data:
+  keys_data:
