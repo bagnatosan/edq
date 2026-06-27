@@ -2427,7 +2427,21 @@ body {
  */
 html {
     animation: page-fade-in 0.25s ease;
-}/* ── iOS PWA Installation Guide (Namespaced under .ios-install-body) ── */
+}
+
+/* ── Hover Glow Options for Home Page ── */
+.hover-glow {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+    will-change: transform;
+}
+
+.hover-glow:hover {
+    border-color: var(--neon-green-solid) !important;
+    transform: translateY(-2px) scale(1.025);
+    box-shadow: 0 4px 20px var(--neon-green-glow);
+    background: rgba(158, 255, 0, 0.02) !important;
+}
+/* ── iOS PWA Installation Guide (Namespaced under .ios-install-body) ── */
 .ios-install-body {
     background: #0b0d11 !important;
     color: #ffffff !important;

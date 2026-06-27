@@ -52,11 +52,11 @@
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[10.0.9, )"
+              "version": "[9.0.0, )"
             },
-            "Microsoft.EntityFrameworkCore.Sqlite": {
+            "Pomelo.EntityFrameworkCore.MySql": {
               "target": "Package",
-              "version": "[10.0.9, )"
+              "version": "[9.0.0-preview.3.efcore.9.0.0, )"
             },
             "SkiaSharp": {
               "target": "Package",

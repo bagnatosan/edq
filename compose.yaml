@@ -1,7 +1,38 @@
-﻿services:
-  edq:
-    image: edq
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:11.2
+    container_name: aspnet_mariadb
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: TuPasswordSeguro123!
+      MARIADB_DATABASE: mi_base_datos
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    command: --innodb-buffer-pool-size=1G --innodb-log-file-size=256M --query-cache-type=0 --query-cache-size=0
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
     build:
       context: .
       dockerfile: edq/Dockerfile
+    container_name: aspnet_app
+    restart: always
+    ports:
+      - "127.0.0.1:5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=db;Port=3306;Database=mi_base_datos;User Id=root;Password=TuPasswordSeguro123!;
+    depends_on:
+      db:
+        condition: service_healthy
 
+volumes:
+  mariadb_data:
