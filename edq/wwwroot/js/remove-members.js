@@ -81,7 +81,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     }, 1500);
                     return;
                 }
-                throw new Error("Error al obtener los miembros del grupo.");
+                showToast("Ocurrió un error al cargar la lista de jugadores.", true);
+                return;
             }
             const data = await response.json();
             // 1. Título
@@ -110,7 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
             row.style.marginBottom = "12px";
             row.dataset.playerId = member.id.toString();
             // Avatar y Nombre
-            let avatarContent = "";
+            let avatarContent;
             if (member.photoUrl) {
                 avatarContent = `<img src="${escapeHtml(member.photoUrl)}" class="avatar-image" alt="${escapeHtml(member.nickname)}" />`;
             }
@@ -118,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 avatarContent = `<span class="avatar-initials" style="font-size: 13px;">${escapeHtml(member.initials)}</span>`;
             }
             const isCreatorSelf = member.id === creatorId;
-            let actionHtml = "";
+            let actionHtml;
             if (isCreatorSelf) {
                 actionHtml = `<span class="card-subtitle-badge" style="color: var(--neon-green); border-color: var(--neon-green-glow); background: rgba(158, 255, 0, 0.05); font-size: 10px; font-weight: 700;">PROPIETARIO</span>`;
             }
@@ -175,7 +176,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 if (!response.ok) {
                     const errorText = await response.text();
-                    throw new Error(errorText || "Error al eliminar al jugador.");
+                    const finalError = errorText || "Error al eliminar al jugador.";
+                    console.error("Error al eliminar miembro (API):", finalError);
+                    showToast(finalError, true);
+                    // Si acá necesitas reactivar algún botón de la lista (ej: btn.disabled = false), ponelo acá.
+                    return; // Cortamos ejecución localmente
                 }
                 // Animación de salida fluida
                 rowElement.style.transition = "all 0.3s ease";
@@ -224,5 +229,5 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/'/g, "&#039;");
     };
     // Carga inicial
-    loadGroupData();
+    loadGroupData().catch(err => console.error('Error:', err));
 });

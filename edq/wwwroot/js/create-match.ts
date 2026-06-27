@@ -83,6 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
             renderPlayersCheckboxes(data.members);
             
             await checkPollPreselection();
+            updateCounter();
 
         } catch (error) {
             console.error("Error al cargar los miembros:", error);
@@ -91,6 +92,13 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Renderizar los checkboxes
+    const updateCounter = (): void => {
+        const countSpan = document.getElementById("selectedPlayersCount");
+        if (!countSpan) return;
+        const count = document.querySelectorAll('input[name="selectedPlayers"]:checked').length;
+        countSpan.textContent = `Seleccionados: ${count}`;
+    };
+
     const renderPlayersCheckboxes = (members: GroupMember[]): void => {
         if (!playersCheckboxGrid) return;
         playersCheckboxGrid.innerHTML = "";
@@ -120,8 +128,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; flex: 1;">${escapeHtml(member.nickname)}</span>
             `;
 
+            const checkbox = label.querySelector('input[name="selectedPlayers"]') as HTMLInputElement;
+            checkbox.addEventListener("change", updateCounter);
+
             playersCheckboxGrid.appendChild(label);
         });
+        updateCounter();
     };
 
     // Botones de Selección Rápida
@@ -129,6 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btnSelectAll.addEventListener("click", () => {
             const checkboxes = document.querySelectorAll('input[name="selectedPlayers"]') as NodeListOf<HTMLInputElement>;
             checkboxes.forEach(cb => cb.checked = true);
+            updateCounter();
         });
     }
 
@@ -136,6 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btnClearAll.addEventListener("click", () => {
             const checkboxes = document.querySelectorAll('input[name="selectedPlayers"]') as NodeListOf<HTMLInputElement>;
             checkboxes.forEach(cb => cb.checked = false);
+            updateCounter();
         });
     }
 

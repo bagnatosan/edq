@@ -96,15 +96,28 @@
     }
     function addInAppNotification(title, body, url) {
         const notifications = getInAppNotifications();
-        const newNotif = {
-            id: Math.random().toString(36).substring(2, 11),
-            title,
-            body,
-            url,
-            timestamp: Date.now(),
-            read: false
-        };
-        notifications.unshift(newNotif); // Añadir al inicio
+        const existingIndex = notifications.findIndex(n => n.url === url);
+        if (existingIndex !== -1) {
+            // Actualizar la notificación existente para no duplicar
+            notifications[existingIndex].title = title;
+            notifications[existingIndex].body = body;
+            notifications[existingIndex].timestamp = Date.now();
+            notifications[existingIndex].read = false;
+            // Mover al inicio de la lista
+            const [item] = notifications.splice(existingIndex, 1);
+            notifications.unshift(item);
+        }
+        else {
+            const newNotif = {
+                id: Math.random().toString(36).substring(2, 11),
+                title,
+                body,
+                url,
+                timestamp: Date.now(),
+                read: false
+            };
+            notifications.unshift(newNotif); // Añadir al inicio
+        }
         saveInAppNotifications(notifications);
         updateNotificationBadge();
         renderNotificationsList();
@@ -207,7 +220,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         const isAuth = document.getElementById('btnNotificationsToggle') !== null;
         if (isAuth) {
-            initPushNotifications();
+            initPushNotifications().catch(err => console.error('Error:', err));
             initNotificationsDropdown();
         }
     });

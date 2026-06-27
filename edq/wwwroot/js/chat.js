@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 document.addEventListener("DOMContentLoaded", () => {
     const groupIdInput = document.getElementById("groupIdInput");
     const currentUserIdInput = document.getElementById("currentUserIdInput");
@@ -22,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const createPollModal = document.getElementById("createPollModal");
     const createPollCard = document.getElementById("createPollCard");
     const btnCancelPoll = document.getElementById("btnCancelPoll");
-    const pollTargetDate = document.getElementById("pollTargetDate");
+    // pollTargetDate no es leído en este script (se usa solo como campo del formulario)
     const createPollForm = document.getElementById("createPollForm");
     const pollQuestion = document.getElementById("pollQuestion");
     const pollDuration = document.getElementById("pollDuration");
@@ -52,17 +43,17 @@ document.addEventListener("DOMContentLoaded", () => {
         .withUrl("/chatHub")
         .withAutomaticReconnect()
         .build();
-    const startSignalR = () => __awaiter(void 0, void 0, void 0, function* () {
+    const startSignalR = async () => {
         try {
-            yield connection.start();
+            await connection.start();
             console.log("SignalR connected.");
-            yield connection.invoke("JoinGroupChat", groupId);
+            await connection.invoke("JoinGroupChat", groupId);
         }
         catch (err) {
             console.error("SignalR connection error:", err);
             setTimeout(startSignalR, 5000);
         }
-    });
+    };
     // Escuchar mensajes entrantes
     connection.on("ReceiveMessage", (msg) => {
         appendMessage(msg);
@@ -78,22 +69,26 @@ document.addEventListener("DOMContentLoaded", () => {
     connection.on("PollUpdated", (updatedPoll) => {
         updatePollCardResults(updatedPoll.pollId, updatedPoll.options);
     });
-    startSignalR();
+    startSignalR().catch(err => console.error('SignalR error:', err));
     // ----------------------------------------------------
     // CARGAR MENSAGES Y ENCUESTAS CHRONOLÓGICAMENTE
     // ----------------------------------------------------
-    const loadMessagesAndPolls = () => __awaiter(void 0, void 0, void 0, function* () {
+    const loadMessagesAndPolls = async () => {
         try {
-            const [messagesRes, pollsRes] = yield Promise.all([
+            const [messagesRes, pollsRes] = await Promise.all([
                 fetch(`/Chat/GetMessages?groupId=${groupId}&skip=0&take=50`),
                 fetch(`/Chat/GetActivePolls?groupId=${groupId}`)
             ]);
-            if (!messagesRes.ok)
-                throw new Error("Error cargando mensajes.");
-            if (!pollsRes.ok)
-                throw new Error("Error cargando encuestas.");
-            const messages = yield messagesRes.json();
-            const polls = yield pollsRes.json();
+            if (!messagesRes.ok) {
+                showToast("Error cargando mensajes.", true);
+                return;
+            }
+            if (!pollsRes.ok) {
+                showToast("Error cargando encuestas.", true);
+                return;
+            }
+            const messages = await messagesRes.json();
+            const polls = await pollsRes.json();
             chatMessages.innerHTML = "";
             if (messages.length === 0 && polls.length === 0) {
                 chatMessages.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 20px 0;">No hay mensajes ni encuestas en este grupo. ¡Comienza la charla!</div>`;
@@ -122,21 +117,24 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error(error);
             chatMessages.innerHTML = `<div style="text-align: center; color: var(--red-alert); font-size: 13px; padding: 20px 0;">Error al cargar el historial.</div>`;
         }
-    });
-    // Renderizar una burbuja de mensaje en el DOM
-    const appendMessage = (msg) => {
+    };
+    // Helper: eliminar el placeholder vacío del chat si existe
+    const removeEmptyPlaceholder = () => {
         var _a, _b;
         const emptyMsg = chatMessages.querySelector("div");
-        if (emptyMsg && (((_a = emptyMsg.textContent) === null || _a === void 0 ? void 0 : _a.includes("No hay mensajes")) || ((_b = emptyMsg.textContent) === null || _b === void 0 ? void 0 : _b.includes("historial")))) {
+        if (emptyMsg && (((_a = emptyMsg.textContent) === null || _a === void 0 ? void 0 : _a.includes("No hay mensajes")) || ((_b = emptyMsg.textContent) === null || _b === void 0 ? void 0 : _b.includes("historial"))))
             emptyMsg.remove();
-        }
+    };
+    // Renderizar una burbuja de mensaje en el DOM
+    const appendMessage = (msg) => {
+        removeEmptyPlaceholder();
         const isMe = msg.senderId === currentUserId;
         const msgWrapper = document.createElement("div");
         msgWrapper.style.display = "flex";
         msgWrapper.style.justifyContent = isMe ? "flex-end" : "flex-start";
         msgWrapper.style.marginBottom = "12px";
         msgWrapper.style.width = "100%";
-        let avatarHtml = "";
+        let avatarHtml;
         if (msg.photoUrl) {
             avatarHtml = `<img src="${escapeHtml(msg.photoUrl)}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; margin-top: 4px;" alt="${escapeHtml(msg.senderName)}" />`;
         }
@@ -162,18 +160,14 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     // Renderizar una tarjeta de encuesta en el DOM (Estilo WhatsApp)
     const appendPoll = (poll) => {
-        var _a, _b;
-        const emptyMsg = chatMessages.querySelector("div");
-        if (emptyMsg && (((_a = emptyMsg.textContent) === null || _a === void 0 ? void 0 : _a.includes("No hay mensajes")) || ((_b = emptyMsg.textContent) === null || _b === void 0 ? void 0 : _b.includes("historial")))) {
-            emptyMsg.remove();
-        }
+        removeEmptyPlaceholder();
         const isMe = poll.creatorId === currentUserId;
         const pollWrapper = document.createElement("div");
         pollWrapper.style.display = "flex";
         pollWrapper.style.justifyContent = isMe ? "flex-end" : "flex-start";
         pollWrapper.style.marginBottom = "12px";
         pollWrapper.style.width = "100%";
-        let avatarHtml = "";
+        let avatarHtml;
         if (poll.creatorPhotoUrl) {
             avatarHtml = `<img src="${escapeHtml(poll.creatorPhotoUrl)}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; margin-top: 4px;" alt="${escapeHtml(poll.creatorName)}" />`;
         }
@@ -283,7 +277,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
     // Enviar mensaje
-    const handleSendMessage = () => __awaiter(void 0, void 0, void 0, function* () {
+    const handleSendMessage = async () => {
         const text = chatMessageInput.value.trim();
         if (!text)
             return;
@@ -294,7 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
         chatMessageInput.value = "";
         btnSendMessage.disabled = true;
         try {
-            yield connection.invoke("SendMessage", groupId, text);
+            await connection.invoke("SendMessage", groupId, text);
         }
         catch (err) {
             console.error("Error sending message:", err);
@@ -304,11 +298,11 @@ document.addEventListener("DOMContentLoaded", () => {
             btnSendMessage.disabled = false;
             chatMessageInput.focus();
         }
-    });
+    };
     btnSendMessage.addEventListener("click", handleSendMessage);
     chatMessageInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
-            handleSendMessage();
+            handleSendMessage().catch(err => console.error('Send error:', err));
         }
     });
     chatMessageInput.addEventListener("input", () => {
@@ -317,9 +311,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     // Emitir voto por AJAX
-    const handleVote = (pollId, optionId) => __awaiter(void 0, void 0, void 0, function* () {
+    const handleVote = async (pollId, optionId) => {
         try {
-            const response = yield fetch("/Chat/Vote", {
+            const response = await fetch("/Chat/Vote", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -328,8 +322,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({ pollId, optionId })
             });
             if (!response.ok) {
-                const text = yield response.text();
-                throw new Error(text || "Error al registrar el voto.");
+                const text = await response.text();
+                showToast(text || "Error al registrar el voto.", true);
+                return;
             }
             // Cambiar resaltado de borde localmente de forma instantánea
             const pollCard = chatMessages.querySelector(`.poll-message-card[data-poll-id="${pollId}"]`);
@@ -361,7 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error(error);
             showToast(error.message || "No se pudo registrar el voto.", true);
         }
-    });
+    };
     // Actualizar resultados en vivo (vía SignalR broadcast)
     const updatePollCardResults = (pollId, options) => {
         const pollCard = chatMessages.querySelector(`.poll-message-card[data-poll-id="${pollId}"]`);
@@ -403,7 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const votersHtml = optVoters.map((v) => {
                     const displayName = v.nickname ? v.nickname : v.name;
                     const avatar = v.photoUrl
-                        ? `<img src="${escapeHtml(v.photoUrl)}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;" />`
+                        ? `<img alt="pictureofuser" src="${escapeHtml(v.photoUrl)}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;" />`
                         : `<div style="width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; color: var(--text-primary);">${escapeHtml(v.initials)}</div>`;
                     return `
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
@@ -500,7 +495,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
         if (createPollForm && pollQuestion && pollDuration) {
-            createPollForm.addEventListener("submit", (e) => __awaiter(void 0, void 0, void 0, function* () {
+            createPollForm.addEventListener("submit", async (e) => {
                 e.preventDefault();
                 const question = pollQuestion.value.trim();
                 const duration = parseInt(pollDuration.value);
@@ -523,7 +518,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     submitBtn.textContent = "Creando...";
                 }
                 try {
-                    const response = yield fetch("/Chat/CreatePoll", {
+                    const response = await fetch("/Chat/CreatePoll", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -537,8 +532,10 @@ document.addEventListener("DOMContentLoaded", () => {
                             targetDate: null
                         })
                     });
-                    if (!response.ok)
-                        throw new Error("No se pudo crear la encuesta.");
+                    if (!response.ok) {
+                        showToast("No se pudo crear la encuesta.", true);
+                        return;
+                    }
                     showToast("¡Encuesta creada correctamente!", false);
                     hideModal();
                 }
@@ -552,7 +549,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         submitBtn.textContent = "Crear";
                     }
                 }
-            }));
+            });
         }
     }
     const getAntiForgeryToken = () => {
@@ -570,5 +567,5 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/'/g, "&#039;");
     };
     // Cargar historial inicializado
-    loadMessagesAndPolls();
+    loadMessagesAndPolls().catch(err => console.error('Load error:', err));
 });

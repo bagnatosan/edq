@@ -50,12 +50,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const loadGroupMembers = async () => {
         try {
             const response = await fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
-            if (!response.ok)
-                throw new Error("Error al obtener miembros del grupo.");
+            if (!response.ok) {
+                showToast("No se pudieron cargar los miembros del grupo.", true);
+                return;
+            }
             const data = await response.json();
             groupNameTitle.textContent = `Crear Partido - ${data.groupName}`;
             renderPlayersCheckboxes(data.members);
             await checkPollPreselection();
+            updateCounter();
         }
         catch (error) {
             console.error("Error al cargar los miembros:", error);
@@ -63,6 +66,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
     // Renderizar los checkboxes
+    const updateCounter = () => {
+        const countSpan = document.getElementById("selectedPlayersCount");
+        if (!countSpan)
+            return;
+        const count = document.querySelectorAll('input[name="selectedPlayers"]:checked').length;
+        countSpan.textContent = `Seleccionados: ${count}`;
+    };
     const renderPlayersCheckboxes = (members) => {
         if (!playersCheckboxGrid)
             return;
@@ -74,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
         members.forEach(member => {
             const label = document.createElement("label");
             label.className = "player-checkbox-item";
-            let avatarContent = "";
+            let avatarContent;
             if (member.photoUrl) {
                 avatarContent = `<img src="${escapeHtml(member.photoUrl)}" class="avatar-image" alt="${escapeHtml(member.nickname)}" />`;
             }
@@ -89,20 +99,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
                 <span style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; flex: 1;">${escapeHtml(member.nickname)}</span>
             `;
+            const checkbox = label.querySelector('input[name="selectedPlayers"]');
+            checkbox.addEventListener("change", updateCounter);
             playersCheckboxGrid.appendChild(label);
         });
+        updateCounter();
     };
     // Botones de Selección Rápida
     if (btnSelectAll) {
         btnSelectAll.addEventListener("click", () => {
             const checkboxes = document.querySelectorAll('input[name="selectedPlayers"]');
             checkboxes.forEach(cb => cb.checked = true);
+            updateCounter();
         });
     }
     if (btnClearAll) {
         btnClearAll.addEventListener("click", () => {
             const checkboxes = document.querySelectorAll('input[name="selectedPlayers"]');
             checkboxes.forEach(cb => cb.checked = false);
+            updateCounter();
         });
     }
     // Elementos del modal de carga de emparejamiento
@@ -178,7 +193,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 clearInterval(progressInterval);
                 if (!response.ok) {
                     const errorText = await response.text();
-                    throw new Error(errorText || "Error al balancear y crear el partido.");
+                    // Ocultar modal de carga
+                    matchmakingLoadingModal.style.opacity = "0";
+                    matchmakingLoadingCard.style.transform = "scale(0.9)";
+                    setTimeout(() => {
+                        matchmakingLoadingModal.style.display = "none";
+                    }, 250);
+                    showToast(errorText || "Error al balancear y crear el partido.", true);
+                    return;
                 }
                 // Completar al 100% de inmediato
                 loadingPercent.textContent = "100%";
@@ -243,5 +265,5 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/'/g, "&#039;");
     };
     // Cargar miembros al cargar la página
-    loadGroupMembers();
+    loadGroupMembers().catch(err => console.error('Error:', err));
 });

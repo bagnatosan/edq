@@ -172,6 +172,11 @@ document.addEventListener("DOMContentLoaded", () => {
         countTeamA.textContent = teamA.length.toString();
         countTeamB.textContent = teamB.length.toString();
 
+        const countSpan = document.getElementById("selectedPlayersCount");
+        if (countSpan) {
+            countSpan.textContent = `Seleccionados: ${currentMatchPlayers.length}`;
+        }
+
         teamAList.innerHTML = teamA.length > 0
             ? teamA.map(p => `<div>• ${escapeHtml(p.nickname)}</div>`).join("")
             : `<div style="font-style: italic; color: var(--text-muted);">Sin jugadores</div>`;

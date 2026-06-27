@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById("searchInput");
     const myGroupsList = document.getElementById("myGroupsList");
@@ -43,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Clave de localStorage para cachear los grupos propios del usuario
     const MY_GROUPS_CACHE_KEY = "edq_cached_my_groups";
     // Cargar grupos desde la API
-    const loadGroups = (...args_1) => __awaiter(void 0, [...args_1], void 0, function* (append = true) {
+    const loadGroups = async (append = true) => {
         if (isLoading)
             return;
         isLoading = true;
@@ -84,10 +75,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
             // -----------------------------------------------
-            const response = yield fetch(`/Group/GetGroups?search=${encodeURIComponent(currentSearch)}&skip=${skip}&take=${take}`);
-            if (!response.ok)
-                throw new Error("Error en la carga de grupos.");
-            const data = yield response.json();
+            const response = await fetch(`/Group/GetGroups?search=${encodeURIComponent(currentSearch)}&skip=${skip}&take=${take}`);
+            if (!response.ok) {
+                showToast("Error en la carga de grupos.", true);
+                return;
+            }
+            const data = await response.json();
             // 1. Renderizar Mis Grupos (solo si es la carga inicial skip === 0)
             if (skip === 0) {
                 const filteredMyGroups = currentSearch
@@ -128,9 +121,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (btnLoadMore) {
                     const btnTextSpan = btnLoadMore.querySelector(".btn-text");
                     if (btnTextSpan)
-                        btnTextSpan.textContent = "🔍 Descubrir Grupos";
+                        btnTextSpan.textContent = "Cargar";
                     else
-                        btnLoadMore.textContent = "🔍 Descubrir Grupos";
+                        btnLoadMore.textContent = "Cargar";
                     btnLoadMore.style.display = "block";
                 }
                 hasMore = false;
@@ -160,9 +153,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (btnLoadMore) {
                         const btnTextSpan = btnLoadMore.querySelector(".btn-text");
                         if (btnTextSpan)
-                            btnTextSpan.textContent = "Cargar más";
+                            btnTextSpan.textContent = "Cargar";
                         else
-                            btnLoadMore.textContent = "Cargar más";
+                            btnLoadMore.textContent = "Cargar";
                         btnLoadMore.style.display = "block";
                     }
                 }
@@ -181,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             loadingIndicator.style.display = "none";
         }
-    });
+    };
     // Crear la tarjeta de grupo individual
     const createGroupCard = (group, isMyGroup) => {
         const card = document.createElement("div");
@@ -246,7 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return `<button class="btn-neon btn-join-group" data-id="${group.id}">Solicitar Unión</button>`;
     };
     // Manejar solicitud de unión por AJAX
-    const handleJoinRequest = (groupId, buttonElement) => __awaiter(void 0, void 0, void 0, function* () {
+    const handleJoinRequest = async (groupId, buttonElement) => {
         if (buttonElement.disabled)
             return;
         // Deshabilitar y mostrar estado intermedio
@@ -254,7 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
         buttonElement.textContent = "Enviando...";
         buttonElement.style.opacity = "0.7";
         try {
-            const response = yield fetch(`/Group/JoinRequest?groupId=${groupId}`, {
+            const response = await fetch(`/Group/JoinRequest?groupId=${groupId}`, {
                 method: "POST",
                 headers: {
                     "RequestVerificationToken": getAntiForgeryToken()
@@ -266,10 +259,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
             if (!response.ok) {
-                const errorMsg = yield response.text();
-                throw new Error(errorMsg || "Error al procesar la solicitud.");
+                const errorMsg = await response.text();
+                showToast(errorMsg || "Error al procesar la solicitud.", true);
+                buttonElement.disabled = false;
+                buttonElement.textContent = "Solicitar Unión";
+                buttonElement.style.opacity = "1";
+                return;
             }
-            const result = yield response.json();
+            const result = await response.json();
             // Éxito: cambiar botón por badge correspondiente
             if (result.state === "Approved") {
                 const parent = buttonElement.parentElement;
@@ -281,7 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 setTimeout(() => {
                     skip = 0;
                     hasMore = true;
-                    loadGroups(false);
+                    loadGroups(false).catch(err => console.error('Error:', err));
                 }, 1000);
             }
             else {
@@ -295,7 +292,7 @@ document.addEventListener("DOMContentLoaded", () => {
             buttonElement.textContent = "Solicitar Unión";
             buttonElement.style.opacity = "1";
         }
-    });
+    };
     const setButtonStateRequested = (buttonElement) => {
         const parent = buttonElement.parentElement;
         if (parent) {
@@ -316,7 +313,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 currentSearch = searchInput.value;
                 skip = 0;
                 hasMore = true;
-                loadGroups(false);
+                loadGroups(false).catch(err => console.error('Error:', err));
             }, 300);
         });
     }
@@ -356,9 +353,9 @@ document.addEventListener("DOMContentLoaded", () => {
                             hasMore = true;
                             const btnTextSpan = btnLoadMore.querySelector(".btn-text");
                             if (btnTextSpan)
-                                btnTextSpan.textContent = "Cargar más";
+                                btnTextSpan.textContent = "Cargar";
                             else
-                                btnLoadMore.textContent = "Cargar más";
+                                btnLoadMore.textContent = "Cargar";
                             btnLoadMore.style.display = "block";
                         }
                         skip = cachedOtherGroups.length;
@@ -367,7 +364,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             else {
                 if (hasMore && !isLoading)
-                    loadGroups(true);
+                    loadGroups(true).catch(err => console.error('Error:', err));
             }
         });
     }
@@ -380,7 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const threshold = 100; // píxeles antes del final
             const position = mainContent.scrollHeight - mainContent.scrollTop - mainContent.clientHeight;
             if (position <= threshold)
-                loadGroups(true);
+                loadGroups(true).catch(err => console.error('Error:', err));
         }
     };
     const mainContent = document.querySelector(".app-content");
@@ -398,5 +395,5 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/'/g, "&#039;");
     };
     // Carga inicial de grupos
-    loadGroups(false);
+    loadGroups(false).catch(err => console.error('Error:', err));
 });

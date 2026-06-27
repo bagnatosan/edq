@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 document.addEventListener("DOMContentLoaded", () => {
     const groupIdInput = document.getElementById("groupIdInput");
     const groupNameTitle = document.getElementById("groupNameTitle");
@@ -33,12 +24,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 3000);
     };
     // Cargar datos por AJAX
-    const loadGroupData = () => __awaiter(void 0, void 0, void 0, function* () {
+    const loadGroupData = async () => {
         try {
-            const response = yield fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
-            if (!response.ok)
-                throw new Error("Error al obtener datos del grupo.");
-            const data = yield response.json();
+            const response = await fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`);
+            if (!response.ok) {
+                console.error("Error cargando configuración: respuesta no ok");
+                return;
+            }
+            const data = await response.json();
             // 1. Título
             groupNameTitle.textContent = `Ajustes - ${data.groupName}`;
             // 2. Input
@@ -47,9 +40,9 @@ document.addEventListener("DOMContentLoaded", () => {
         catch (error) {
             console.error("Error cargando configuración:", error);
         }
-    });
+    };
     // Guardar cambios en el backend
-    btnSaveSettings.addEventListener("click", () => __awaiter(void 0, void 0, void 0, function* () {
+    btnSaveSettings.addEventListener("click", async () => {
         const newName = groupNameInput.value.trim();
         if (!newName) {
             showToast("El nombre del grupo no puede estar vacío.", true);
@@ -61,15 +54,28 @@ document.addEventListener("DOMContentLoaded", () => {
         spinner.className = "btn-spinner";
         btnSaveSettings.appendChild(spinner);
         try {
-            const response = yield fetch(`/Group/UpdateGroupName?groupId=${groupId}&name=${encodeURIComponent(newName)}`, {
+            const response = await fetch(`/Group/UpdateGroupName?groupId=${groupId}&name=${encodeURIComponent(newName)}`, {
                 method: "POST",
                 headers: {
                     "RequestVerificationToken": getAntiForgeryToken()
                 }
             });
             if (!response.ok) {
-                const errMsg = yield response.text();
-                throw new Error(errMsg || "Error al actualizar el nombre del grupo.");
+                const errMsg = await response.text();
+                // 1. Corregido el texto por defecto aquí:
+                const finalError = errMsg || "Error al actualizar la configuración.";
+                // 2. Corregido el console.error aquí:
+                console.error("Error actualizando configuración (API):", finalError);
+                showToast(finalError, true);
+                // Reestablecemos el botón aquí mismo
+                if (btnSaveSettings) {
+                    btnSaveSettings.disabled = false;
+                    btnSaveSettings.classList.remove("btn-loading");
+                    const existingSpinner = btnSaveSettings.querySelector(".btn-spinner");
+                    if (existingSpinner)
+                        existingSpinner.remove();
+                }
+                return;
             }
             showToast("¡Nombre del grupo actualizado con éxito!", false);
             setTimeout(() => {
@@ -85,12 +91,12 @@ document.addEventListener("DOMContentLoaded", () => {
             if (existingSpinner)
                 existingSpinner.remove();
         }
-    }));
+    });
     // Anti forgery token helper
     const getAntiForgeryToken = () => {
         const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
         return tokenInput ? tokenInput.value : "";
     };
     // Carga inicial
-    loadGroupData();
+    loadGroupData().catch(err => console.error('Error:', err));
 });

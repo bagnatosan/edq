@@ -1,38 +1,34 @@
+"use strict";
 document.addEventListener("DOMContentLoaded", () => {
     const groupIdInput = document.getElementById("groupIdInput");
     const groupNameTitle = document.getElementById("groupNameTitle");
     const membersScoresList = document.getElementById("membersScoresList");
     const membersCountBadge = document.getElementById("membersCountBadge");
     const btnSaveScores = document.getElementById("btnSaveScores");
-
-    if (!groupIdInput || !groupNameTitle || !membersScoresList || !membersCountBadge) return;
-
+    if (!groupIdInput || !groupNameTitle || !membersScoresList || !membersCountBadge)
+        return;
     const groupId = parseInt(groupIdInput.value);
-    if (isNaN(groupId)) return;
-
-    // Toast de notificaciones con estilo premium
+    if (isNaN(groupId))
+        return;
     const showToast = (message, isError = false) => {
         const toast = document.createElement("div");
         toast.className = `toast-notification ${isError ? 'toast-error' : 'toast-success'}`;
         toast.textContent = message;
         document.body.appendChild(toast);
-        toast.offsetHeight; // Trigger reflow
+        toast.offsetHeight;
         toast.classList.add("show");
         setTimeout(() => {
             toast.classList.remove("show");
             setTimeout(() => toast.remove(), 400);
         }, 3000);
     };
-
-    // Anti forgery token helper
     const getAntiForgeryToken = () => {
         const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
         return tokenInput ? tokenInput.value : "";
     };
-
-    // Escapar HTML para evitar XSS
     const escapeHtml = (unsafe) => {
-        if (!unsafe) return "";
+        if (!unsafe)
+            return "";
         return unsafe
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
@@ -40,28 +36,21 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     };
-
-    // Renderizar miembros en forma de lista editable
     const renderMembersList = (members) => {
         membersScoresList.innerHTML = "";
         membersCountBadge.textContent = `${members.length} ${members.length === 1 ? 'MIEMBRO' : 'MIEMBROS'}`;
-
         if (members.length === 0) {
             membersScoresList.innerHTML = `<div style="text-align:center;color:var(--text-muted);padding:20px;">No hay miembros registrados en este grupo.</div>`;
             return;
         }
-
         members.forEach(member => {
             const defaultScore = member.score ? Math.round(member.score) : 6;
-
             const avatarContent = member.photoUrl
                 ? `<img src="${escapeHtml(member.photoUrl)}" class="avatar-image" alt="${escapeHtml(member.nickname)}" />`
                 : `<span class="avatar-initials" style="font-size:13px;">${escapeHtml(member.initials)}</span>`;
-
             const nicknameHtml = (member.nickname && member.nickname !== member.name)
                 ? `<div style="font-size:11px;color:var(--text-secondary);text-overflow:ellipsis;overflow:hidden;white-space:nowrap;">@${escapeHtml(member.nickname)}</div>`
                 : '';
-
             const row = document.createElement("div");
             row.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);";
             row.innerHTML = `
@@ -79,57 +68,48 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="member-score-val" id="scoreVal_${member.id}" style="color:var(--neon-green);font-weight:800;font-size:15px;width:24px;text-align:right;flex-shrink:0;">${defaultScore}</span>
                 </div>
             `;
-
             const slider = row.querySelector(".member-score-slider");
             const labelVal = row.querySelector(`#scoreVal_${member.id}`);
             if (slider && labelVal)
                 slider.addEventListener("input", () => { labelVal.textContent = slider.value; });
-
             membersScoresList.appendChild(row);
         });
     };
-
-    // Cargar datos por AJAX
-    const loadGroupData = () =>
-        fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`)
-            .then(response => {
-                if (!response.ok) {
-                    if (response.status === 403) {
-                        showToast("No tienes permisos de administrador.", true);
-                        setTimeout(() => { window.location.href = `/Group/Dashboard?groupId=${groupId}`; }, 1500);
-                        return;
-                    }
-                    showToast("Error al obtener los miembros del grupo.", true);
-                    return;
-                }
-                return response.json().then(data => {
-                    groupNameTitle.textContent = `Calificar Miembros - ${data.groupName}`;
-                    renderMembersList(data.members);
-                });
-            })
-            .catch(error => {
-                console.error("Error cargando jugadores:", error);
-                showToast("Ocurrió un error al cargar la lista de jugadores.", true);
-            });
-
-    // Guardar puntajes
+    // Cargar datos por AJAX — retorna Promise directamente para manejo externo
+    const loadGroupData = () => fetch(`/Group/GetGroupDashboardData?groupId=${groupId}`)
+        .then(response => {
+        if (!response.ok) {
+            if (response.status === 403) {
+                showToast("No tienes permisos de administrador.", true);
+                setTimeout(() => { window.location.href = `/Group/Dashboard?groupId=${groupId}`; }, 1500);
+                return;
+            }
+            showToast("Error al obtener los miembros del grupo.", true);
+            return;
+        }
+        return response.json().then((data) => {
+            groupNameTitle.textContent = `Calificar Miembros - ${data.groupName}`;
+            renderMembersList(data.members);
+        });
+    })
+        .catch(error => {
+        console.error("Error cargando jugadores:", error);
+        showToast("Ocurrió un error al cargar la lista de jugadores.", true);
+    });
     if (btnSaveScores) {
         btnSaveScores.addEventListener("click", async () => {
             const sliders = document.querySelectorAll(".member-score-slider");
             const updates = [];
-
             sliders.forEach(slider => {
                 const playerId = parseInt(slider.dataset.playerId || "");
                 const score = parseInt(slider.value);
                 if (!isNaN(playerId) && !isNaN(score))
                     updates.push({ PlayerId: playerId, Score: score });
             });
-
-            if (updates.length === 0) return;
-
+            if (updates.length === 0)
+                return;
             btnSaveScores.disabled = true;
             btnSaveScores.textContent = "Guardando...";
-
             try {
                 const response = await fetch(`/Group/UpdateScores?groupId=${groupId}`, {
                     method: "POST",
@@ -139,26 +119,24 @@ document.addEventListener("DOMContentLoaded", () => {
                     },
                     body: JSON.stringify(updates)
                 });
-
                 if (!response.ok) {
                     const errMsg = await response.text();
                     showToast(errMsg || "Error al actualizar los puntajes.", true);
                     return;
                 }
-
                 showToast("¡Puntajes guardados con éxito!", false);
                 await loadGroupData();
-
-            } catch (error) {
+            }
+            catch (error) {
                 console.error("Error al guardar puntajes:", error);
                 showToast(error.message || "No se pudieron guardar los puntajes.", true);
-            } finally {
+            }
+            finally {
                 btnSaveScores.disabled = false;
                 btnSaveScores.innerHTML = `💾 Guardar Puntajes`;
             }
         });
     }
-
-    // Carga inicial
+    // Carga inicial — .catch() explícito para evitar "Promise ignored" warning
     loadGroupData().catch(err => console.error("Error en carga inicial:", err));
 });

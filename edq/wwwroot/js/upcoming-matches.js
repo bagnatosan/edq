@@ -8,8 +8,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const loadUpcomingMatches = async () => {
         try {
             const response = await fetch("/Match/GetUpcomingMatches");
-            if (!response.ok)
-                throw new Error("Error al obtener los partidos programados.");
+            if (!response.ok) {
+                const errMsg = await response.text();
+                const finalError = errMsg || "Error al obtener los partidos programados.";
+                // Corregido el texto del console.error para que coincida con esta función:
+                console.error("Error al obtener partidos futuros (API):", finalError);
+                // Si tienes un contenedor de error o un Toast, lo muestras aquí:
+                upcomingMatchesList.innerHTML = `<p class="text-danger">${finalError}</p>`;
+                matchesCountBadge.textContent = "0";
+                return;
+            }
             const data = await response.json();
             renderUpcomingList(data);
         }

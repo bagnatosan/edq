@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 document.addEventListener("DOMContentLoaded", () => {
     const matchIdInput = document.getElementById("matchIdInput");
     const groupIdInput = document.getElementById("groupIdInput");
@@ -43,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     const matchId = parseInt(matchIdInput.value);
     const groupId = parseInt(groupIdInput.value);
-    const isCreator = isCreatorInput.value === "true";
     if (isNaN(matchId) || isNaN(groupId))
         return;
     // Estado local de jugadores
@@ -67,12 +57,14 @@ document.addEventListener("DOMContentLoaded", () => {
         return tokenInput ? tokenInput.value : "";
     };
     // Cargar datos iniciales del partido
-    const loadDetails = () => __awaiter(void 0, void 0, void 0, function* () {
+    const loadDetails = async () => {
         try {
-            const response = yield fetch(`/Match/GetMatchDetails?matchId=${matchId}`);
-            if (!response.ok)
-                throw new Error("Error al obtener los detalles del partido.");
-            const data = yield response.json();
+            const response = await fetch(`/Match/GetMatchDetails?matchId=${matchId}`);
+            if (!response.ok) {
+                showToast("No se pudieron cargar los datos del partido.", true);
+                return;
+            }
+            const data = await response.json();
             allMembers = data.groupMembers;
             currentMatchPlayers = data.matchPlayers;
             renderCheckboxes();
@@ -83,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error al cargar detalles:", error);
             showToast("No se pudieron cargar los datos del partido.", true);
         }
-    });
+    };
     // Renderizar checkboxes de convocatoria
     const renderCheckboxes = () => {
         if (!membersCheckboxList)
@@ -137,6 +129,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const teamNone = currentMatchPlayers.filter(p => p.team !== 1 && p.team !== 2);
         countTeamA.textContent = teamA.length.toString();
         countTeamB.textContent = teamB.length.toString();
+        const countSpan = document.getElementById("selectedPlayersCount");
+        if (countSpan) {
+            countSpan.textContent = `Seleccionados: ${currentMatchPlayers.length}`;
+        }
         teamAList.innerHTML = teamA.length > 0
             ? teamA.map(p => `<div>• ${escapeHtml(p.nickname)}</div>`).join("")
             : `<div style="font-style: italic; color: var(--text-muted);">Sin jugadores</div>`;
@@ -151,7 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     // Botón: Re-balancear Equipos
     if (btnRebalance) {
-        btnRebalance.addEventListener("click", () => __awaiter(void 0, void 0, void 0, function* () {
+        btnRebalance.addEventListener("click", async () => {
             const playerIds = currentMatchPlayers.map(p => p.playerId);
             if (playerIds.length < 2) {
                 showToast("Debes convocar al menos 2 jugadores para poder balancear.", true);
@@ -160,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
             btnRebalance.disabled = true;
             btnRebalance.textContent = "Balanceando...";
             try {
-                const response = yield fetch(`/Match/BalancePlayers`, {
+                const response = await fetch(`/Match/BalancePlayers`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -171,9 +167,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         playerIds: playerIds
                     })
                 });
-                if (!response.ok)
-                    throw new Error("Error en el balanceador.");
-                const teamsBalanced = yield response.json();
+                if (!response.ok) {
+                    showToast("No se pudo re-balancear el partido.", true);
+                    return;
+                }
+                const teamsBalanced = await response.json();
                 // Actualizar los equipos locales en el estado
                 currentMatchPlayers.forEach(p => {
                     const teamId = teamsBalanced[p.playerId.toString()];
@@ -192,11 +190,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 btnRebalance.disabled = false;
                 btnRebalance.textContent = "🔄 Volver a Emparejar";
             }
-        }));
+        });
     }
     // Botón: Guardar Cambios de Convocados/Fecha
     if (btnSaveChanges) {
-        btnSaveChanges.addEventListener("click", () => __awaiter(void 0, void 0, void 0, function* () {
+        btnSaveChanges.addEventListener("click", async () => {
             if (!matchDateTime || !matchDateTime.value) {
                 showToast("Por favor selecciona una fecha válida.", true);
                 return;
@@ -215,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }))
             };
             try {
-                const response = yield fetch(`/Match/UpdateMatch`, {
+                const response = await fetch(`/Match/UpdateMatch`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -223,8 +221,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     },
                     body: JSON.stringify(payload)
                 });
-                if (!response.ok)
-                    throw new Error("Error al guardar cambios.");
+                if (!response.ok) {
+                    showToast("No se pudieron guardar los cambios.", true);
+                    return;
+                }
                 showToast("¡Partido actualizado correctamente!", false);
             }
             catch (error) {
@@ -238,7 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (existingSpinner)
                     existingSpinner.remove();
             }
-        }));
+        });
     }
     // Lógica para el Marcador en Tiempo Real y modalidad de carga
     const initResultCalculations = () => {
@@ -355,7 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     // Enviar Formulario de Finalización de Partido
     if (finishMatchForm) {
-        finishMatchForm.addEventListener("submit", (e) => __awaiter(void 0, void 0, void 0, function* () {
+        finishMatchForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             if (!goalsAhead || !goalsTeamA || !goalsTeamB || !matchResultMode || !btnFinishMatch)
                 return;
@@ -367,8 +367,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const spinner = document.createElement("span");
             spinner.className = "btn-spinner";
             btnFinishMatch.appendChild(spinner);
-            let goalsAheadValNum = 0;
-            let totalGoalsValNum = 0;
+            let goalsAheadValNum;
+            let totalGoalsValNum;
             if (mode === "ahead") {
                 goalsAheadValNum = winner === "Empate" ? 0 : parseInt(goalsAhead.value);
                 totalGoalsValNum = goalsAheadValNum;
@@ -386,7 +386,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 winner: winner
             };
             try {
-                const response = yield fetch(`/Match/FinishMatch`, {
+                const response = await fetch(`/Match/FinishMatch`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -394,8 +394,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     },
                     body: JSON.stringify(payload)
                 });
-                if (!response.ok)
-                    throw new Error("Error al registrar el resultado.");
+                if (!response.ok) {
+                    showToast("No se pudo registrar el resultado del partido.", true);
+                    return;
+                }
                 showToast("¡Partido finalizado y resultado registrado!", false);
                 setTimeout(() => {
                     window.location.href = `/Group/Dashboard?groupId=${groupId}`;
@@ -404,13 +406,15 @@ document.addEventListener("DOMContentLoaded", () => {
             catch (error) {
                 console.error("Error al finalizar partido:", error);
                 showToast("No se pudo registrar el resultado del partido.", true);
+            }
+            finally {
                 btnFinishMatch.disabled = false;
                 btnFinishMatch.classList.remove("btn-loading");
                 const existingSpinner = btnFinishMatch.querySelector(".btn-spinner");
                 if (existingSpinner)
                     existingSpinner.remove();
             }
-        }));
+        });
     }
     // Escapar HTML para evitar XSS
     const escapeHtml = (unsafe) => {
@@ -424,5 +428,5 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/'/g, "&#039;");
     };
     // Cargar detalles al inicio
-    loadDetails();
+    loadDetails().catch(err => console.error('Error:', err));
 });

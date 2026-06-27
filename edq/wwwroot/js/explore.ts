@@ -151,9 +151,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (btnLoadMore) {
                     const btnTextSpan = btnLoadMore.querySelector(".btn-text") as HTMLElement | null;
                     if (btnTextSpan)
-                        btnTextSpan.textContent = "🔍 Descubrir Grupos";
+                        btnTextSpan.textContent = "Cargar";
                     else
-                        btnLoadMore.textContent = "🔍 Descubrir Grupos";
+                        btnLoadMore.textContent = "Cargar";
                     btnLoadMore.style.display = "block";
                 }
                 
@@ -184,9 +184,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (btnLoadMore) {
                         const btnTextSpan = btnLoadMore.querySelector(".btn-text") as HTMLElement | null;
                         if (btnTextSpan)
-                            btnTextSpan.textContent = "Cargar más";
+                            btnTextSpan.textContent = "Cargar";
                         else
-                            btnLoadMore.textContent = "Cargar más";
+                            btnLoadMore.textContent = "Cargar";
                         btnLoadMore.style.display = "block";
                     }
                 }
@@ -401,9 +401,9 @@ document.addEventListener("DOMContentLoaded", () => {
                             hasMore = true;
                             const btnTextSpan = btnLoadMore.querySelector(".btn-text") as HTMLElement | null;
                             if (btnTextSpan)
-                                btnTextSpan.textContent = "Cargar más";
+                                btnTextSpan.textContent = "Cargar";
                             else
-                                btnLoadMore.textContent = "Cargar más";
+                                btnLoadMore.textContent = "Cargar";
                             btnLoadMore.style.display = "block";
                         }
                         

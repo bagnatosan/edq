@@ -1,4 +1,4 @@
-const CACHE_NAME = 'edq-cache-v13';
+const CACHE_NAME = 'edq-cache-v14';
 
 // Recursos estáticos que se cachean al instalar el Service Worker
 const STATIC_ASSETS = [
@@ -156,6 +156,8 @@ self.addEventListener('push', event => {
     icon: '/images/logo_appicon.svg',
     badge: '/images/logo_navbar.svg',
     vibrate: [100, 50, 100],
+    tag: data.url ? 'chat-' + data.url : 'default',
+    renotify: true,
     data: {
       url: data.url || '/'
     }

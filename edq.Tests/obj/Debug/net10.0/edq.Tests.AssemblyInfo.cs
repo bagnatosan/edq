@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("edq.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+003741fb2caea4fe145dd22de8f48aa3e53449ce")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cab984635b6def31cf65d33f32e26241ce1cd3ce")]
 [assembly: System.Reflection.AssemblyProductAttribute("edq.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("edq.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

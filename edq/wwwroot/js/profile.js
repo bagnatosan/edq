@@ -209,7 +209,9 @@ document.addEventListener("DOMContentLoaded", () => {
                             const p256dh = (_a = subJson.keys) === null || _a === void 0 ? void 0 : _a.p256dh;
                             const auth = (_b = subJson.keys) === null || _b === void 0 ? void 0 : _b.auth;
                             if (!sub.endpoint || !p256dh || !auth) {
-                                throw new Error("Suscripción inválida obtenida del navegador.");
+                                console.error("Suscripción inválida obtenida del navegador.");
+                                showToast("Suscripción inválida obtenida del navegador.", true);
+                                return; // Cortamos ejecución localmente
                             }
                             // Enviar al servidor
                             const regResponse = await fetch('/Push/Subscribe', {
@@ -225,7 +227,9 @@ document.addEventListener("DOMContentLoaded", () => {
                                 })
                             });
                             if (!regResponse.ok) {
-                                throw new Error("El servidor rechazó el registro de la suscripción.");
+                                console.error("Error en Push/Subscribe: El servidor rechazó el registro.");
+                                showToast("El servidor rechazó el registro de la suscripción.", true);
+                                return; // Cortamos ejecución localmente
                             }
                             updateSettingsButtonVisibility(true);
                         }
