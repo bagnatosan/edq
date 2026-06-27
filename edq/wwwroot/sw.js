@@ -1,4 +1,4 @@
-const CACHE_NAME = 'edq-cache-v14';
+const CACHE_NAME = 'edq-cache-v15';
 
 // Recursos estáticos que se cachean al instalar el Service Worker
 const STATIC_ASSETS = [
@@ -199,4 +199,11 @@ self.addEventListener('notificationclick', event => {
         }
       })
   );
+});
+
+// Background Sync Event
+self.addEventListener('sync', event => {
+  if (event.tag === 'sync-messages') {
+    console.log('Background sync triggered for sync-messages');
+  }
 });
