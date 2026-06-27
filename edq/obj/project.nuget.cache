@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "hHKEYYEUPpI=",
+  "dgSpecHash": "758vezn81RM=",
   "success": true,
   "projectFilePath": "/home/santiago/Documentos/GitHub/edq/edq/edq.csproj",
   "expectedPackageFiles": [
@@ -37,7 +37,10 @@
     "/home/santiago/.nuget/packages/mono.texttemplating/3.0.0/mono.texttemplating.3.0.0.nupkg.sha512",
     "/home/santiago/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512",
     "/home/santiago/.nuget/packages/portable.bouncycastle/1.9.0/portable.bouncycastle.1.9.0.nupkg.sha512",
-    "/home/santiago/.nuget/packages/sixlabors.imagesharp/2.1.9/sixlabors.imagesharp.2.1.9.nupkg.sha512",
+    "/home/santiago/.nuget/packages/skiasharp/3.116.1/skiasharp.3.116.1.nupkg.sha512",
+    "/home/santiago/.nuget/packages/skiasharp.nativeassets.linux/3.116.1/skiasharp.nativeassets.linux.3.116.1.nupkg.sha512",
+    "/home/santiago/.nuget/packages/skiasharp.nativeassets.macos/3.116.1/skiasharp.nativeassets.macos.3.116.1.nupkg.sha512",
+    "/home/santiago/.nuget/packages/skiasharp.nativeassets.win32/3.116.1/skiasharp.nativeassets.win32.3.116.1.nupkg.sha512",
     "/home/santiago/.nuget/packages/sqlitepclraw.bundle_e_sqlite3/2.1.11/sqlitepclraw.bundle_e_sqlite3.2.1.11.nupkg.sha512",
     "/home/santiago/.nuget/packages/sqlitepclraw.core/2.1.11/sqlitepclraw.core.2.1.11.nupkg.sha512",
     "/home/santiago/.nuget/packages/sqlitepclraw.lib.e_sqlite3/2.1.11/sqlitepclraw.lib.e_sqlite3.2.1.11.nupkg.sha512",
@@ -53,30 +56,6 @@
     "/home/santiago/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.9/microsoft.aspnetcore.app.ref.10.0.9.nupkg.sha512"
   ],
   "logs": [
-    {
-      "code": "NU1903",
-      "level": "Warning",
-      "message": "Package 'SixLabors.ImageSharp' 2.1.9 has a known high severity vulnerability, https://github.com/advisories/GHSA-2cmq-823j-5qj8",
-      "projectPath": "/home/santiago/Documentos/GitHub/edq/edq/edq.csproj",
-      "warningLevel": 1,
-      "filePath": "/home/santiago/Documentos/GitHub/edq/edq/edq.csproj",
-      "libraryId": "SixLabors.ImageSharp",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    },
-    {
-      "code": "NU1902",
-      "level": "Warning",
-      "message": "Package 'SixLabors.ImageSharp' 2.1.9 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-rxmq-m78w-7wmc",
-      "projectPath": "/home/santiago/Documentos/GitHub/edq/edq/edq.csproj",
-      "warningLevel": 1,
-      "filePath": "/home/santiago/Documentos/GitHub/edq/edq/edq.csproj",
-      "libraryId": "SixLabors.ImageSharp",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    },
     {
       "code": "NU1903",
       "level": "Warning",

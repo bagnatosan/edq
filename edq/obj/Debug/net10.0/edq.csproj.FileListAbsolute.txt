@@ -220,7 +220,6 @@
 /home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/BouncyCastle.Crypto.dll
 /home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/WebPush.dll
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/6vpjo7m7oy-{0}-tf1komhz1c-tf1komhz1c.gz
-/home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/SixLabors.ImageSharp.dll
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/sudnjedor1-{0}-6l7zkfz444-6l7zkfz444.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/jozni1su0g-{0}-9a8o4t754c-9a8o4t754c.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/8fy9rbicfq-{0}-0gwum6astr-0gwum6astr.gz
@@ -243,3 +242,16 @@
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/snkqyfgimc-{0}-dskgku6odw-dskgku6odw.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/nn78637j3a-{0}-r88rlm15o0-r88rlm15o0.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/gs3u0tvtjl-{0}-ngfkbqyifb-ngfkbqyifb.gz
+/home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/SkiaSharp.dll
+/home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/runtimes/linux-arm/native/libSkiaSharp.so
+/home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/runtimes/linux-arm/native/libSkiaSharp.so.116.0.0
+/home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/runtimes/linux-arm64/native/libSkiaSharp.so
+/home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/runtimes/linux-arm64/native/libSkiaSharp.so.116.0.0
+/home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/runtimes/linux-musl-x64/native/libSkiaSharp.so
+/home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/runtimes/linux-musl-x64/native/libSkiaSharp.so.116.0.0
+/home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/runtimes/linux-x64/native/libSkiaSharp.so
+/home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/runtimes/linux-x64/native/libSkiaSharp.so.116.0.0
+/home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/runtimes/osx/native/libSkiaSharp.dylib
+/home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/runtimes/win-arm64/native/libSkiaSharp.dll
+/home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/runtimes/win-x64/native/libSkiaSharp.dll
+/home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/runtimes/win-x86/native/libSkiaSharp.dll

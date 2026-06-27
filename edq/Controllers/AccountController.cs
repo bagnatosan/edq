@@ -5,9 +5,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Formats.Webp;
+using SkiaSharp;
 
 namespace edq.Controllers;
 
@@ -193,23 +191,26 @@ public class AccountController : Controller
             string uniqueName = Guid.NewGuid().ToString() + ".webp";
             string completePhysicalRoute = Path.Combine(folderDestination, uniqueName);
 
-            // Procesar y guardar la imagen de forma optimizada
-            using (var image = await Image.LoadAsync(photo.OpenReadStream()))
-            {
-                // Redimensionar si excede 300px manteniendo la relación de aspecto
-                image.Mutate(x => x.Resize(new ResizeOptions
-                {
-                    Size = new Size(300, 300),
-                    Mode = ResizeMode.Max
-                }));
+            // Procesar y guardar la imagen de forma optimizada con SkiaSharp
+            using var inputStream = photo.OpenReadStream();
+            using var originalBitmap = SKBitmap.Decode(inputStream)
+                ?? throw new InvalidOperationException("No se pudo decodificar la imagen.");
 
-                // Guardar como WebP con calidad del 75%
-                var encoder = new WebpEncoder
-                {
-                    Quality = 75
-                };
-                await image.SaveAsync(completePhysicalRoute, encoder);
-            }
+            // Calcular nuevo tamaño manteniendo la relación de aspecto (máximo 300px)
+            const int maxSize = 300;
+            int srcW = originalBitmap.Width;
+            int srcH = originalBitmap.Height;
+            float scale = Math.Min((float)maxSize / srcW, (float)maxSize / srcH);
+            int newW = scale < 1f ? (int)(srcW * scale) : srcW;
+            int newH = scale < 1f ? (int)(srcH * scale) : srcH;
+
+            using var resized = originalBitmap.Resize(new SKImageInfo(newW, newH), new SKSamplingOptions(SKCubicResampler.Mitchell));
+            using var skImage = SKImage.FromBitmap(resized);
+
+            // Guardar como WebP con calidad del 75%
+            using var webpData = skImage.Encode(SKEncodedImageFormat.Webp, 75);
+            await using var fileStream = new FileStream(completePhysicalRoute, FileMode.Create, FileAccess.Write);
+            webpData.SaveTo(fileStream);
 
             string photoUrl = "/images/profiles/" + uniqueName;
             var success = await _authService.UpdatePlayerPhotoAsync(userId.Value, photoUrl);
