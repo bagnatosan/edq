@@ -89,6 +89,7 @@ public class PushNotificationService : IPushNotificationService
         }
         catch (WebPushException ex)
         {
+            Console.WriteLine($"[ERROR] SendNotificationAsync WebPushException: StatusCode={ex.StatusCode}, Message={ex.Message}");
             // Si el endpoint ya no existe (410 Gone o 404), remover la suscripción
             if (ex.StatusCode == System.Net.HttpStatusCode.Gone || ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
@@ -100,15 +101,15 @@ public class PushNotificationService : IPushNotificationService
                     _context.PushSubscriptions.Remove(subscription);
                     await _context.SaveChangesAsync();
                 }
-                catch
+                catch (Exception dbEx)
                 {
-                    // Ignorar errores de DbContext descartado
+                    Console.WriteLine($"[ERROR] Failed to remove stale subscription: {dbEx.Message}");
                 }
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Ignorar otros errores
+            Console.WriteLine($"[ERROR] SendNotificationAsync general Exception: {ex.Message}");
         }
     }
 
