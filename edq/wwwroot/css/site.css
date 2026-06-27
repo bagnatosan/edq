@@ -2387,47 +2387,9 @@ body {
   }
 }
 
-/* ==========================================================================
-   TRANSICIONES DE NAVEGACIÓN ENTRE PÁGINAS
-   ========================================================================== */
 
-/*
- * View Transitions API (Chrome 111+, Edge 111+):
- * Activa el crossfade automático entre páginas al navegar.
- */
-@view-transition {
-    navigation: auto;
-}
 
-/*
- * Personalización del crossfade: animación de salida de la página vieja
- * y animación de entrada de la página nueva, con 300ms de duración.
- */
-::view-transition-old(root) {
-    animation: 0.3s ease-out both page-fade-out;
-}
 
-::view-transition-new(root) {
-    animation: 0.3s ease-in both page-fade-in;
-}
-
-@keyframes page-fade-out {
-    from { opacity: 1; }
-    to   { opacity: 0; }
-}
-
-@keyframes page-fade-in {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-
-/*
- * Fallback para Firefox (sin soporte a @view-transition):
- * Solo puede animar la entrada. La salida se maneja con JS en _Layout.cshtml.
- */
-html {
-    animation: page-fade-in 0.25s ease;
-}
 
 /* ── Hover Glow Options for Home Page ── */
 .hover-glow {

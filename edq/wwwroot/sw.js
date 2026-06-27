@@ -1,4 +1,4 @@
-const CACHE_NAME = 'edq-cache-v5';
+const CACHE_NAME = 'edq-cache-v12';
 
 // Recursos estáticos que se cachean al instalar el Service Worker
 const STATIC_ASSETS = [
@@ -114,10 +114,18 @@ self.addEventListener('fetch', event => {
         })
         .catch(() =>
           // Sin red: intentar caché propio, sino mostrar página offline
-          caches.match(event.request).then(cached =>
+          caches.match(event.request, { ignoreSearch: true }).then(cached =>
             cached || caches.match('/Home/Offline')
           )
         )
+    );
+    return;
+  // Para páginas HTML que NO son cacheables: ir a la red de una, sin tocar el caché.
+  // Esto evita que páginas dinámicas como /Match/Upcoming o /Account/Login se queden cacheadas viejas.
+  const isHtml = event.request.headers.get('Accept')?.includes('text/html');
+  if (isHtml) {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('/Home/Offline'))
     );
     return;
   }
@@ -126,7 +134,7 @@ self.addEventListener('fetch', event => {
   // Si el recurso ya está cacheado, lo sirve instantáneamente sin ir a la red.
   // Si no hay red ni caché (ej: una página de navegación desconocida), muestra offline.
   event.respondWith(
-    caches.match(event.request).then(cached => {
+    caches.match(event.request, { ignoreSearch: true }).then(cached => {
       if (cached)
         return cached;
       return fetch(event.request)
