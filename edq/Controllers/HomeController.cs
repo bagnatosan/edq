@@ -46,4 +46,9 @@ public class HomeController : Controller
             ErrorMessage = "No hay conexión a internet. Revisá tu red y volvé a intentarlo."
         });
     }
+
+    // Guía de instalación de la PWA en iOS Safari
+    [AllowAnonymous]
+    public IActionResult InstallIos()
+        => View();
 }

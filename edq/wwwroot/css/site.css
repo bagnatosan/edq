@@ -2427,4 +2427,323 @@ body {
  */
 html {
     animation: page-fade-in 0.25s ease;
+}/* ── iOS PWA Installation Guide (Namespaced under .ios-install-body) ── */
+.ios-install-body {
+    background: #0b0d11 !important;
+    color: #ffffff !important;
+    min-height: 100% !important;
+    font-family: 'Outfit', system-ui, sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    display: block !important;
+    overflow-y: auto !important;
+}
+
+.ios-install-body::before {
+    content: '';
+    position: fixed;
+    top: -30%;
+    left: 50%;
+    translate: -50% 0;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(158,255,0,.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.ios-install-body .page {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 0 60px;
+}
+
+.ios-install-body .topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 20px 0;
+}
+
+.ios-install-body .btn-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(22, 25, 33, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 50%;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: #ffffff;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: background .2s, border-color .2s;
+}
+
+.ios-install-body .btn-back:hover  { background: rgba(158,255,0,.1); border-color: #9eff00; }
+.ios-install-body .btn-back:active { transform: scale(.92); }
+
+.ios-install-body .btn-back svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.ios-install-body .hero {
+    text-align: center;
+    padding: 36px 24px 28px;
+    display: block !important;
+}
+
+.ios-install-body .hero-logo {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #1a1d24, #0f1115);
+    border: 1px solid rgba(158,255,0,.25);
+    box-shadow: 0 0 32px rgba(158, 255, 0, 0.22), 0 8px 24px rgba(0,0,0,.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: float 3s ease-in-out infinite;
+}
+
+.ios-install-body .hero-logo img { width: 52px; height: 52px; }
+
+.ios-install-body .hero h1 {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 10px;
+    color: #ffffff !important;
+}
+
+.ios-install-body .hero h1 span { color: #9eff00; }
+
+.ios-install-body .hero p {
+    font-size: 15px;
+    color: #8a92a6;
+    line-height: 1.5;
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+.ios-install-body .safari-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 20px 8px;
+    padding: 14px 16px;
+    background: rgba(255, 149, 0, .08);
+    border: 1px solid rgba(255, 149, 0, .25);
+    border-radius: 14px;
+}
+
+.ios-install-body .safari-badge svg { flex-shrink: 0; }
+
+.ios-install-body .safari-badge p {
+    font-size: 13px;
+    color: #ffb340;
+    line-height: 1.4;
+    font-weight: 500;
+}
+
+.ios-install-body .safari-badge strong { font-weight: 700; }
+
+.ios-install-body .appstore-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0 20px 28px;
+    padding: 14px 16px;
+    background: rgba(167, 139, 250, .07);
+    border: 1px solid rgba(167, 139, 250, .22);
+    border-radius: 14px;
+}
+
+.ios-install-body .appstore-note svg { flex-shrink: 0; margin-top: 1px; }
+
+.ios-install-body .appstore-note p {
+    font-size: 13px;
+    color: #c4b5fd;
+    line-height: 1.4;
+    font-weight: 500;
+}
+
+.ios-install-body .appstore-note strong { font-weight: 700; color: #ddd6fe; }
+.ios-install-body .appstore-note em     { font-style: normal; font-weight: 700; color: #ddd6fe; }
+
+.ios-install-body .steps { display: flex; flex-direction: column; gap: 12px; padding: 0 20px; }
+
+.ios-install-body .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    background: rgba(22, 25, 33, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 20px;
+    padding: 18px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: border-color .25s, box-shadow .25s;
+}
+
+.ios-install-body .step:hover {
+    border-color: rgba(158,255,0,.2);
+    box-shadow: 0 4px 20px rgba(158,255,0,.06);
+}
+
+.ios-install-body .step-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(158, 255, 0, 0.08);
+    border: 1.5px solid rgba(158,255,0,.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: #9eff00;
+    flex-shrink: 0;
+}
+
+.ios-install-body .step-body { flex: 1; min-width: 0; }
+
+.ios-install-body .step-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #ffffff;
+}
+
+.ios-install-body .step-desc {
+    font-size: 13px;
+    color: #8a92a6;
+    line-height: 1.5;
+}
+
+.ios-install-body .icon-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 6px;
+    padding: 2px 7px 2px 5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ffffff;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.ios-install-body .icon-pill svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+}
+
+.ios-install-body .step-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background: rgba(158, 255, 0, 0.08);
+}
+
+.ios-install-body .step-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: #9eff00;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.ios-install-body .done-card {
+    margin: 24px 20px 0;
+    padding: 24px 20px;
+    background: linear-gradient(135deg, rgba(158,255,0,.07), rgba(158,255,0,.02));
+    border: 1px solid rgba(158,255,0,.3);
+    border-radius: 20px;
+    text-align: center;
+}
+
+.ios-install-body .done-card .emoji { font-size: 36px; margin-bottom: 10px; }
+
+.ios-install-body .done-card h2 {
+    font-size: 19px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    color: #ffffff;
+}
+
+.ios-install-body .done-card p {
+    font-size: 13px;
+    color: #8a92a6;
+    line-height: 1.5;
+}
+
+/* ── Responsive: tablet ─────────────────────────────────── */
+@media (min-width: 600px) {
+    .ios-install-body { padding: 32px 20px !important; }
+
+    .ios-install-body .page {
+        max-width: 680px;
+        padding-bottom: 60px;
+    }
+
+    .ios-install-body .hero { padding: 40px 40px 32px; }
+    .ios-install-body .hero h1 { font-size: 30px; }
+    .ios-install-body .hero-logo { animation: none; }
+
+    .ios-install-body .topbar { padding: 0 0 24px; }
+
+    .ios-install-body .safari-badge  { margin: 0 0 8px; }
+    .ios-install-body .appstore-note { margin: 0 0 28px; }
+    .ios-install-body .steps         { padding: 0; gap: 14px; }
+    .ios-install-body .done-card     { margin: 28px 0 0; }
+
+    .ios-install-body .steps { display: grid; grid-template-columns: 1fr 1fr; }
+    .ios-install-body .steps .step:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+
+/* ── Responsive: desktop ────────────────────────────────── */
+@media (min-width: 960px) {
+    .ios-install-body { padding: 48px 20px !important; }
+
+    .ios-install-body .page { max-width: 860px; }
+
+    .ios-install-body .topbar { padding: 0 20px 0; margin-bottom: 40px; }
+
+    .ios-install-body .hero { padding: 0 0 40px; display: flex; align-items: center; gap: 40px; text-align: left; }
+    .ios-install-body .hero-logo { margin: 0; width: 100px; height: 100px; border-radius: 22px; animation: none; }
+    .ios-install-body .hero-logo img { width: 64px; height: 64px; }
+    .ios-install-body .hero-text { flex: 1; }
+    .ios-install-body .hero h1 { font-size: 36px; }
+    .ios-install-body .hero p  { max-width: 100%; margin: 0; }
+
+    .ios-install-body .steps { grid-template-columns: 1fr 1fr 1fr; }
+    .ios-install-body .steps .step:last-child:nth-child(3n - 1) { grid-column: auto; }
+    .ios-install-body .steps .step:last-child:nth-child(odd)    { grid-column: auto; }
+
+    .ios-install-body .done-card { padding: 32px; }
 }

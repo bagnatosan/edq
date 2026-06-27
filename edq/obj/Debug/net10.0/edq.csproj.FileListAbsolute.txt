@@ -236,7 +236,6 @@
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/tpmc4f0ug7-{0}-qhba3bwjfv-qhba3bwjfv.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/e7y5m0fc5w-{0}-zrjv9aaxji-zrjv9aaxji.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/b61zlydoc8-{0}-m378huzste-m378huzste.gz
-/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/39938q6i2y-{0}-jjgv6z0p1r-jjgv6z0p1r.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/15508tqiwp-{0}-cv4t4q5x5a-cv4t4q5x5a.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/8o1p1ndg8z-{0}-z0arz9czse-z0arz9czse.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/snkqyfgimc-{0}-dskgku6odw-dskgku6odw.gz
@@ -255,3 +254,4 @@
 /home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/runtimes/win-arm64/native/libSkiaSharp.dll
 /home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/runtimes/win-x64/native/libSkiaSharp.dll
 /home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/runtimes/win-x86/native/libSkiaSharp.dll
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/39938q6i2y-{0}-fl59pusq1p-fl59pusq1p.gz
