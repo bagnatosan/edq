@@ -21,7 +21,12 @@ public class PushNotificationService : IPushNotificationService
         _publicKey = "";
         _privateKey = "";
 
-        string path = Path.Combine(AppContext.BaseDirectory, "vapid.json");
+        string directory = Path.Combine(AppContext.BaseDirectory, "wwwroot", "images", "profiles");
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+        string path = Path.Combine(directory, "vapid.json");
         bool keysLoaded = false;
 
         // 1. Intentar leer el archivo si existe
