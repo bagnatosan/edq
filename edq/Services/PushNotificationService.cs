@@ -3,19 +3,22 @@ using edq.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using WebPush;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace edq.Services;
 
 public class PushNotificationService : IPushNotificationService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly string _publicKey;
     private readonly string _privateKey;
     private readonly string _subject = "mailto:admin@edq.local";
 
-    public PushNotificationService(ApplicationDbContext context)
+    public PushNotificationService(ApplicationDbContext context, IServiceScopeFactory scopeFactory)
     {
         _context = context;
+        _scopeFactory = scopeFactory;
     
         // Inicializar con valores por defecto para evitar advertencias de nulidad del compilador
         _publicKey = "";
@@ -93,13 +96,16 @@ public class PushNotificationService : IPushNotificationService
             // Si el endpoint ya no existe (410 Gone o 404), remover la suscripción
             if (ex.StatusCode == System.Net.HttpStatusCode.Gone || ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                // Crear un DbContext temporal o usar el inyectado si sigue vivo.
-                // Como SendNotificationAsync se ejecuta en paralelo y puede durar más que la petición original,
-                // removemos de forma segura.
                 try
                 {
-                    _context.PushSubscriptions.Remove(subscription);
-                    await _context.SaveChangesAsync();
+                    using var scope = _scopeFactory.CreateScope();
+                    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    var subToDelete = await context.PushSubscriptions.FirstOrDefaultAsync(s => s.Endpoint == subscription.Endpoint);
+                    if (subToDelete != null)
+                    {
+                        context.PushSubscriptions.Remove(subToDelete);
+                        await context.SaveChangesAsync();
+                    }
                 }
                 catch (Exception dbEx)
                 {
@@ -115,12 +121,15 @@ public class PushNotificationService : IPushNotificationService
 
     public async Task SendNotificationToGroupAsync(int groupId, string title, string body, string url, int excludePlayerId = 0, NotificationType type = NotificationType.Default)
     {
-        var memberIds = await _context.GroupPlayers.AsNoTracking()
+        using var scope = _scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        var memberIds = await context.GroupPlayers.AsNoTracking()
             .Where(gp => gp.GroupId == groupId)
             .Select(gp => gp.PlayerId)
             .ToListAsync();
 
-        var group = await _context.Groups.AsNoTracking().FirstOrDefaultAsync(g => g.Id == groupId);
+        var group = await context.Groups.AsNoTracking().FirstOrDefaultAsync(g => g.Id == groupId);
         if (group != null && !memberIds.Contains(group.CreatorId))
         {
             memberIds.Add(group.CreatorId);
@@ -137,19 +146,19 @@ public class PushNotificationService : IPushNotificationService
         switch (type)
         {
             case NotificationType.MatchCreation:
-                filteredMemberIds = await _context.Players.AsNoTracking()
+                filteredMemberIds = await context.Players.AsNoTracking()
                     .Where(p => memberIds.Contains(p.Id) && p.NotifyMatchCreation)
                     .Select(p => p.Id)
                     .ToListAsync();
                 break;
             case NotificationType.MatchModification:
-                filteredMemberIds = await _context.Players.AsNoTracking()
+                filteredMemberIds = await context.Players.AsNoTracking()
                     .Where(p => memberIds.Contains(p.Id) && p.NotifyMatchModification)
                     .Select(p => p.Id)
                     .ToListAsync();
                 break;
             case NotificationType.Chat:
-                filteredMemberIds = await _context.Players.AsNoTracking()
+                filteredMemberIds = await context.Players.AsNoTracking()
                     .Where(p => memberIds.Contains(p.Id) && p.NotifyChat)
                     .Select(p => p.Id)
                     .ToListAsync();
@@ -161,7 +170,7 @@ public class PushNotificationService : IPushNotificationService
 
         if (filteredMemberIds.Count == 0) return;
 
-        var subscriptions = await _context.PushSubscriptions.AsNoTracking()
+        var subscriptions = await context.PushSubscriptions.AsNoTracking()
             .Where(s => filteredMemberIds.Contains(s.PlayerId))
             .ToListAsync();
 
@@ -177,20 +186,23 @@ public class PushNotificationService : IPushNotificationService
 
     public async Task SendMatchCreationNotificationAsync(int creatorId, int groupId, List<int> chosenPlayerIds, DateTime date)
     {
-        var creator = await _context.Players.AsNoTracking().FirstOrDefaultAsync(p => p.Id == creatorId);
+        using var scope = _scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        var creator = await context.Players.AsNoTracking().FirstOrDefaultAsync(p => p.Id == creatorId);
         var creatorName = creator != null ? (!string.IsNullOrWhiteSpace(creator.Nickname) ? creator.Nickname : $"{creator.Name} {creator.LastName}") : "Un administrador";
         
-        var group = await _context.Groups.AsNoTracking().FirstOrDefaultAsync(g => g.Id == groupId);
+        var group = await context.Groups.AsNoTracking().FirstOrDefaultAsync(g => g.Id == groupId);
         var groupName = group?.Name ?? "Grupo";
 
-        var targets = await _context.Players.AsNoTracking()
+        var targets = await context.Players.AsNoTracking()
             .Where(p => chosenPlayerIds.Contains(p.Id) && p.Id != creatorId && p.NotifyMatchCreation)
             .Select(p => p.Id)
             .ToListAsync();
 
         if (targets.Count == 0) return;
 
-        var subscriptions = await _context.PushSubscriptions.AsNoTracking()
+        var subscriptions = await context.PushSubscriptions.AsNoTracking()
             .Where(s => targets.Contains(s.PlayerId))
             .ToListAsync();
 
@@ -206,28 +218,31 @@ public class PushNotificationService : IPushNotificationService
 
     public async Task SendMatchModificationNotificationAsync(int? modifierId, int matchId)
     {
-        var match = await _context.Matches.AsNoTracking()
+        using var scope = _scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        var match = await context.Matches.AsNoTracking()
             .Include(m => m.MatchPlayers)
             .FirstOrDefaultAsync(m => m.Id == matchId);
 
         if (match == null) return;
 
-        var group = await _context.Groups.AsNoTracking().FirstOrDefaultAsync(g => g.Id == match.GroupId);
+        var group = await context.Groups.AsNoTracking().FirstOrDefaultAsync(g => g.Id == match.GroupId);
         var groupName = group?.Name ?? "Grupo";
 
-        var modifier = await _context.Players.AsNoTracking().FirstOrDefaultAsync(p => p.Id == modifierId);
+        var modifier = await context.Players.AsNoTracking().FirstOrDefaultAsync(p => p.Id == modifierId);
         var modifierName = modifier != null ? (!string.IsNullOrWhiteSpace(modifier.Nickname) ? modifier.Nickname : $"{modifier.Name} {modifier.LastName}") : "Un administrador";
 
         var chosenPlayerIds = match.MatchPlayers.Select(mp => mp.PlayerId).ToList();
 
-        var targets = await _context.Players.AsNoTracking()
+        var targets = await context.Players.AsNoTracking()
             .Where(p => chosenPlayerIds.Contains(p.Id) && p.Id != modifierId && p.NotifyMatchModification)
             .Select(p => p.Id)
             .ToListAsync();
 
         if (targets.Count == 0) return;
 
-        var subscriptions = await _context.PushSubscriptions.AsNoTracking()
+        var subscriptions = await context.PushSubscriptions.AsNoTracking()
             .Where(s => targets.Contains(s.PlayerId))
             .ToListAsync();
 
