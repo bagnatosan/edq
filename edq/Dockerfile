@@ -16,8 +16,15 @@ RUN dotnet publish "edq.csproj" -c Release -o /app/publish \
     /p:PublishReadyToRun=true
 
 # --- ETAPA 2: PRODUCCIÓN (ALTO RENDIMIENTO) ---
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
+
+# Instalar dependencias nativas requeridas por SkiaSharp
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libfontconfig1 \
+    libfreetype6 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=build /app/publish .
 
 # Variables de entorno críticas para rendimiento en contenedores

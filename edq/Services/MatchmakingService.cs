@@ -130,8 +130,10 @@ namespace edq.Services
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine($"[ERROR] CreateMatchAsync: Error saving match: {ex.Message}");
+                Console.WriteLine(ex.ToString());
                 return false;
             }
         }
