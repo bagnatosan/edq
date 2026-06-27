@@ -28,9 +28,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=Server=db;Port=3306;Database=mi_base_datos;User Id=root;Password=TuPasswordSeguro123!;
+    volumes:
+      - uploads_data:/app/wwwroot/images/profiles
     depends_on:
       db:
         condition: service_healthy
 
 volumes:
   mariadb_data:
+  uploads_data:

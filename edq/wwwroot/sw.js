@@ -1,4 +1,4 @@
-const CACHE_NAME = 'edq-cache-v12';
+const CACHE_NAME = 'edq-cache-v13';
 
 // Recursos estáticos que se cachean al instalar el Service Worker
 const STATIC_ASSETS = [
@@ -23,7 +23,10 @@ const CACHEABLE_PAGES = [
 ];
 
 const API_PREFIXES = [
+  '/Match/',
   '/Group/GetGroups',
+  '/Group/GetGroupDashboardData',
+  '/Group/GetMatchHistory',
   '/Group/JoinRequest',
   '/Group/CreateGroup',
   '/Chat/GetMessages',

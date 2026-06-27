@@ -227,4 +227,4 @@
 /home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/zh-Hans/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 /home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/zh-Hant/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/39938q6i2y-{0}-qh3anqh5u5-qh3anqh5u5.gz
-/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/15508tqiwp-{0}-mslr4uqrgp-mslr4uqrgp.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/15508tqiwp-{0}-jg1ywij5u1-jg1ywij5u1.gz

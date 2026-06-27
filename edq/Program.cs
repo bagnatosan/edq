@@ -62,6 +62,7 @@ if (app.Environment.IsProduction())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
