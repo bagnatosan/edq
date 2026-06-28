@@ -246,11 +246,7 @@ document.addEventListener("DOMContentLoaded", () => {
             else if (position === 3)
                 positionSymbol = "🥉";
             const hasNickname = member.nickname && member.nickname !== member.name;
-            const nicknameHtml = hasNickname ? `
-                        <div class="ranking-nickname">
-                            @${escapeHtml(member.nickname)}
-                        </div>
-            ` : '';
+            const displayName = hasNickname ? member.nickname : member.name.trim().split(" ")[0];
             rankingItem.innerHTML = `
                 <div class="ranking-player-info">
                     <span class="ranking-position">${positionSymbol}</span>
@@ -259,9 +255,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                     <div class="ranking-details">
                         <div class="ranking-name" style="display: flex; align-items: center; gap: 6px;">
-                            ${escapeHtml(member.name)}
+                            ${escapeHtml(displayName)}
                         </div>
-                        ${nicknameHtml}
                     </div>
                 </div>
                 <div class="ranking-winrate-pill">

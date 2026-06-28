@@ -2723,3 +2723,118 @@ body {
 
     .ios-install-body .done-card { padding: 32px; }
 }
+
+/* ── Secciones para Edición y Eliminación de Partido ── */
+.btn-delete-match {
+    width: 100%;
+    justify-content: center;
+    background: #ff3838 !important;
+    border-color: #ff3838 !important;
+    color: #fff !important;
+    box-shadow: 0 0 10px rgba(255, 56, 56, 0.2);
+}
+
+.btn-manual-swap-toggle {
+    margin-top: 8px;
+    width: 100%;
+    justify-content: center;
+    padding: 10px;
+    font-size: 13px;
+}
+
+.manual-swap-container {
+    margin-top: 12px;
+    border: 1px dashed rgba(255,255,255,0.15);
+    padding: 12px;
+    border-radius: var(--border-radius-sm);
+    background: rgba(0,0,0,0.25);
+}
+
+.manual-swap-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.manual-swap-select-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 2px;
+}
+
+.manual-swap-select {
+    font-size: 12px;
+    padding: 4px 8px;
+    width: 100%;
+    height: 32px;
+    background: rgba(0,0,0,0.3);
+    color: var(--text-primary);
+    border-color: rgba(255,255,255,0.1);
+}
+
+.manual-swap-icon-divider {
+    text-align: center;
+    color: var(--neon-green);
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.btn-execute-swap {
+    width: 100%;
+    justify-content: center;
+    padding: 6px;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.delete-match-confirm-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(9, 10, 13, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease-out;
+}
+
+.delete-match-confirm-card {
+    max-width: 340px;
+    width: 90%;
+    border-color: #ff3838 !important;
+    background: rgba(26, 29, 36, 0.95);
+    box-shadow: 0 8px 32px rgba(255, 56, 56, 0.15);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+    transform: scale(0.9);
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-confirm-delete-cancel {
+    flex: 1;
+    justify-content: center;
+    padding: 10px;
+    border-color: rgba(255,255,255,0.15) !important;
+    color: var(--text-secondary) !important;
+}
+
+.btn-confirm-delete-yes {
+    flex: 1;
+    justify-content: center;
+    padding: 10px;
+    background: #ff3838 !important;
+    border-color: #ff3838 !important;
+    color: #fff !important;
+}
