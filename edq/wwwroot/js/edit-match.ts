@@ -59,6 +59,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const goalsTeamB = document.getElementById("goalsTeamB") as HTMLInputElement | null;
     const goalsTeamBVal = document.getElementById("goalsTeamBVal") as HTMLSpanElement | null;
 
+    // Elementos de eliminación
+    const btnDeleteMatch = document.getElementById("btnDeleteMatch") as HTMLButtonElement | null;
+    const deleteMatchConfirmModal = document.getElementById("deleteMatchConfirmModal") as HTMLDivElement | null;
+    const btnConfirmDeleteCancel = document.getElementById("btnConfirmDeleteCancel") as HTMLButtonElement | null;
+    const btnConfirmDeleteYes = document.getElementById("btnConfirmDeleteYes") as HTMLButtonElement | null;
+
+    // Elementos de asignación manual
+    const btnManualSwapToggle = document.getElementById("btnManualSwapToggle") as HTMLButtonElement | null;
+    const manualSwapSection = document.getElementById("manualSwapSection") as HTMLDivElement | null;
+    const swapPlayerA = document.getElementById("swapPlayerA") as HTMLSelectElement | null;
+    const swapPlayerB = document.getElementById("swapPlayerB") as HTMLSelectElement | null;
+    const btnExecuteSwap = document.getElementById("btnExecuteSwap") as HTMLButtonElement | null;
+
     if (!matchIdInput || !groupIdInput || !isCreatorInput) return;
 
     const matchId = parseInt(matchIdInput.value);
@@ -185,12 +198,23 @@ document.addEventListener("DOMContentLoaded", () => {
             ? teamB.map(p => `<div>• ${escapeHtml(p.nickname)}</div>`).join("")
             : `<div style="font-style: italic; color: var(--text-muted);">Sin jugadores</div>`;
 
+        populateSwapDropdowns();
+
         // Si hay jugadores convocados pero sin equipo asignado, ponerlos en Equipo A por defecto
         if (teamNone.length > 0) {
             teamNone.forEach(p => p.team = 1);
             renderTeams();
         }
     };
+
+    function populateSwapDropdowns(): void {
+        if (!swapPlayerA || !swapPlayerB) return;
+        const teamA = currentMatchPlayers.filter(p => p.team === 1);
+        const teamB = currentMatchPlayers.filter(p => p.team === 2);
+
+        swapPlayerA.innerHTML = teamA.map(p => `<option value="${p.playerId}">${escapeHtml(p.nickname)}</option>`).join("");
+        swapPlayerB.innerHTML = teamB.map(p => `<option value="${p.playerId}">${escapeHtml(p.nickname)}</option>`).join("");
+    }
 
     // Botón: Re-balancear Equipos
     if (btnRebalance) {
@@ -474,6 +498,116 @@ document.addEventListener("DOMContentLoaded", () => {
                 btnFinishMatch.classList.remove("btn-loading");
                 const existingSpinner = btnFinishMatch.querySelector(".btn-spinner");
                 if (existingSpinner) existingSpinner.remove();
+            }
+        });
+    }
+
+    // Toggle manual swap section
+    if (btnManualSwapToggle) {
+        btnManualSwapToggle.addEventListener("click", () => {
+            if (!manualSwapSection) return;
+            const isHidden = manualSwapSection.style.display === "none";
+            manualSwapSection.style.display = isHidden ? "block" : "none";
+            if (isHidden) {
+                populateSwapDropdowns();
+            }
+        });
+    }
+
+    // Execute swap
+    if (btnExecuteSwap) {
+        btnExecuteSwap.addEventListener("click", () => {
+            if (!swapPlayerA || !swapPlayerB) return;
+            const valA = parseInt(swapPlayerA.value);
+            const valB = parseInt(swapPlayerB.value);
+            if (isNaN(valA) || isNaN(valB)) {
+                showToast("Por favor selecciona dos jugadores para intercambiar.", true);
+                return;
+            }
+
+            const pA = currentMatchPlayers.find(p => p.playerId === valA);
+            const pB = currentMatchPlayers.find(p => p.playerId === valB);
+
+            if (pA && pB) {
+                pA.team = 2;
+                pB.team = 1;
+                renderTeams();
+                showToast("Jugadores intercambiados correctamente.", false);
+            }
+        });
+    }
+
+    // Modal de Confirmación de Eliminación
+    if (btnDeleteMatch) {
+        btnDeleteMatch.addEventListener("click", () => {
+            if (!deleteMatchConfirmModal) return;
+            const confirmCard = document.getElementById("deleteMatchConfirmCard");
+            deleteMatchConfirmModal.style.display = "flex";
+            deleteMatchConfirmModal.offsetHeight; // force reflow
+            deleteMatchConfirmModal.style.opacity = "1";
+            if (confirmCard) confirmCard.style.transform = "scale(1)";
+        });
+    }
+
+    const closeDeleteModal = (): void => {
+        if (!deleteMatchConfirmModal) return;
+        const confirmCard = document.getElementById("deleteMatchConfirmCard");
+        deleteMatchConfirmModal.style.opacity = "0";
+        if (confirmCard) confirmCard.style.transform = "scale(0.9)";
+        setTimeout(() => {
+            deleteMatchConfirmModal.style.display = "none";
+        }, 200);
+    };
+
+    if (btnConfirmDeleteCancel) {
+        btnConfirmDeleteCancel.addEventListener("click", closeDeleteModal);
+    }
+
+    // Cerrar modal al hacer click fuera de la tarjeta de confirmación
+    if (deleteMatchConfirmModal) {
+        deleteMatchConfirmModal.addEventListener("click", (e) => {
+            const confirmCard = document.getElementById("deleteMatchConfirmCard");
+            if (confirmCard && !confirmCard.contains(e.target as Node)) {
+                closeDeleteModal();
+            }
+        });
+    }
+
+    if (btnConfirmDeleteYes) {
+        btnConfirmDeleteYes.addEventListener("click", async () => {
+            if (!matchIdInput || !groupIdInput) return;
+            const id = parseInt(matchIdInput.value);
+            const groupId = parseInt(groupIdInput.value);
+            if (isNaN(id)) return;
+
+            btnConfirmDeleteYes.disabled = true;
+            btnConfirmDeleteYes.textContent = "Eliminando...";
+
+            try {
+                const response = await fetch(`/Match/DeleteMatch?matchId=${id}`, {
+                    method: "POST",
+                    headers: {
+                        "RequestVerificationToken": getAntiForgeryToken()
+                    }
+                });
+
+                if (!response.ok) {
+                    showToast("No se pudo eliminar el partido.", true);
+                    btnConfirmDeleteYes.disabled = false;
+                    btnConfirmDeleteYes.textContent = "Sí, Eliminar";
+                    return;
+                }
+
+                showToast("¡Partido eliminado correctamente!", false);
+                setTimeout(() => {
+                    window.location.href = `/Group/Dashboard?groupId=${groupId}`;
+                }, 1500);
+
+            } catch (error) {
+                console.error("Error al eliminar partido:", error);
+                showToast("No se pudo eliminar el partido.", true);
+                btnConfirmDeleteYes.disabled = false;
+                btnConfirmDeleteYes.textContent = "Sí, Eliminar";
             }
         });
     }

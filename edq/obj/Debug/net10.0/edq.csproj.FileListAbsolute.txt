@@ -171,7 +171,6 @@
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/edq.pdb
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/edq.genruntimeconfig.cache
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/ref/edq.dll
-/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/1m8qta0b2r-{0}-ojqac90086-ojqac90086.gz
 /home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/BouncyCastle.Crypto.dll
 /home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/WebPush.dll
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/6vpjo7m7oy-{0}-tf1komhz1c-tf1komhz1c.gz
@@ -212,15 +211,12 @@
 /home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/zh-Hans/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 /home/santiago/Documentos/GitHub/edq/edq/bin/Debug/net10.0/zh-Hant/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/39938q6i2y-{0}-qh3anqh5u5-qh3anqh5u5.gz
-/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/15508tqiwp-{0}-4msjv1pwoe-4msjv1pwoe.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/8o1p1ndg8z-{0}-htr1gjmnjc-htr1gjmnjc.gz
-/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/e7y5m0fc5w-{0}-lyjxs6powm-lyjxs6powm.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/35t5j8b4ca-{0}-wgafdttuis-wgafdttuis.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/ascjuncfqn-{0}-o8tqb3z7rq-o8tqb3z7rq.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/9flnuhc6xo-{0}-rruvm4xls5-rruvm4xls5.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/n4yz2p1bdy-{0}-seg9vq89v1-seg9vq89v1.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/z4x438jh9m-{0}-dplhjkhjji-dplhjkhjji.gz
-/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/sdwh7dt9yp-{0}-6xmkqqd3vz-6xmkqqd3vz.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/b61zlydoc8-{0}-zjtmzzkstf-zjtmzzkstf.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/hfoedq47d5-{0}-zx4f8mawkc-zx4f8mawkc.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/jozni1su0g-{0}-rp87ao5npe-rp87ao5npe.gz
@@ -228,3 +224,7 @@
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/8fy9rbicfq-{0}-7w69i9i6gq-7w69i9i6gq.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/hyiiw9gq10-{0}-2evmr2l6gu-2evmr2l6gu.gz
 /home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/gka09gfb9a-{0}-bdv5l6xs3e-bdv5l6xs3e.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/1m8qta0b2r-{0}-twi7wp6njp-twi7wp6njp.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/15508tqiwp-{0}-z24536ho4g-z24536ho4g.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/e7y5m0fc5w-{0}-vpnk6m37cc-vpnk6m37cc.gz
+/home/santiago/Documentos/GitHub/edq/edq/obj/Debug/net10.0/compressed/sdwh7dt9yp-{0}-zj77tfii3h-zj77tfii3h.gz

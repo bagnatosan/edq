@@ -10,6 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
         container.innerHTML = "";
 
         if (myGroups.length === 0) {
+            container.style.minHeight = "250px";
+            container.style.justifyContent = "center";
+            container.style.alignItems = "center";
             container.innerHTML = `
                 <div class="no-results-message" style="padding: 40px 20px; text-align: center; color: var(--text-muted); width: 100%;">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 48px; height: 48px; opacity: 0.5; margin: 0 auto 12px auto; display: block;">
@@ -24,6 +27,10 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             return;
         }
+
+        container.style.minHeight = "unset";
+        container.style.justifyContent = "flex-start";
+        container.style.alignItems = "stretch";
 
         const listDiv = document.createElement("div");
         listDiv.className = "groups-list";

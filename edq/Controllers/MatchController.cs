@@ -121,6 +121,25 @@ public class MatchController : Controller
         return Ok(new { success = true });
     }
     
+    // POST: /Match/DeleteMatch (AJAX)
+    [HttpPost]
+    public async Task<IActionResult> DeleteMatch(int matchId)
+    {
+        var userId = GetUserId();
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var success = await _matchService.DeleteMatchAsync(matchId, userId.Value);
+        if (!success)
+        {
+            return BadRequest("No se pudo eliminar el partido o no tienes permisos.");
+        }
+
+        return Ok(new { success = true });
+    }
+    
 
     // POST: /Match/BalancePlayers (AJAX)
     [HttpPost]

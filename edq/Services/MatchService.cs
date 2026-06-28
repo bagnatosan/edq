@@ -225,6 +225,43 @@ public class MatchService : IMatchService
         return true;
     }
 
+    public async Task<bool> DeleteMatchAsync(int matchId, int userId)
+    {
+        // 1. Obtener la info mínima del partido y verificar acceso
+        var matchInfo = await _context.Matches.AsNoTracking()
+            .Where(m => m.Id == matchId)
+            .Select(m => new
+            {
+                m.GroupId,
+                GroupCreatorId = m.Group != null ? m.Group.CreatorId : 0,
+                IsMember = _context.GroupPlayers.Any(gp => gp.GroupId == m.GroupId && gp.PlayerId == userId)
+            })
+            .FirstOrDefaultAsync();
+
+        if (matchInfo == null)
+            return false;
+
+        var isUserAuthorized = matchInfo.IsMember || matchInfo.GroupCreatorId == userId;
+        if (!isUserAuthorized)
+            return false;
+
+        // 2. Borrar primero las convocatorias asociadas por la restricción de FK
+        var matchPlayers = await _context.MatchPlayers
+            .Where(mp => mp.MatchId == matchId)
+            .ToListAsync();
+        _context.MatchPlayers.RemoveRange(matchPlayers);
+
+        // 3. Borrar el partido
+        var match = await _context.Matches.FindAsync(matchId);
+        if (match != null)
+        {
+            _context.Matches.Remove(match);
+        }
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
     private async Task<bool> IsUserInGroupAsync(Match match, int userId)
     {
         var isMember = await _context.GroupPlayers.AnyAsync(gp => gp.GroupId == match.GroupId && gp.PlayerId == userId)

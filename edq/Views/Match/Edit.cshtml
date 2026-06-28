@@ -67,6 +67,25 @@
                     🔄 Volver a Emparejar
                 </button>
                 <div id="selectedPlayersCount" style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 6px;">Seleccionados: 0</div>
+                <button type="button" id="btnManualSwapToggle" class="btn-outline-neon" style="margin-top: 8px; width: 100%; justify-content: center; padding: 10px; font-size: 13px;">
+                    Asignar Manualmente
+                </button>
+                
+                <div id="manualSwapSection" style="display: none; margin-top: 12px; border: 1px dashed rgba(255,255,255,0.15); padding: 12px; border-radius: var(--border-radius-sm); background: rgba(0,0,0,0.25);">
+                    <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px; text-align: center;">Intercambio Manual</div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div>
+                            <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px;">Jugador Equipo A</label>
+                            <select id="swapPlayerA" class="form-control-neon" style="font-size: 12px; padding: 4px 8px; width: 100%; height: 32px; background: rgba(0,0,0,0.3); color: var(--text-primary); border-color: rgba(255,255,255,0.1);"></select>
+                        </div>
+                        <div style="text-align: center; color: var(--neon-green); font-size: 14px; font-weight: bold;">⇆</div>
+                        <div>
+                            <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px;">Jugador Equipo B</label>
+                            <select id="swapPlayerB" class="form-control-neon" style="font-size: 12px; padding: 4px 8px; width: 100%; height: 32px; background: rgba(0,0,0,0.3); color: var(--text-primary); border-color: rgba(255,255,255,0.1);"></select>
+                        </div>
+                        <button type="button" id="btnExecuteSwap" class="btn-neon" style="width: 100%; justify-content: center; padding: 6px; font-size: 12px; margin-top: 4px;">Intercambiar</button>
+                    </div>
+                </div>
             </div>
         }
 
@@ -187,6 +206,28 @@
             </form>
         </div>
     }
+    
+    @if (Model.IsCreator && Model.State == "Pending")
+    {
+        <div style="margin-top: 10px;">
+            <button type="button" id="btnDeleteMatch" class="btn-neon" style="width: 100%; justify-content: center; background: #ff3838; border-color: #ff3838; color: #fff; box-shadow: 0 0 10px rgba(255, 56, 56, 0.2);">
+                Eliminar Partido
+            </button>
+        </div>
+    }
+</div>
+
+<!-- Modal de Confirmación de Eliminación con Fondo Difuminado -->
+<div id="deleteMatchConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 10, 13, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s ease-out;">
+    <div id="deleteMatchConfirmCard" class="card" style="max-width: 340px; width: 90%; border-color: #ff3838; background: rgba(26, 29, 36, 0.95); box-shadow: 0 8px 32px rgba(255, 56, 56, 0.15); text-align: center; display: flex; flex-direction: column; gap: 16px; padding: 24px; transform: scale(0.9); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);">
+        <div style="font-size: 36px; margin-bottom: 4px;">⚠️</div>
+        <h2 style="font-size: 18px; font-weight: 800; color: #fff; margin: 0;">¿Eliminar Partido?</h2>
+        <p style="font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.5;">Esta acción no se puede deshacer. Todos los equipos balanceados y la fecha del encuentro serán eliminados permanentemente.</p>
+        <div style="display: flex; gap: 12px; margin-top: 10px;">
+            <button type="button" id="btnConfirmDeleteCancel" class="btn-outline-neon" style="flex: 1; justify-content: center; padding: 10px; border-color: rgba(255,255,255,0.15); color: var(--text-secondary);">Cancelar</button>
+            <button type="button" id="btnConfirmDeleteYes" class="btn-neon" style="flex: 1; justify-content: center; padding: 10px; background: #ff3838; border-color: #ff3838; color: #fff;">Sí, Eliminar</button>
+        </div>
+    </div>
 </div>
 
 @section Scripts {

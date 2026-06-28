@@ -10,4 +10,5 @@ public interface IMatchService
     Task<MatchDetailsDto?> GetMatchDetailsAsync(int matchId, int userId);
     Task<bool> UpdateMatchPlayersAsync(int matchId, int userId, List<MatchPlayerUpdateDto> players, DateTime date);
     Task<bool> FinishMatchAsync(int matchId, int userId, FinishMatchRequestDto request);
+    Task<bool> DeleteMatchAsync(int matchId, int userId);
 }
