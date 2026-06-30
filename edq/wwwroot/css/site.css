@@ -261,7 +261,6 @@ body {
 .app-content {
   flex: 1;
   overflow-y: auto;
-  overflow-x: hidden;
   padding: 20px;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
@@ -1609,7 +1608,6 @@ body {
 .profile-container {
     display: flex;
     flex-direction: column;
-    height: 100%;
     padding-top: 10px;
 }
 
@@ -1819,7 +1817,7 @@ body {
 
 /* Log out button - Red at the bottom */
 .profile-logout-container {
-    margin-top: auto;
+    margin-top: 32px;
     padding-bottom: 20px;
 }
 

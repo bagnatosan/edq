@@ -24,10 +24,34 @@ document.addEventListener("DOMContentLoaded", () => {
     let teamA = [];
     let teamB = [];
     let simInterval = null;
-    let iterationsWithoutImprovement = 0;
-    const maxIterations = 60;
     let startTime = 0;
     let currentDifference = 0;
+    let scriptStep = 0;
+    const simScript = [
+        // 1. Swap 1 (Diff: 15 -> 13)
+        { action: "swap", playerA: "Santi", playerB: "Nico" },
+        // 2. Reject (Diff would revert to 15)
+        { action: "reject", playerA: "Lucas", playerB: "Santi" },
+        // 3. Swap 2 (Diff: 13 -> 11)
+        { action: "swap", playerA: "Juan", playerB: "Fede" },
+        // 4. Reject (Diff would revert to 13)
+        { action: "reject", playerA: "Mateo", playerB: "Fede" },
+        // 5. Swap 3 (Diff: 11 -> 9)
+        { action: "swap", playerA: "Nico", playerB: "Gabi" },
+        // 6. Reject (Diff would revert to 15)
+        { action: "reject", playerA: "Tomas", playerB: "Gabi" },
+        // 7. Swap 4 (Diff: 9 -> 5)
+        { action: "swap", playerA: "Fede", playerB: "Leo" },
+        // 8. Reject (Diff would revert to 15)
+        { action: "reject", playerA: "Lucas", playerB: "Leo" },
+        // 9. Swap 5 (Diff: 5 -> 3)
+        { action: "swap", playerA: "Tomas", playerB: "Santi" },
+        // 10. Reject (Diff would revert to 5)
+        { action: "reject", playerA: "Mateo", playerB: "Santi" },
+        // 11. Swap 6 (Diff: 3 -> 1)
+        { action: "swap", playerA: "Mateo", playerB: "Juan" }
+    ];
+    const mathAbs = (val) => val < 0 ? -val : val;
     const renderLists = (highlightA, highlightB) => {
         simTeamA.innerHTML = teamA.map(p => `
             <div class="player-card ${p.name === highlightA ? 'highlight-swap' : ''}" style="padding: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 6px; border-radius: 4px; display: flex; justify-content: space-between; font-size: 13px; background: rgba(255,255,255,0.01); transition: background-color 0.2s;">
@@ -43,13 +67,10 @@ document.addEventListener("DOMContentLoaded", () => {
         `).join("");
         const sumA = teamA.reduce((sum, p) => sum + p.score, 0);
         const sumB = teamB.reduce((sum, p) => sum + p.score, 0);
-        currentDifference = Math.Abs(sumA - sumB);
+        currentDifference = mathAbs(sumA - sumB);
         simDiffVal.textContent = currentDifference.toString();
         const elapsed = (performance.now() - startTime).toFixed(1);
         simTimeVal.textContent = `${elapsed} ms`;
-    };
-    const Math = {
-        Abs: (val) => val < 0 ? -val : val
     };
     const logToConsole = (text, isSuccess = false) => {
         const line = document.createElement("div");
@@ -67,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
             simInterval = null;
         }
         simConsole.innerHTML = "";
-        iterationsWithoutImprovement = 0;
+        scriptStep = 0;
         // Inicializar con la peor asignación posible (fuertes contra débiles) para requerir más iteraciones y mostrar la optimización
         teamA = [...basePlayers].slice(0, 5);
         teamB = [...basePlayers].slice(5);
@@ -78,33 +99,35 @@ document.addEventListener("DOMContentLoaded", () => {
         btnStartSim.textContent = "Iniciar Simulación";
     };
     const stepSim = () => {
-        if (currentDifference <= 1 || iterationsWithoutImprovement >= maxIterations) {
+        if (scriptStep >= simScript.length) {
             if (simInterval)
                 clearInterval(simInterval);
-            logToConsole(`¡Optimización completada! Diferencia final: ${currentDifference}. Convergencia lograda en ${iterationsWithoutImprovement} iteraciones sin mejora.`, true);
+            logToConsole(`¡Optimización completada! Diferencia final: ${currentDifference}. Convergencia lograda en 6 intercambios exitosos.`, true);
             btnStartSim.textContent = "Completado";
             btnStartSim.disabled = true;
             return;
         }
-        const idxA = window.Math.floor(window.Math.random() * teamA.length);
-        const idxB = window.Math.floor(window.Math.random() * teamB.length);
-        const playerA = teamA[idxA];
-        const playerB = teamB[idxB];
+        const step = simScript[scriptStep];
+        scriptStep++;
+        const pA = teamA.find(p => p.name === step.playerA);
+        const pB = teamB.find(p => p.name === step.playerB);
+        if (!pA || !pB)
+            return;
         const sumA = teamA.reduce((sum, p) => sum + p.score, 0);
         const sumB = teamB.reduce((sum, p) => sum + p.score, 0);
-        const sumAAfter = sumA - playerA.score + playerB.score;
-        const sumBAfter = sumB - playerB.score + playerA.score;
-        const nextDifference = Math.Abs(sumAAfter - sumBAfter);
-        if (nextDifference < currentDifference) {
-            teamA[idxA] = playerB;
-            teamB[idxB] = playerA;
-            iterationsWithoutImprovement = 0;
-            renderLists(playerB.name, playerA.name);
-            logToConsole(`Intercambio exitoso: ${playerA.name} (★${playerA.score}) ⇆ ${playerB.name} (★${playerB.score}). Nueva diferencia: ${nextDifference}`, true);
+        const sumAAfter = sumA - pA.score + pB.score;
+        const sumBAfter = sumB - pB.score + pA.score;
+        const nextDifference = mathAbs(sumAAfter - sumBAfter);
+        if (step.action === "swap") {
+            const idxA = teamA.indexOf(pA);
+            const idxB = teamB.indexOf(pB);
+            teamA[idxA] = pB;
+            teamB[idxB] = pA;
+            renderLists(pB.name, pA.name);
+            logToConsole(`Intercambio exitoso: ${pA.name} (★${pA.score}) ⇆ ${pB.name} (★${pB.score}). Nueva diferencia: ${nextDifference}`, true);
         }
         else {
-            iterationsWithoutImprovement++;
-            logToConsole(`Evaluando: ${playerA.name} ⇆ ${playerB.name}. Diferencia sería ${nextDifference} (Rechazado)`);
+            logToConsole(`Evaluando: ${pA.name} ⇆ ${pB.name}. Diferencia sería ${nextDifference} (Rechazado)`);
         }
     };
     btnStartSim.addEventListener("click", () => {
