@@ -82,14 +82,9 @@ document.addEventListener("DOMContentLoaded", () => {
         simConsole.innerHTML = "";
         iterationsWithoutImprovement = 0;
         
-        // Shuffle
-        const shuffled = [...basePlayers].sort(() => Math.Abs(Math.Abs(Math.Abs(0.5 - javaScriptRandom()))));
-        function javaScriptRandom() {
-            return window.crypto ? (window.crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) : window.Math.random();
-        }
-
-        teamA = shuffled.slice(0, 5);
-        teamB = shuffled.slice(5);
+        // Inicializar con la peor asignación posible (fuertes contra débiles) para requerir más iteraciones y mostrar la optimización
+        teamA = [...basePlayers].slice(0, 5);
+        teamB = [...basePlayers].slice(5);
 
         startTime = performance.now();
         renderLists();

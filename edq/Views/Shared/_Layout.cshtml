@@ -17,6 +17,7 @@
     <link rel="apple-touch-icon" href="/images/logo_appicon.svg"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <meta name="mobile-web-app-capable" content="yes">
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <!-- Banner de "sin conexión": se muestra automáticamente cuando el navegador pierde la red -->
@@ -74,11 +75,11 @@
                         </a>
                         <a href="/Match/Upcoming" class="@(currentController == "Match" && currentAction == "Upcoming" ? "active" : "")" aria-label="Partidos">
                             <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
-                                <rect x="3" y="2" width="18" height="20" rx="2" />
-                                <line x1="3" y1="12" x2="21" y2="12" />
-                                <circle cx="12" cy="12" r="3" />
-                                <rect x="7" y="2" width="10" height="4" />
-                                <rect x="7" y="18" width="10" height="4" />
+                                <rect x="2" y="4" width="20" height="16" rx="2" />
+                                <line x1="12" y1="4" x2="12" y2="20" />
+                                <circle cx="12" cy="12" r="3.5" />
+                                <rect x="2" y="8" width="3" height="8" />
+                                <rect x="19" y="8" width="3" height="8" />
                             </svg>
                         </a>
                         <a href="/Group/Chat" class="@(currentController == "Chat" ? "active" : "")" aria-label="Chat">
@@ -140,11 +141,11 @@
                 
                 <a href="/Match/Upcoming" class="nav-item @(currentController == "Match" && currentAction == "Upcoming" ? "active" : "")">
                     <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
-                        <rect x="3" y="2" width="18" height="20" rx="2" />
-                        <line x1="3" y1="12" x2="21" y2="12" />
-                        <circle cx="12" cy="12" r="3" />
-                        <rect x="7" y="2" width="10" height="4" />
-                        <rect x="7" y="18" width="10" height="4" />
+                        <rect x="2" y="4" width="20" height="16" rx="2" />
+                        <line x1="12" y1="4" x2="12" y2="20" />
+                        <circle cx="12" cy="12" r="3.5" />
+                        <rect x="2" y="8" width="3" height="8" />
+                        <rect x="19" y="8" width="3" height="8" />
                     </svg>
                     <span>Partidos</span>
                 </a>
