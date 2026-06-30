@@ -175,8 +175,19 @@ public class PushNotificationService : IPushNotificationService
             .ToListAsync();
 
         var groupName = group?.Name ?? "Grupo";
-        var finalTitle = $"[{groupName}] {title}";
-        var finalBody = body.Replace("{groupName}", groupName);
+        
+        string finalTitle;
+        string finalBody;
+        if (type == NotificationType.Chat)
+        {
+            finalTitle = groupName;
+            finalBody = body.Replace("{groupName}", groupName);
+        }
+        else
+        {
+            finalTitle = $"[{groupName}] {title}";
+            finalBody = body.Replace("{groupName}", groupName);
+        }
 
         foreach (var sub in subscriptions)
         {

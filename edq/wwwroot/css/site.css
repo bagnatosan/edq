@@ -2838,3 +2838,134 @@ body {
     border-color: #ff3838 !important;
     color: #fff !important;
 }
+
+@keyframes swap-flash {
+    0% { background-color: rgba(158, 255, 0, 0.4); }
+    100% { background-color: rgba(255, 255, 255, 0.01); }
+}
+
+.player-card.highlight-swap {
+    animation: swap-flash 1s ease-out;
+}
+
+/* Personalización de Flatpickr para EDQ (Neon Green) */
+.flatpickr-calendar {
+    background: #111115 !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+    border-radius: var(--border-radius-md) !important;
+    width: 100% !important;
+    max-width: 320px !important;
+    font-family: inherit !important;
+    margin: 10px auto 0 auto !important;
+}
+
+.flatpickr-months .flatpickr-month {
+    color: var(--neon-green) !important;
+    fill: var(--neon-green) !important;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+    background: #1a1a22 !important;
+    color: var(--text-primary) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: var(--border-radius-sm) !important;
+}
+
+.flatpickr-weekdays {
+    background: transparent !important;
+}
+
+span.flatpickr-weekday {
+    color: var(--text-muted) !important;
+    font-weight: 700 !important;
+}
+
+.flatpickr-day {
+    color: var(--text-primary) !important;
+    border-radius: 50% !important;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.flatpickr-day:hover {
+    background: rgba(158, 255, 0, 0.15) !important;
+    color: var(--neon-green) !important;
+}
+
+.flatpickr-day.today {
+    border-color: var(--neon-green) !important;
+    color: var(--neon-green) !important;
+}
+
+.flatpickr-day.selected {
+    background: var(--neon-green-solid) !important;
+    border-color: var(--neon-green-solid) !important;
+    color: #000 !important;
+    font-weight: 800 !important;
+}
+
+.flatpickr-time {
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.flatpickr-time input {
+    color: var(--text-primary) !important;
+}
+
+.flatpickr-time .numInputWrapper span.arrowUp:after {
+    border-bottom-color: var(--text-muted) !important;
+}
+
+.flatpickr-time .numInputWrapper span.arrowDown:after {
+    border-top-color: var(--text-muted) !important;
+}
+
+.flatpickr-time input:hover, .flatpickr-time .flatpickr-am-pm:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Drag and Drop Team Balancing CSS */
+.teams-container {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 12px;
+    border-radius: var(--border-radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    align-items: center;
+}
+
+.draggable-player {
+    cursor: grab;
+    user-select: none;
+    transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.draggable-player:active {
+    cursor: grabbing;
+}
+
+.draggable-player.dragging {
+    opacity: 0.4;
+    transform: scale(0.95);
+    background: rgba(158, 255, 0, 0.05) !important;
+    border: 1px dashed var(--neon-green-solid) !important;
+}
+
+.team-drop-zone {
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    border: 1px solid transparent;
+    border-radius: var(--border-radius-sm);
+}
+
+.team-drop-zone.drag-over {
+    background: rgba(158, 255, 0, 0.03) !important;
+    border: 1px dashed rgba(158, 255, 0, 0.3) !important;
+}
+
+/* Grid drop zone indicator when dragging */
+.player-checkbox-grid.drag-over {
+    background: rgba(255, 56, 56, 0.03) !important;
+    border: 1px dashed rgba(255, 56, 56, 0.3) !important;
+}

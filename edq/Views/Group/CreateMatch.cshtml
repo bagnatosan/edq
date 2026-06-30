@@ -2,6 +2,10 @@
     ViewData["Title"] = "Crear Nuevo Partido";
 }
 
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+}
+
 @Html.AntiForgeryToken()
 
 <input type="hidden" id="groupIdInput" value="@ViewBag.GroupId" />
@@ -75,5 +79,7 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
     <script src="~/js/create-match.js" asp-append-version="true"></script>
 }

@@ -12,20 +12,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const groupId = parseInt(groupIdInput.value);
     if (isNaN(groupId))
         return;
+    // Inicializar Flatpickr en modo inline
+    const fpInstance = flatpickr(matchDateTime, {
+        inline: true,
+        enableTime: true,
+        dateFormat: "Y-m-d\\TH:i",
+        time_24hr: true,
+        locale: "es"
+    });
     // Establecer la fecha predeterminada para el picker (próximo viernes a las 19:00 hs)
     const setNextFridayDateTime = () => {
         const now = new Date();
         const nextFriday = new Date(now);
         nextFriday.setDate(now.getDate() + ((5 - now.getDay() + 7) % 7));
         nextFriday.setHours(19, 0, 0, 0);
-        // Formatear a 'YYYY-MM-DDTHH:MM' para datetime-local
-        const pad = (num) => num.toString().padStart(2, '0');
-        const year = nextFriday.getFullYear();
-        const month = pad(nextFriday.getMonth() + 1);
-        const date = pad(nextFriday.getDate());
-        const hours = pad(nextFriday.getHours());
-        const minutes = pad(nextFriday.getMinutes());
-        matchDateTime.value = `${year}-${month}-${date}T${hours}:${minutes}`;
+        if (fpInstance) {
+            fpInstance.setDate(nextFriday);
+        }
+        else {
+            const pad = (num) => num.toString().padStart(2, '0');
+            const year = nextFriday.getFullYear();
+            const month = pad(nextFriday.getMonth() + 1);
+            const date = pad(nextFriday.getDate());
+            const hours = pad(nextFriday.getHours());
+            const minutes = pad(nextFriday.getMinutes());
+            matchDateTime.value = `${year}-${month}-${date}T${hours}:${minutes}`;
+        }
     };
     setNextFridayDateTime();
     const checkPollPreselection = async () => {

@@ -1,3 +1,5 @@
+declare var flatpickr: any;
+
 interface MatchPlayerDetails {
     playerId: number;
     name: string;
@@ -39,6 +41,20 @@ document.addEventListener("DOMContentLoaded", () => {
     // Botones
     const btnRebalance = document.getElementById("btnRebalance") as HTMLButtonElement | null;
     const btnSaveChanges = document.getElementById("btnSaveChanges") as HTMLButtonElement | null;
+
+    // Inicializar Flatpickr si no está deshabilitado
+    let fpInstance: any = null;
+    if (matchDateTime) {
+        if (!matchDateTime.disabled) {
+            fpInstance = flatpickr(matchDateTime, {
+                inline: true,
+                enableTime: true,
+                dateFormat: "Y-m-d\\TH:i",
+                time_24hr: true,
+                locale: "es"
+            });
+        }
+    }
     
     // Elementos de Carga de Resultado
     const finishMatchForm = document.getElementById("finishMatchForm") as HTMLFormElement | null;
@@ -190,12 +206,22 @@ document.addEventListener("DOMContentLoaded", () => {
             countSpan.textContent = `Seleccionados: ${currentMatchPlayers.length}`;
         }
 
+        const isEditable = isCreator && !!btnSaveChanges;
+
         teamAList.innerHTML = teamA.length > 0
-            ? teamA.map(p => `<div>• ${escapeHtml(p.nickname)}</div>`).join("")
+            ? teamA.map(p => `
+                <div class="draggable-player" ${isEditable ? 'draggable="true"' : ''} data-player-id="${p.playerId}" style="background: rgba(255,255,255,0.02); padding: 8px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; align-items: center; cursor: ${isEditable ? 'grab' : 'default'};">
+                    <span>${escapeHtml(p.nickname)}</span>
+                </div>
+              `).join("")
             : `<div style="font-style: italic; color: var(--text-muted);">Sin jugadores</div>`;
 
         teamBList.innerHTML = teamB.length > 0
-            ? teamB.map(p => `<div>• ${escapeHtml(p.nickname)}</div>`).join("")
+            ? teamB.map(p => `
+                <div class="draggable-player" ${isEditable ? 'draggable="true"' : ''} data-player-id="${p.playerId}" style="background: rgba(255,255,255,0.02); padding: 8px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; align-items: center; cursor: ${isEditable ? 'grab' : 'default'};">
+                    <span>${escapeHtml(p.nickname)}</span>
+                </div>
+              `).join("")
             : `<div style="font-style: italic; color: var(--text-muted);">Sin jugadores</div>`;
 
         populateSwapDropdowns();
@@ -610,6 +636,100 @@ document.addEventListener("DOMContentLoaded", () => {
                 btnConfirmDeleteYes.textContent = "Sí, Eliminar";
             }
         });
+    }
+
+    // Configuración de Arrastrar y Soltar (Drag and Drop)
+    const isCreator = isCreatorInput.value === "true";
+    const isEditable = isCreator && !!btnSaveChanges;
+
+    if (isEditable) {
+        document.addEventListener("dragstart", (e) => {
+            const target = e.target as HTMLElement;
+            if (target.classList.contains("draggable-player")) {
+                const playerId = target.getAttribute("data-player-id");
+                if (playerId && e.dataTransfer) {
+                    e.dataTransfer.setData("text/plain", playerId);
+                    target.classList.add("dragging");
+                }
+            }
+        });
+
+        document.addEventListener("dragend", (e) => {
+            const target = e.target as HTMLElement;
+            if (target.classList.contains("draggable-player")) {
+                target.classList.remove("dragging");
+                if (teamAList) teamAList.classList.remove("drag-over");
+                if (teamBList) teamBList.classList.remove("drag-over");
+                if (membersCheckboxList) membersCheckboxList.classList.remove("drag-over");
+            }
+        });
+
+        const setupDropZone = (zone: HTMLElement | null) => {
+            if (!zone) return;
+            zone.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                zone.classList.add("drag-over");
+            });
+            zone.addEventListener("dragleave", () => {
+                zone.classList.remove("drag-over");
+            });
+        };
+
+        setupDropZone(teamAList);
+        setupDropZone(teamBList);
+        setupDropZone(membersCheckboxList);
+
+        if (teamAList) {
+            teamAList.addEventListener("drop", (e) => {
+                e.preventDefault();
+                teamAList.classList.remove("drag-over");
+                if (!e.dataTransfer) return;
+                const playerId = parseInt(e.dataTransfer.getData("text/plain"));
+                if (isNaN(playerId)) return;
+                
+                const player = currentMatchPlayers.find(p => p.playerId === playerId);
+                if (player && player.team !== 1) {
+                    player.team = 1;
+                    renderTeams();
+                }
+            });
+        }
+
+        if (teamBList) {
+            teamBList.addEventListener("drop", (e) => {
+                e.preventDefault();
+                teamBList.classList.remove("drag-over");
+                if (!e.dataTransfer) return;
+                const playerId = parseInt(e.dataTransfer.getData("text/plain"));
+                if (isNaN(playerId)) return;
+                
+                const player = currentMatchPlayers.find(p => p.playerId === playerId);
+                if (player && player.team !== 2) {
+                    player.team = 2;
+                    renderTeams();
+                }
+            });
+        }
+
+        if (membersCheckboxList) {
+            membersCheckboxList.addEventListener("drop", (e) => {
+                e.preventDefault();
+                membersCheckboxList.classList.remove("drag-over");
+                if (!e.dataTransfer) return;
+                const playerId = parseInt(e.dataTransfer.getData("text/plain"));
+                if (isNaN(playerId)) return;
+
+                const initialLength = currentMatchPlayers.length;
+                currentMatchPlayers = currentMatchPlayers.filter(p => p.playerId !== playerId);
+                if (currentMatchPlayers.length !== initialLength) {
+                    const checkbox = membersCheckboxList.querySelector(`input[type="checkbox"][value="${playerId}"]`) as HTMLInputElement | null;
+                    if (checkbox) {
+                        checkbox.checked = false;
+                    }
+                    renderTeams();
+                }
+            });
+        }
     }
 
     // Escapar HTML para evitar XSS

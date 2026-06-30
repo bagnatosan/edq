@@ -39,12 +39,6 @@
             </p>
         </div>
         <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.05);" class="hover-glow">
-            <h3 style="font-size: 15px; font-weight: 800; color: var(--neon-green); margin: 0 0 6px 0;">⚡ Gestión sin WhatsApp</h3>
-            <p style="font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.4;">
-                Convocá, confirmá asistencia y balanceá los equipos desde una interfaz táctil fluida y de alto contraste en pocos segundos.
-            </p>
-        </div>
-        <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.05);" class="hover-glow">
             <h3 style="font-size: 15px; font-weight: 800; color: var(--neon-green); margin: 0 0 6px 0;">👥 Integrantes Temporales</h3>
             <p style="font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.4;">
                 ¿Falta uno a último momento? Agregá invitados temporales al partido al instante sin necesidad de que se registren o creen una cuenta.
@@ -142,5 +136,56 @@
     </div>
 </div>
 
+<!-- CARD 3: Simulador del Algoritmo Heurístico -->
+<div class="card" style="border-color: rgba(255, 255, 255, 0.05); margin-top: 20px;">
+    <div class="card-header-flex">
+        <h2 class="card-title">Simulador del Algoritmo</h2>
+        <span class="card-subtitle-badge">INTERACTIVO</span>
+    </div>
+    <p class="card-description" style="margin-bottom: 16px;">
+        Visualizá cómo trabaja la búsqueda local en tiempo real con 10 jugadores ficticios:
+    </p>
+
+    <!-- Columnas de Equipos en la Simulación -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+        <div>
+            <div style="font-size: 11px; font-weight: 800; color: var(--neon-green); text-transform: uppercase; margin-bottom: 8px;">Equipo A</div>
+            <div id="simTeamA" style="min-height: 190px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.03);"></div>
+        </div>
+        <div>
+            <div style="font-size: 11px; font-weight: 800; color: var(--neon-green); text-transform: uppercase; margin-bottom: 8px;">Equipo B</div>
+            <div id="simTeamB" style="min-height: 190px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.03);"></div>
+        </div>
+    </div>
+
+    <!-- Consola de Pasos -->
+    <div style="margin-bottom: 16px;">
+        <div style="font-size: 11px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">Consola del Algoritmo</div>
+        <div id="simConsole" style="height: 120px; overflow-y: auto; background: #070709; border: 1px solid rgba(255,255,255,0.05); padding: 10px; border-radius: var(--border-radius-sm); font-family: monospace; line-height: 1.4; color: var(--text-muted);"></div>
+    </div>
+
+    <!-- Datos de Rendimiento en Tiempo Real -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: center; margin-bottom: 16px;">
+        <div style="background: rgba(255, 255, 255, 0.01); padding: 10px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.03);">
+            <div id="simDiffVal" style="font-size: 20px; font-weight: 900; color: var(--neon-green);">0</div>
+            <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Diferencia Actual</div>
+        </div>
+        <div style="background: rgba(255, 255, 255, 0.01); padding: 10px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.03);">
+            <div id="simTimeVal" style="font-size: 20px; font-weight: 900; color: var(--neon-green);">0 ms</div>
+            <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Tiempo Convergencia</div>
+        </div>
+    </div>
+
+    <!-- Botones de Control -->
+    <div style="display: flex; gap: 12px;">
+        <button type="button" id="btnStartSim" class="btn-neon" style="flex: 2; justify-content: center; font-size: 13px; padding: 10px;">Iniciar Simulación</button>
+        <button type="button" id="btnResetSim" class="btn-outline-neon" style="flex: 1; justify-content: center; font-size: 13px; padding: 10px;">Mezclar</button>
+    </div>
+</div>
+
 <div class="divider"></div>
+
+@section Scripts {
+    <script src="~/js/heuristics-simulation.js" asp-append-version="true"></script>
+}
 
