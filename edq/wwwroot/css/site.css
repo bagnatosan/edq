@@ -2935,17 +2935,11 @@ span.flatpickr-weekday {
     box-shadow: none !important;
 }
 
-.flatpickr-calendar.inline {
-    display: block !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-}
-
 @media (max-width: 360px) {
-    .flatpickr-calendar.inline {
-        transform: scale(0.84) !important;
-        transform-origin: center top !important;
-        margin-bottom: -42px !important;
+    .flatpickr-calendar {
+        transform: scale(0.88) !important;
+        transform-origin: top center !important;
+        margin-bottom: -36px !important;
     }
 }
 
@@ -3005,29 +2999,4 @@ span.flatpickr-weekday {
 .player-checkbox-grid.drag-over {
     background: rgba(255, 56, 56, 0.03) !important;
     border: 1px dashed rgba(255, 56, 56, 0.3) !important;
-}
-
-@media (max-width: 480px) {
-    .teams-container {
-        grid-template-columns: 1fr !important;
-        gap: 12px !important;
-    }
-    
-    #teamAZone {
-        border-right: none !important;
-        padding-right: 0 !important;
-    }
-    
-    #teamBZone {
-        border-left: none !important;
-        padding-left: 0 !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
-        padding-top: 16px !important;
-    }
-    
-    .teams-container > div:nth-child(2) {
-        flex-direction: row !important;
-        transform: rotate(90deg) !important;
-        padding: 8px 0 !important;
-    }
 }
