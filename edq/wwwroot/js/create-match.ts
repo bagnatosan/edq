@@ -275,7 +275,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     // Redirección después de mostrar el estado de éxito
                     setTimeout(() => {
-                        window.location.href = `/Group/Dashboard?groupId=${groupId}`;
+                        window.location.href = "/Match/Upcoming";
                     }, 1500);
                 }, 300);
 

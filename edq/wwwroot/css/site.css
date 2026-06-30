@@ -255,6 +255,7 @@ body {
 .app-content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 20px;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
@@ -2180,6 +2181,8 @@ body {
   
   .search-container {
     max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   /* Centrado y límite de ancho para vistas secundarias y formularios */
@@ -2910,6 +2913,24 @@ span.flatpickr-weekday {
 
 .flatpickr-time input {
     color: var(--text-primary) !important;
+    background: transparent !important;
+}
+
+.flatpickr-time input:focus,
+.flatpickr-time input:active {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: var(--text-primary) !important;
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+@media (max-width: 360px) {
+    .flatpickr-calendar {
+        transform: scale(0.88) !important;
+        transform-origin: top center !important;
+        margin-bottom: -36px !important;
+    }
 }
 
 .flatpickr-time .numInputWrapper span.arrowUp:after {

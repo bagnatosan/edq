@@ -228,7 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     matchmakingLoadingCard.style.boxShadow = "0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px var(--neon-green-glow)";
                     // Redirección después de mostrar el estado de éxito
                     setTimeout(() => {
-                        window.location.href = `/Group/Dashboard?groupId=${groupId}`;
+                        window.location.href = "/Match/Upcoming";
                     }, 1500);
                 }, 300);
             }

@@ -81,12 +81,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnConfirmDeleteCancel = document.getElementById("btnConfirmDeleteCancel") as HTMLButtonElement | null;
     const btnConfirmDeleteYes = document.getElementById("btnConfirmDeleteYes") as HTMLButtonElement | null;
 
-    // Elementos de asignación manual
-    const btnManualSwapToggle = document.getElementById("btnManualSwapToggle") as HTMLButtonElement | null;
-    const manualSwapSection = document.getElementById("manualSwapSection") as HTMLDivElement | null;
-    const swapPlayerA = document.getElementById("swapPlayerA") as HTMLSelectElement | null;
-    const swapPlayerB = document.getElementById("swapPlayerB") as HTMLSelectElement | null;
-    const btnExecuteSwap = document.getElementById("btnExecuteSwap") as HTMLButtonElement | null;
 
     if (!matchIdInput || !groupIdInput || !isCreatorInput) return;
 
@@ -224,23 +218,12 @@ document.addEventListener("DOMContentLoaded", () => {
               `).join("")
             : `<div style="font-style: italic; color: var(--text-muted);">Sin jugadores</div>`;
 
-        populateSwapDropdowns();
-
         // Si hay jugadores convocados pero sin equipo asignado, ponerlos en Equipo A por defecto
         if (teamNone.length > 0) {
             teamNone.forEach(p => p.team = 1);
             renderTeams();
         }
     };
-
-    function populateSwapDropdowns(): void {
-        if (!swapPlayerA || !swapPlayerB) return;
-        const teamA = currentMatchPlayers.filter(p => p.team === 1);
-        const teamB = currentMatchPlayers.filter(p => p.team === 2);
-
-        swapPlayerA.innerHTML = teamA.map(p => `<option value="${p.playerId}">${escapeHtml(p.nickname)}</option>`).join("");
-        swapPlayerB.innerHTML = teamB.map(p => `<option value="${p.playerId}">${escapeHtml(p.nickname)}</option>`).join("");
-    }
 
     // Botón: Re-balancear Equipos
     if (btnRebalance) {
@@ -529,39 +512,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Toggle manual swap section
-    if (btnManualSwapToggle) {
-        btnManualSwapToggle.addEventListener("click", () => {
-            if (!manualSwapSection) return;
-            const isHidden = manualSwapSection.style.display === "none";
-            manualSwapSection.style.display = isHidden ? "block" : "none";
-            if (isHidden) {
-                populateSwapDropdowns();
-            }
-        });
-    }
-
-    // Execute swap
-    if (btnExecuteSwap) {
-        btnExecuteSwap.addEventListener("click", () => {
-            if (!swapPlayerA || !swapPlayerB) return;
-            const valA = parseInt(swapPlayerA.value);
-            const valB = parseInt(swapPlayerB.value);
-            if (isNaN(valA) || isNaN(valB)) {
-                showToast("Por favor selecciona dos jugadores para intercambiar.", true);
-                return;
-            }
-
-            const pA = currentMatchPlayers.find(p => p.playerId === valA);
-            const pB = currentMatchPlayers.find(p => p.playerId === valB);
-
-            if (pA && pB) {
-                pA.team = 2;
-                pB.team = 1;
-                renderTeams();
-                showToast("Jugadores intercambiados correctamente.", false);
-            }
-        });
-    }
 
     // Modal de Confirmación de Eliminación
     if (btnDeleteMatch) {
