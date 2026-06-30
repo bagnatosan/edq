@@ -149,6 +149,12 @@ body {
     border: none;
     border-radius: 0;
   }
+  .app-content {
+    padding: 12px !important;
+  }
+  .card {
+    padding: 12px !important;
+  }
 }
 
 /* Teléfonos móviles grandes, Tablets y PCs - Pantalla Completa */

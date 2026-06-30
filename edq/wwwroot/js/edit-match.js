@@ -74,6 +74,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
         return tokenInput ? tokenInput.value : "";
     };
+    const getShortName = (nickname, name) => {
+        if (nickname && nickname.trim() !== "") {
+            return nickname.trim().split(" ")[0];
+        }
+        if (name && name.trim() !== "") {
+            return name.trim().split(" ")[0];
+        }
+        return "Jugador";
+    };
     // Cargar datos iniciales del partido
     const loadDetails = async () => {
         try {
@@ -114,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
             wrapper.style.cursor = "pointer";
             wrapper.innerHTML = `
                 <input type="checkbox" value="${member.playerId}" ${isChecked ? 'checked' : ''} style="accent-color: var(--neon-green-solid);" />
-                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(member.nickname)}</span>
+                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(getShortName(member.nickname, member.name))}</span>
             `;
             // Escuchar cambios
             const checkbox = wrapper.querySelector('input[type="checkbox"]');
@@ -155,14 +164,14 @@ document.addEventListener("DOMContentLoaded", () => {
         teamAList.innerHTML = teamA.length > 0
             ? teamA.map(p => `
                 <div class="draggable-player" ${isEditable ? 'draggable="true"' : ''} data-player-id="${p.playerId}" style="background: rgba(255,255,255,0.02); padding: 8px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; align-items: center; cursor: ${isEditable ? 'grab' : 'default'};">
-                    <span>${escapeHtml(p.nickname)}</span>
+                    <span>${escapeHtml(getShortName(p.nickname, p.name))}</span>
                 </div>
               `).join("")
             : `<div style="font-style: italic; color: var(--text-muted);">Sin jugadores</div>`;
         teamBList.innerHTML = teamB.length > 0
             ? teamB.map(p => `
                 <div class="draggable-player" ${isEditable ? 'draggable="true"' : ''} data-player-id="${p.playerId}" style="background: rgba(255,255,255,0.02); padding: 8px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; align-items: center; cursor: ${isEditable ? 'grab' : 'default'};">
-                    <span>${escapeHtml(p.nickname)}</span>
+                    <span>${escapeHtml(getShortName(p.nickname, p.name))}</span>
                 </div>
               `).join("")
             : `<div style="font-style: italic; color: var(--text-muted);">Sin jugadores</div>`;

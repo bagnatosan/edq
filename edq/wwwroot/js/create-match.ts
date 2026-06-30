@@ -112,6 +112,16 @@ document.addEventListener("DOMContentLoaded", () => {
         countSpan.textContent = `Seleccionados: ${count}`;
     };
 
+    const getShortName = (nickname: string, name: string): string => {
+        if (nickname && nickname.trim() !== "") {
+            return nickname.trim().split(" ")[0];
+        }
+        if (name && name.trim() !== "") {
+            return name.trim().split(" ")[0];
+        }
+        return "Jugador";
+    };
+
     const renderPlayersCheckboxes = (members: GroupMember[]): void => {
         if (!playersCheckboxGrid) return;
         playersCheckboxGrid.innerHTML = "";
@@ -127,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             let avatarContent : string;
             if (member.photoUrl) {
-                avatarContent = `<img src="${escapeHtml(member.photoUrl)}" class="avatar-image" alt="${escapeHtml(member.nickname)}" />`;
+                avatarContent = `<img src="${escapeHtml(member.photoUrl)}" class="avatar-image" alt="${escapeHtml(getShortName(member.nickname, member.name))}" />`;
             } else {
                 avatarContent = escapeHtml(member.initials);
             }
@@ -138,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="player-avatar-mini">
                     ${avatarContent}
                 </div>
-                <span style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; flex: 1;">${escapeHtml(member.nickname)}</span>
+                <span style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; flex: 1;">${escapeHtml(getShortName(member.nickname, member.name))}</span>
             `;
 
             const checkbox = label.querySelector('input[name="selectedPlayers"]') as HTMLInputElement;

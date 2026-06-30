@@ -85,6 +85,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const count = document.querySelectorAll('input[name="selectedPlayers"]:checked').length;
         countSpan.textContent = `Seleccionados: ${count}`;
     };
+    const getShortName = (nickname, name) => {
+        if (nickname && nickname.trim() !== "") {
+            return nickname.trim().split(" ")[0];
+        }
+        if (name && name.trim() !== "") {
+            return name.trim().split(" ")[0];
+        }
+        return "Jugador";
+    };
     const renderPlayersCheckboxes = (members) => {
         if (!playersCheckboxGrid)
             return;
@@ -98,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
             label.className = "player-checkbox-item";
             let avatarContent;
             if (member.photoUrl) {
-                avatarContent = `<img src="${escapeHtml(member.photoUrl)}" class="avatar-image" alt="${escapeHtml(member.nickname)}" />`;
+                avatarContent = `<img src="${escapeHtml(member.photoUrl)}" class="avatar-image" alt="${escapeHtml(getShortName(member.nickname, member.name))}" />`;
             }
             else {
                 avatarContent = escapeHtml(member.initials);
@@ -109,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="player-avatar-mini">
                     ${avatarContent}
                 </div>
-                <span style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; flex: 1;">${escapeHtml(member.nickname)}</span>
+                <span style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; flex: 1;">${escapeHtml(getShortName(member.nickname, member.name))}</span>
             `;
             const checkbox = label.querySelector('input[name="selectedPlayers"]');
             checkbox.addEventListener("change", updateCounter);
