@@ -1,0 +1,75 @@
+@model edq.DTO.DeleteRequestDto
+@{
+    ViewData["Title"] = "Solicitar Eliminación de Cuenta";
+}
+
+<div class="hero-container auth-hero" style="margin-top: 20px;">
+    <img src="/images/logo_appicon.svg" alt="edq. Logo" class="logo-hero auth-logo" />
+    <h1 class="hero-title auth-title" style="color: #ff3838;">Eliminar mi cuenta</h1>
+</div>
+
+<div class="card" style="max-width: 500px; margin: 0 auto; border-color: rgba(255, 56, 56, 0.4);">
+    <div class="card-header-flex">
+        <h2 class="card-title" style="color: #ff3838;">Confirmar Solicitud de Baja</h2>
+        <span class="card-subtitle-badge" style="background: rgba(255, 56, 56, 0.1); color: #ff3838; border-color: rgba(255, 56, 56, 0.3);">IRREVERSIBLE</span>
+    </div>
+    
+    <p class="card-description" style="margin-bottom: 20px; color: var(--text-secondary);">
+        Para eliminar de forma permanente tu cuenta, tu perfil, tus grupos creados y todos tus datos del servidor, completa las siguientes credenciales de validación:
+    </p>
+
+    <form method="post" asp-controller="Account" asp-action="DeleteRequest" id="formDeleteRequest">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="auth-error-container" style="background: rgba(255, 56, 56, 0.1); border: 1px solid rgba(255, 56, 56, 0.4); border-radius: var(--border-radius-md); padding: 12px; margin-bottom: 16px;">
+                @foreach (var modelState in ViewData.ModelState.Values)
+                {
+                    foreach (var error in modelState.Errors)
+                    {
+                        <div style="color: #ff3838; font-size: 13px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                            <span>⚠️</span> @error.ErrorMessage
+                        </div>
+                    }
+                }
+            </div>
+        }
+
+        <div class="form-group">
+            <label class="form-label">Correo Electrónico</label>
+            <input type="email" asp-for="Email" class="form-control-neon" style="border-color: rgba(255, 255, 255, 0.1);" required />
+        </div>
+        
+        <div class="form-group" style="margin-top: 16px;">
+            <label class="form-label">Contraseña</label>
+            <input type="password" asp-for="Password" class="form-control-neon" style="border-color: rgba(255, 255, 255, 0.1);" required />
+        </div>
+
+        <div class="form-group" style="margin-top: 16px; margin-bottom: 24px;">
+            <label class="form-label" style="display: block; margin-bottom: 8px;">
+                Escribí <strong>quiero eliminar mi cuenta</strong> para confirmar:
+            </label>
+            <input type="text" asp-for="VerificationText" id="txtVerifyDeleteExt" class="form-control-neon" style="border-color: rgba(255, 56, 56, 0.2); text-align: center;" placeholder="Escribir aquí" autocomplete="off" required />
+        </div>
+
+        <button type="submit" id="btnSubmitDeleteExt" class="btn-neon" style="background: #ff3838; border-color: #ff3838; color: #fff; width: 100%; justify-content: center; opacity: 0.5;" disabled>
+            Eliminar permanentemente mi cuenta
+        </button>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const inputVerify = document.getElementById("txtVerifyDeleteExt");
+            const btnSubmit = document.getElementById("btnSubmitDeleteExt");
+            
+            if (inputVerify && btnSubmit) {
+                inputVerify.addEventListener("input", () => {
+                    const isMatch = inputVerify.value.trim() === "quiero eliminar mi cuenta";
+                    btnSubmit.disabled = !isMatch;
+                    btnSubmit.style.opacity = isMatch ? "1" : "0.5";
+                });
+            }
+        });
+    </script>
+}

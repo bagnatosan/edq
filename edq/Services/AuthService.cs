@@ -155,4 +155,104 @@ public class AuthService : IAuthService
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<bool> DeletePlayerAsync(int id)
+    {
+        var player = await _context.Players.FirstOrDefaultAsync(p => p.Id == id);
+        if (player == null)
+        {
+            return false;
+        }
+
+        // 1. Eliminar foto física de perfil del disco si existe
+        if (!string.IsNullOrEmpty(player.PhotoUrl))
+        {
+            try
+            {
+                string oldPhysicalRoute = Path.Combine(_environment.WebRootPath, player.PhotoUrl.TrimStart('/'));
+                if (System.IO.File.Exists(oldPhysicalRoute))
+                {
+                    System.IO.File.Delete(oldPhysicalRoute);
+                }
+            }
+            catch (Exception deleteEx)
+            {
+                Console.WriteLine($"Error al eliminar la foto del disco al borrar cuenta: {deleteEx.Message}");
+            }
+        }
+
+        // 2. Eliminar suscripciones push (PushSubscriptions)
+        var pushSubs = await _context.PushSubscriptions.Where(ps => ps.PlayerId == id).ToListAsync();
+        _context.PushSubscriptions.RemoveRange(pushSubs);
+
+        // 3. Eliminar solicitudes de unión a grupos (Requests)
+        var reqs = await _context.Requests.Where(r => r.PlayerId == id).ToListAsync();
+        _context.Requests.RemoveRange(reqs);
+
+        // 4. Eliminar votos de encuestas (PollVotes)
+        var votes = await _context.PollVotes.Where(v => v.PlayerId == id).ToListAsync();
+        _context.PollVotes.RemoveRange(votes);
+
+        // 5. Eliminar mensajes de chat individuales (ChatMessages)
+        var msgs = await _context.ChatMessages.Where(m => m.SenderId == id).ToListAsync();
+        _context.ChatMessages.RemoveRange(msgs);
+
+        // 6. Eliminar convocatorias a partidos (MatchPlayers)
+        var matchPlayers = await _context.MatchPlayers.Where(mp => mp.PlayerId == id).ToListAsync();
+        _context.MatchPlayers.RemoveRange(matchPlayers);
+
+        // 7. Eliminar membresías de grupos (GroupPlayers)
+        var groupPlayers = await _context.GroupPlayers.Where(gp => gp.PlayerId == id).ToListAsync();
+        _context.GroupPlayers.RemoveRange(groupPlayers);
+
+        // 8. Gestionar grupos creados por el usuario (donde CreatorId == id)
+        var groupsCreated = await _context.Groups
+            .Where(g => g.CreatorId == id)
+            .ToListAsync();
+
+        foreach (var group in groupsCreated)
+        {
+            // Eliminar solicitudes de este grupo
+            var groupReqs = await _context.Requests.Where(r => r.GroupId == group.Id).ToListAsync();
+            _context.Requests.RemoveRange(groupReqs);
+
+            // Eliminar integrantes
+            var groupMembers = await _context.GroupPlayers.Where(gp => gp.GroupId == group.Id).ToListAsync();
+            _context.GroupPlayers.RemoveRange(groupMembers);
+
+            // Eliminar partidos y sus convocados
+            var groupMatches = await _context.Matches.Where(m => m.GroupId == group.Id).ToListAsync();
+            foreach (var match in groupMatches)
+            {
+                var mPlayers = await _context.MatchPlayers.Where(mp => mp.MatchId == match.Id).ToListAsync();
+                _context.MatchPlayers.RemoveRange(mPlayers);
+            }
+            _context.Matches.RemoveRange(groupMatches);
+
+            // Eliminar encuestas, opciones y votos
+            var groupPolls = await _context.Polls.Where(p => p.GroupId == group.Id).ToListAsync();
+            foreach (var poll in groupPolls)
+            {
+                var pVotes = await _context.PollVotes.Where(pv => pv.PollId == poll.Id).ToListAsync();
+                _context.PollVotes.RemoveRange(pVotes);
+
+                var pOptions = await _context.PollOptions.Where(po => po.PollId == poll.Id).ToListAsync();
+                _context.PollOptions.RemoveRange(pOptions);
+            }
+            _context.Polls.RemoveRange(groupPolls);
+
+            // Eliminar mensajes del chat del grupo
+            var groupMsgs = await _context.ChatMessages.Where(m => m.GroupId == group.Id).ToListAsync();
+            _context.ChatMessages.RemoveRange(groupMsgs);
+
+            // Eliminar el grupo
+            _context.Groups.Remove(group);
+        }
+
+        // 9. Eliminar al jugador
+        _context.Players.Remove(player);
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }

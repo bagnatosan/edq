@@ -14,3 +14,16 @@ public class NotificationSettingsDto
     public bool NotifyMatchModification { get; set; }
     public bool NotifyChat { get; set; }
 }
+
+public class DeleteRequestDto
+{
+    [Required(ErrorMessage = "El correo electrónico es obligatorio.")]
+    [EmailAddress(ErrorMessage = "Ingresá un correo electrónico válido.")]
+    public string Email { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "La contraseña es obligatoria.")]
+    public string Password { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Debes ingresar la frase de confirmación.")]
+    public string VerificationText { get; set; } = string.Empty;
+}

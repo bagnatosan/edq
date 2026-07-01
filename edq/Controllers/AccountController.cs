@@ -24,11 +24,15 @@ public class AccountController : Controller
 
     // GET: /Account/Login
     [HttpGet]
-    public IActionResult Login()
+    public IActionResult Login(string? successMessage)
     {
         if (User.Identity?.IsAuthenticated == true)
         {
             return RedirectToAction("Explore", "Group");
+        }
+        if (!string.IsNullOrEmpty(successMessage))
+        {
+            TempData["SuccessMessage"] = successMessage;
         }
         return View();
     }
@@ -447,6 +451,82 @@ public class AccountController : Controller
 
         TempData["SuccessMessage"] = "Contraseña restablecida correctamente. Ya puedes iniciar sesión.";
 
+        return RedirectToAction("Login");
+    }
+
+    // POST: /Account/DeleteAccount
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteAccount()
+    {
+        var userId = GetUserId();
+        if (userId == null)
+        {
+            return Unauthorized(new { message = "Usuario no autenticado." });
+        }
+
+        var success = await _authService.DeletePlayerAsync(userId.Value);
+        if (!success)
+        {
+            return BadRequest(new { message = "No se pudo eliminar la cuenta. El usuario no existe." });
+        }
+
+        // Cerrar sesión
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+        return Ok(new { success = true });
+    }
+
+    // GET: /Account/DeleteRequest
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult DeleteRequest()
+    {
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return RedirectToAction("Profile");
+        }
+        return View(new DeleteRequestDto());
+    }
+
+    // POST: /Account/DeleteRequest
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteRequest(DeleteRequestDto model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        if (model.VerificationText != "quiero eliminar mi cuenta")
+        {
+            ModelState.AddModelError(nameof(model.VerificationText), "Debes escribir exactamente la frase de confirmación.");
+            return View(model);
+        }
+
+        // 1. Validar credenciales
+        var player = await _authService.LoginAsync(model.Email, model.Password);
+        if (player == null)
+        {
+            ModelState.AddModelError(string.Empty, "El correo electrónico o la contraseña son incorrectos.");
+            return View(model);
+        }
+
+        // 2. Eliminar cuenta
+        var success = await _authService.DeletePlayerAsync(player.Id);
+        if (!success)
+        {
+            ModelState.AddModelError(string.Empty, "Ocurrió un error al intentar eliminar tu cuenta.");
+            return View(model);
+        }
+
+        // 3. Cerrar sesión
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+        TempData["SuccessMessage"] = "Tu cuenta y todos tus datos personales han sido eliminados de forma permanente.";
         return RedirectToAction("Login");
     }
     

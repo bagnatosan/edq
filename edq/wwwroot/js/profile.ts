@@ -360,4 +360,72 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    // ==========================================
+    // 5. ELIMINACIÓN DE CUENTA (ESTILO GITHUB)
+    // ==========================================
+    const btnDeleteAccount = document.getElementById("btnDeleteAccount") as HTMLButtonElement | null;
+    const modalDeleteAccountBackdrop = document.getElementById("modalDeleteAccountBackdrop") as HTMLDivElement | null;
+    const btnCancelDeleteAccount = document.getElementById("btnCancelDeleteAccount") as HTMLButtonElement | null;
+    const btnConfirmDeleteAccount = document.getElementById("btnConfirmDeleteAccount") as HTMLButtonElement | null;
+    const confirmDeleteInput = document.getElementById("confirmDeleteInput") as HTMLInputElement | null;
+
+    if (btnDeleteAccount && modalDeleteAccountBackdrop && btnCancelDeleteAccount && btnConfirmDeleteAccount && confirmDeleteInput) {
+        btnDeleteAccount.addEventListener("click", () => {
+            confirmDeleteInput.value = "";
+            btnConfirmDeleteAccount.disabled = true;
+            btnConfirmDeleteAccount.style.opacity = "0.5";
+            modalDeleteAccountBackdrop.classList.add("show");
+        });
+
+        const closeDeleteModal = () => {
+            modalDeleteAccountBackdrop.classList.remove("show");
+        };
+
+        btnCancelDeleteAccount.addEventListener("click", closeDeleteModal);
+        modalDeleteAccountBackdrop.addEventListener("click", (e) => {
+            if (e.target === modalDeleteAccountBackdrop) {
+                closeDeleteModal();
+            }
+        });
+
+        confirmDeleteInput.addEventListener("input", () => {
+            const isMatch = confirmDeleteInput.value.trim() === "quiero eliminar mi cuenta";
+            btnConfirmDeleteAccount.disabled = !isMatch;
+            btnConfirmDeleteAccount.style.opacity = isMatch ? "1" : "0.5";
+        });
+
+        btnConfirmDeleteAccount.addEventListener("click", async () => {
+            if (confirmDeleteInput.value.trim() !== "quiero eliminar mi cuenta") return;
+
+            try {
+                btnConfirmDeleteAccount.disabled = true;
+                btnConfirmDeleteAccount.textContent = "Eliminando...";
+
+                const response = await fetch("/Account/DeleteAccount", {
+                    method: "POST",
+                    headers: {
+                        "RequestVerificationToken": getVerificationToken()
+                    }
+                });
+
+                if (response.ok) {
+                    closeDeleteModal();
+                    // Redirigir a Login con mensaje de éxito mediante parámetro de consulta
+                    const message = "Tu cuenta y todos tus datos personales han sido eliminados de forma permanente.";
+                    window.location.href = `/Account/Login?successMessage=${encodeURIComponent(message)}`;
+                } else {
+                    btnConfirmDeleteAccount.disabled = false;
+                    btnConfirmDeleteAccount.textContent = "Eliminar permanentemente";
+                    const errData = await response.json();
+                    showToast(errData.message || "Error al eliminar la cuenta.", true);
+                }
+            } catch (err) {
+                console.error("Error al eliminar cuenta:", err);
+                btnConfirmDeleteAccount.disabled = false;
+                btnConfirmDeleteAccount.textContent = "Eliminar permanentemente";
+                showToast("Error de conexión al eliminar la cuenta.", true);
+            }
+        });
+    }
 });

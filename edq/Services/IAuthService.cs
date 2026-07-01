@@ -14,4 +14,5 @@ public interface IAuthService
     Task<bool> UpdatePlayerNotificationSettingsAsync(int id, bool creation, bool modification, bool chat);
     Task<bool> EmailExistsAsync(string email);
     Task<bool> ResetPasswordAsync(string email, string newPassword);
+    Task<bool> DeletePlayerAsync(int id);
 }
