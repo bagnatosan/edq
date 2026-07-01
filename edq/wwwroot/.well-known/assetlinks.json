@@ -3,6 +3,6 @@
   "target": {
     "namespace": "android_app",
     "package_name": "org.duckdns.edqapp.twa",
-    "sha256_cert_fingerprints": ["B6:5C:0B:F6:65:BA:2B:D8:5A:63:1E:CF:90:52:A9:5A:8F:BA:EC:79:91:65:BF:CC:5F:B9:54:51:2C:3C:50:9F"]
+    "sha256_cert_fingerprints": ["57:19:B1:F7:9A:D9:CF:07:DC:44:94:73:FE:17:82:E0:E2:13:18:49:E8:F8:7E:22:2B:5E:99:13:C3:EA:B1:B3"]
   }
 }]
