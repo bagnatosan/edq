@@ -41,7 +41,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         myGroups.forEach((group: any) => {
             const groupName = group.name || "";
-            const initials = groupName.substring(0, Math.min(2, groupName.length)).toUpperCase();
             const card = document.createElement("div");
             card.className = "group-card clickable-group-card";
             card.style.cursor = "pointer";
@@ -60,10 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
             };
 
             card.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 14px; min-width: 0; flex: 1;">
-                    <div class="avatar-container" style="width: 42px; height: 42px; background: rgba(158, 255, 0, 0.05); border: 1px solid rgba(158, 255, 0, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--neon-green); font-weight: 800; font-size: 16px; margin: 0;">
-                        ${escapeHtml(initials)}
-                    </div>
+                <div style="display: flex; align-items: center; min-width: 0; flex: 1;">
                     <div style="min-width: 0; flex: 1;">
                         <div class="group-card-title" style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                             ${escapeHtml(groupName)}

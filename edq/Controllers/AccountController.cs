@@ -177,6 +177,14 @@ public class AccountController : Controller
             return Unauthorized();
         }
 
+        // Obtener jugador para consultar foto anterior
+        var player = await _authService.GetPlayerByIdAsync(userId.Value);
+        if (player == null)
+        {
+            return NotFound(new { message = "Usuario no encontrado." });
+        }
+        string? oldPhotoUrl = player.PhotoUrl;
+
         try
         {
             string folderDestination = Path.Combine(_environment.WebRootPath, "images", "profiles");
@@ -217,6 +225,24 @@ public class AccountController : Controller
             if (!success)
             {
                 return NotFound(new { message = "Usuario no encontrado." });
+            }
+
+            // Eliminar físicamente la foto anterior del servidor si era una imagen local
+            if (!string.IsNullOrEmpty(oldPhotoUrl) && oldPhotoUrl.StartsWith("/images/profiles/", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    string oldFilename = Path.GetFileName(oldPhotoUrl);
+                    string oldPhysicalRoute = Path.Combine(folderDestination, oldFilename);
+                    if (System.IO.File.Exists(oldPhysicalRoute))
+                    {
+                        System.IO.File.Delete(oldPhysicalRoute);
+                    }
+                }
+                catch (Exception deleteEx)
+                {
+                    Console.WriteLine($"Error al eliminar la foto anterior del disco: {deleteEx.Message}");
+                }
             }
 
             return Ok(new { photoUrl });

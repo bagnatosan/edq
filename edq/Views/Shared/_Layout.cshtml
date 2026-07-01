@@ -60,7 +60,9 @@
         <header class="app-header">
             <div class="app-header-left">
                 <!-- Logotipo del Navbar cargado directamente -->
-                <img src="~/images/logo_navbar.svg" alt="edq." class="navbar-logo" />
+                <a href="/" style="display: flex; align-items: center; text-decoration: none;">
+                    <img src="~/images/logo_navbar.svg" alt="edq." class="navbar-logo" />
+                </a>
             </div>
 
             @if (User.Identity?.IsAuthenticated == true)
