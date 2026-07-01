@@ -142,7 +142,7 @@ body {
 }
 
 /* Teléfonos móviles pequeños/medianos - ancho completo */
-@media (max-width: 480px) {
+@media (max-width: 484px) {
   .app-shell {
     max-width: 100% !important;
     max-height: 100% !important;
@@ -152,13 +152,16 @@ body {
   .app-content {
     padding: 12px !important;
   }
+  .app-content.with-nav {
+    padding-bottom: 96px !important;
+  }
   .card {
     padding: 12px !important;
   }
 }
 
 /* Teléfonos móviles grandes, Tablets y PCs - Pantalla Completa */
-@media (min-width: 481px) {
+@media (min-width: 485px) {
   body {
     display: block !important;
   }

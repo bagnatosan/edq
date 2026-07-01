@@ -177,16 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const avatarContent = buildAvatarHtml(member.photoUrl, member.nickname, member.initials);
 
-            // Mostrar el puntaje abajo del nombre únicamente si es el creador
             let ratingHtml = "";
-            if (isCreator) {
-                ratingHtml = `
-                    <div class="member-rating">
-                        <span class="star-icon">★</span>
-                        <span>${member.score ? member.score.toFixed(1) : "6.0"}</span>
-                    </div>
-                `;
-            }
 
             memberCard.innerHTML = `
                 <div class="avatar-container">
