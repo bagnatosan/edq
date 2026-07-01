@@ -106,11 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             matchCard.appendChild(teamsRow);
 
-            matchCard.style.cursor = "pointer";
-            matchCard.onclick = () => {
-                window.location.href = `/Match/Edit?matchId=${match.matchId}`;
-            };
-
             matchesHistoryList.appendChild(matchCard);
         });
     };
