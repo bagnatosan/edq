@@ -390,13 +390,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         confirmDeleteInput.addEventListener("input", () => {
-            const isMatch = confirmDeleteInput.value.trim() === "quiero eliminar mi cuenta";
+            const isMatch = confirmDeleteInput.value.trim().toLowerCase() === "quiero eliminar mi cuenta";
             btnConfirmDeleteAccount.disabled = !isMatch;
             btnConfirmDeleteAccount.style.opacity = isMatch ? "1" : "0.5";
         });
 
         btnConfirmDeleteAccount.addEventListener("click", async () => {
-            if (confirmDeleteInput.value.trim() !== "quiero eliminar mi cuenta") return;
+            if (confirmDeleteInput.value.trim().toLowerCase() !== "quiero eliminar mi cuenta") return;
 
             try {
                 btnConfirmDeleteAccount.disabled = true;

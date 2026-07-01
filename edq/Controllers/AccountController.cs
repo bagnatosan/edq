@@ -501,7 +501,7 @@ public class AccountController : Controller
             return View(model);
         }
 
-        if (model.VerificationText != "quiero eliminar mi cuenta")
+        if (model.VerificationText?.Trim().ToLowerInvariant() != "quiero eliminar mi cuenta")
         {
             ModelState.AddModelError(nameof(model.VerificationText), "Debes escribir exactamente la frase de confirmación.");
             return View(model);

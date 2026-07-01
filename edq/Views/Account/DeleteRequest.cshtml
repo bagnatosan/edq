@@ -65,7 +65,7 @@
             
             if (inputVerify && btnSubmit) {
                 inputVerify.addEventListener("input", () => {
-                    const isMatch = inputVerify.value.trim() === "quiero eliminar mi cuenta";
+                    const isMatch = inputVerify.value.trim().toLowerCase() === "quiero eliminar mi cuenta";
                     btnSubmit.disabled = !isMatch;
                     btnSubmit.style.opacity = isMatch ? "1" : "0.5";
                 });
