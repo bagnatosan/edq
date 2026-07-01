@@ -3041,12 +3041,27 @@ span.flatpickr-weekday {
 
 .chat-header-nav.centered-header .hero-title {
   font-size: 20px;
-  margin: 0;
+  margin: 0 auto;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 70%;
+  width: 100%;
+  padding: 0 48px;
+  box-sizing: border-box;
+}
+
+/* 2. Títulos de Sección Neón (Explore.cshtml) */
+.section-title-neon {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--neon-green) !important;
+  text-shadow: 0 0 10px rgba(158, 255, 0, 0.15);
+  margin: 0;
+}
+
+.section-title-neon.margin-bottom-md {
+  margin-bottom: 12px;
 }
 
 /* 2. Simulador de Matchmaking Heurístico (Home/Index.cshtml) */
