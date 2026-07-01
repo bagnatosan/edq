@@ -2,7 +2,7 @@
   "id": "/",
   "name": "EDQ - Emparejador de Equipos",
   "short_name": "EDQ",
-  "description": "Armá partidos y balanceá tus equipos de forma justa y rápida.",
+  "description": "EDQ organiza tus partidos y equilibra equipos de fútbol de forma justa. Su algoritmo heurístico O(N²) con 20 reinicios calcula alineaciones perfectas en milisegundos. Incluye chat en tiempo real con SignalR, encuestas dinámicas, notificaciones al estilo WhatsApp y una interfaz táctil de arrastrar y soltar.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
