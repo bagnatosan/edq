@@ -75,42 +75,42 @@
         }
 
         <!-- Mensaje de Instrucción para Arrastrar y Soltar -->
-        <div style="font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">
+        <div class="drag-instructions">
             Arrastrá para cambiar jugadores manualmente
         </div>
 
         <!-- Visualización de los equipos actuales -->
         <div class="teams-container">
-            <div id="teamAZone" style="border-right: 1px solid rgba(255,255,255,0.06); padding-right: 8px; align-self: start; min-height: 150px;">
-                <div style="font-size: 12px; font-weight: 800; color: var(--neon-green); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <div id="teamAZone" class="team-zone-left">
+                <div class="team-zone-header">
                     <span>Equipo A</span>
-                    <span id="countTeamA" style="font-size: 10px; background: rgba(158, 255, 0, 0.1); padding: 2px 6px; border-radius: 4px;">0</span>
+                    <span id="countTeamA" class="team-player-count">0</span>
                 </div>
-                <div id="teamAList" class="team-drop-zone" style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--text-secondary); min-height: 120px;">
+                <div id="teamAList" class="team-drop-zone team-list-zone">
                     <!-- JS list -->
                 </div>
             </div>
 
             <!-- Columna Central con Flechas indicadoras de Desplazamiento -->
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--neon-green); opacity: 0.5; padding: 0 4px; user-select: none;">
+            <div class="teams-container-arrows">
                 <!-- Flecha Izquierda (hacia Equipo A) -->
                 <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
                 <!-- Flecha Derecha (hacia Equipo B) -->
-                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(180deg);">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" class="rotate-180">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
             </div>
 
-            <div id="teamBZone" style="border-left: 1px solid rgba(255,255,255,0.06); padding-left: 8px; align-self: start; min-height: 150px;">
-                <div style="font-size: 12px; font-weight: 800; color: var(--neon-green); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <div id="teamBZone" class="team-zone-right">
+                <div class="team-zone-header">
                     <span>Equipo B</span>
-                    <span id="countTeamB" style="font-size: 10px; background: rgba(158, 255, 0, 0.1); padding: 2px 6px; border-radius: 4px;">0</span>
+                    <span id="countTeamB" class="team-player-count">0</span>
                 </div>
-                <div id="teamBList" class="team-drop-zone" style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--text-secondary); min-height: 120px;">
+                <div id="teamBList" class="team-drop-zone team-list-zone">
                     <!-- JS list -->
                 </div>
             </div>
@@ -118,7 +118,7 @@
 
         @if (Model.IsCreator && Model.State == "Pending")
         {
-            <button type="button" id="btnSaveChanges" class="btn-neon" style="margin-top: 16px; width: 100%; justify-content: center;">
+            <button type="button" id="btnSaveChanges" class="btn-neon btn-save-match">
                 <span class="btn-text">💾 Guardar Cambios del Partido</span>
             </button>
         }

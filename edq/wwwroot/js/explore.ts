@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let hasMore: boolean = true;
     let searchTimeout: ReturnType<typeof setTimeout> | null = null;
     let cachedOtherGroups: Group[] = [];
-    let hasDiscoveredInitial: boolean = false;
+    let hasDiscoveredInitial: boolean = true;
 
     // Clave de localStorage para cachear los grupos propios del usuario
     const MY_GROUPS_CACHE_KEY = "edq_cached_my_groups";
@@ -142,26 +142,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 otherGroupsList.innerHTML = "";
 
             const otherGroups = data.otherGroups;
-
-            // CASO ESPECIAL: Si es la carga inicial, no hay búsqueda activa y el usuario tiene grupos propios
-            if (skip === 0 && !currentSearch && data.myGroups.length > 0 && !hasDiscoveredInitial) {
-                cachedOtherGroups = otherGroups;
-                otherGroupsList.innerHTML = "";
-                
-                if (btnLoadMore) {
-                    const btnTextSpan = btnLoadMore.querySelector(".btn-text") as HTMLElement | null;
-                    if (btnTextSpan)
-                        btnTextSpan.textContent = "Cargar Grupos";
-                    else
-                        btnLoadMore.textContent = "Cargar Grupos";
-                    btnLoadMore.style.display = "block";
-                }
-                
-                hasMore = false;
-                isLoading = false;
-                loadingIndicator.style.display = "none";
-                return;
-            }
 
             // Flujo normal de renderizado
             if (otherGroups.length === 0 && skip === 0) {
@@ -360,60 +340,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 hasMore = true;
                 loadGroups(false).catch(err => console.error('Error:', err));
             }, 300);
-        });
-    }
-
-    // Cargar más al hacer clic en el botón o descubrir grupos
-    if (btnLoadMore) {
-        btnLoadMore.addEventListener("click", () => {
-            if (!hasDiscoveredInitial) {
-                hasDiscoveredInitial = true;
-                
-                // Activar spinner en el botón
-                btnLoadMore.disabled = true;
-                btnLoadMore.classList.add("btn-loading");
-                const spinner = document.createElement("span");
-                spinner.className = "btn-spinner";
-                btnLoadMore.appendChild(spinner);
-                
-                setTimeout(() => {
-                    btnLoadMore.disabled = false;
-                    btnLoadMore.classList.remove("btn-loading");
-                    const existingSpinner = btnLoadMore.querySelector(".btn-spinner");
-                    if (existingSpinner)
-                        existingSpinner.remove();
-                    
-                    if (cachedOtherGroups.length === 0) {
-                        noResultsMessage.style.display = "flex";
-                        btnLoadMore.style.display = "none";
-                        hasMore = false;
-                    } else {
-                        otherGroupsList.innerHTML = "";
-                        cachedOtherGroups.forEach(group => {
-                            const card = createGroupCard(group, false);
-                            otherGroupsList.appendChild(card);
-                        });
-                        
-                        if (cachedOtherGroups.length < take) {
-                            hasMore = false;
-                            btnLoadMore.style.display = "none";
-                        } else {
-                            hasMore = true;
-                            const btnTextSpan = btnLoadMore.querySelector(".btn-text") as HTMLElement | null;
-                            if (btnTextSpan)
-                                btnTextSpan.textContent = "Cargar Grupos";
-                            else
-                                btnLoadMore.textContent = "Cargar Grupos";
-                            btnLoadMore.style.display = "block";
-                        }
-                        
-                        skip = cachedOtherGroups.length;
-                    }
-                }, 600);
-            } else {
-                if (hasMore && !isLoading)
-                    loadGroups(true).catch(err => console.error('Error:', err));
-            }
         });
     }
 

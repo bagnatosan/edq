@@ -15,7 +15,7 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 12px; flex-wrap: wrap;">
         <h2 class="section-title-neon" style="font-size: 18px; font-weight: 700; margin: 0; color: var(--neon-green);">Mis Grupos</h2>
         <a href="/Group/Create" class="btn-neon" style="padding: 8px 16px; font-size: 14px; width: auto; text-decoration: none; display: flex; align-items: center; gap: 6px;">
-            <span>➕ Crear Grupo</span>
+            <span>➕ Crear</span>
         </a>
     </div>
     <div id="myGroupsList" class="groups-list">
@@ -39,7 +39,7 @@
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <input type="text" id="searchInput" class="form-control-neon" placeholder="Buscar grupo por nombre..." autocomplete="off" />
+            <input type="text" id="searchInput" class="form-control-neon" placeholder="Buscar por nombre..." autocomplete="off" />
         </div>
     </div>
 
@@ -50,7 +50,6 @@
 
     <!-- Indicadores de Carga y Mensajes -->
     <div class="load-more-container">
-        <button id="btnLoadMore" class="btn-neon" style="display: none; padding: 10px 20px; font-size: 14px; width: auto; font-weight: 700;"><span class="btn-text">Cargar Grupos</span></button>
         <div id="loadingIndicator" class="loading-spinner" style="display: none;">Cargando grupos...</div>
         <div id="noResultsMessage" class="no-results-message" style="display: none;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

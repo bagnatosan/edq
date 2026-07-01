@@ -147,39 +147,39 @@
     </p>
 
     <!-- Columnas de Equipos en la Simulación -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+    <div class="sim-grid-teams">
         <div>
-            <div style="font-size: 11px; font-weight: 800; color: var(--neon-green); text-transform: uppercase; margin-bottom: 8px;">Equipo A</div>
-            <div id="simTeamA" style="min-height: 190px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.03);"></div>
+            <div class="sim-team-header">Equipo A</div>
+            <div id="simTeamA" class="sim-team-zone"></div>
         </div>
         <div>
-            <div style="font-size: 11px; font-weight: 800; color: var(--neon-green); text-transform: uppercase; margin-bottom: 8px;">Equipo B</div>
-            <div id="simTeamB" style="min-height: 190px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.03);"></div>
+            <div class="sim-team-header">Equipo B</div>
+            <div id="simTeamB" class="sim-team-zone"></div>
         </div>
     </div>
 
     <!-- Consola de Pasos -->
-    <div style="margin-bottom: 16px;">
-        <div style="font-size: 11px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">Consola del Algoritmo</div>
-        <div id="simConsole" style="height: 120px; overflow-y: auto; background: #070709; border: 1px solid rgba(255,255,255,0.05); padding: 10px; border-radius: var(--border-radius-sm); font-family: monospace; line-height: 1.4; color: var(--text-muted);"></div>
+    <div class="sim-console-container">
+        <div class="sim-console-header">Consola del Algoritmo</div>
+        <div id="simConsole" class="sim-console-box"></div>
     </div>
 
     <!-- Datos de Rendimiento en Tiempo Real -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: center; margin-bottom: 16px;">
-        <div style="background: rgba(255, 255, 255, 0.01); padding: 10px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.03);">
-            <div id="simDiffVal" style="font-size: 20px; font-weight: 900; color: var(--neon-green);">0</div>
-            <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Diferencia Actual</div>
+    <div class="sim-metrics-grid">
+        <div class="sim-metric-card">
+            <div id="simDiffVal" class="sim-metric-value">0</div>
+            <div class="sim-metric-label">Diferencia Actual</div>
         </div>
-        <div style="background: rgba(255, 255, 255, 0.01); padding: 10px; border-radius: var(--border-radius-sm); border: 1px solid rgba(255,255,255,0.03);">
-            <div id="simTimeVal" style="font-size: 20px; font-weight: 900; color: var(--neon-green);">0 ms</div>
-            <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Tiempo Convergencia</div>
+        <div class="sim-metric-card">
+            <div id="simTimeVal" class="sim-metric-value">0 ms</div>
+            <div class="sim-metric-label">Tiempo Convergencia</div>
         </div>
     </div>
 
     <!-- Botones de Control -->
-    <div style="display: flex; gap: 12px;">
-        <button type="button" id="btnStartSim" class="btn-neon" style="flex: 2; justify-content: center; font-size: 13px; padding: 10px;">Iniciar Simulación</button>
-        <button type="button" id="btnResetSim" class="btn-outline-neon" style="flex: 1; justify-content: center; font-size: 13px; padding: 10px;">Mezclar</button>
+    <div class="sim-controls">
+        <button type="button" id="btnStartSim" class="btn-neon">Iniciar Simulación</button>
+        <button type="button" id="btnResetSim" class="btn-outline-neon">Mezclar</button>
     </div>
 </div>
 
